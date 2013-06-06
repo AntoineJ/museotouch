@@ -1,0 +1,36 @@
+<html>
+   <head>
+      <!-- <script src="autobahn.min.js"></script> -->
+      <script src="http://autobahn.s3.amazonaws.com/js/autobahn.min.js"></script>
+      <script src="http://code.jquery.com/jquery-1.9.0.min.js"></script>
+
+      <script type="text/javascript">
+         // var webSocket;
+         window.onload = function() {
+ 
+            // webSocket = new WebSocket("ws://localhost    :9000");
+            webSocket = new WebSocket("ws://192.168.2.2:9000");
+            console.log(webSocket)
+            webSocket.onmessage = function(e) {
+               console.log("Got echo: " + e.data);
+            }
+         }
+         function sendMessage(msg){
+            webSocket.send(msg);
+            $("p").append("</br> bouton clique ");
+         }
+      </script>
+   </head>
+   <body>
+      <h1>WebSocket Echo Client</h1>
+      <button onclick='sendMessage("Hello");'>
+         Send Hello
+      </button>
+
+      <p id="retour"> Retour :  </p>
+   </body>
+
+   <script>
+
+   </script>
+</html>

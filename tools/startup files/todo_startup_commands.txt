@@ -1,0 +1,23 @@
+(A) Execute command at system startup
+Let us assume you would like to run command called
+
+i) Create a script called mystartup.sh in /etc/init.d/ directory(login as root)
+# vi /etc/init.d/mystartup.sh
+
+ii) Add commands to this script one by one:
+#!/bin/bash
+echo "Setting up customized environment..."
+fortune
+
+iii) Setup executable permission on script:
+# chmod +x /etc/init.d/mystartup.sh
+
+iv)Make sure this script get executed every time Debian Linux system boot up/comes up:
+# update-rc.d mystartup.sh defaults 100
+
+
+Extinction ordi -# /etc/crontab
+
+L'exemple ci-dessous exécutera /usr/bin/apt-get update, chaque jour, de chaque mois à 03:05 (le cron fonctionne sur 24 h) avec les droits de l'utilisateur nomdutilisateur.
+
+5 3  * *  * nomdutilisateur /usr/bin/apt-get update

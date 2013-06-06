@@ -1,0 +1,265 @@
+#:kivy 1.0
+#:import math math
+
+#:set futuraHeavy 'widgets/FuturaLT-Heavy.ttf'
+#:set futuraBook 'widgets/FuturaLT-Book.ttf'
+#:set TimeNR 'fonts/Times New Roman.ttf'
+#:set TimeNR 'fonts/OFLGoudyStMTT.ttf'
+#:set TimeNR-Italic 'fonts/Times New Roman Italic.ttf'
+
+<ImageItem>:
+	img_square: img_carre
+	size_hint: None, None
+	size: 512, 512
+	scale: .8
+	container: container
+	scale_min: .48
+	scale_max: 3
+	color: (1,1,1,1)
+
+	legendePhoto: legendePhoto
+	text_content: text_content
+	scatter_date_photo: scatter_date_photo
+	scatter_legende_photo: scatter_legende_photo
+	text_content_label: text_content_label
+	scatter_background_texte: scatter_background_texte
+	background_texte: background_texte
+	play_button: play_button
+	stop_button: stop_button
+	video_buttons_layout: video_buttons_layout
+	# fullscreen_button: fullscreen_button
+	preview_button: preview_button
+
+	FloatLayout:
+		size: root.size
+		id: container
+		canvas:
+			Color:
+				rgba: root.color
+			Rectangle:
+				pos:(-10,-10 - 32) if root.item['keywords'][0] == '270' else (0,0)
+				size: (root.width + 20, root.height + 20 + 32) if root.item['keywords'][0] == '270' else root.size
+				# source: 'widgets/background-texte.png' 
+
+		Image:
+			id: img_carre
+			source: root.source
+			# mipmap:True
+			size_hint:None,None
+			size:self.texture_size[0], self.texture_size[1]
+
+		#############################################
+		#############################################
+		####	 VIDEO ITEM 		#################
+		#############################################
+		#############################################
+		Button:
+			id: preview_button
+			text: 'play'
+			size_hint: None,None
+			size:(200,40)
+			on_release:root.on_play_button()
+			x: root.width/2 - self.width/2
+			y: root.height/2 - self.height/2
+
+		BoxLayout:
+			id: video_buttons_layout
+			orientation: 'horizontal'
+			spacing: 5
+			size_hint: None,None
+			size:(410, 40)
+			x: root.width/2 - self.width/2
+			y: root.height/2 - self.height/2
+			canvas:
+				Color:
+					rgba: (0,0,0,.6)
+				Rectangle:
+					size: root.size
+
+			Button:
+				id: play_button
+				text: 'play'
+				size_hint: None,None
+				size:(200,40)
+				on_release:root.on_play_button()
+
+			Button:
+				id: stop_button
+				text: 'stop'
+				size_hint: None,None
+				size:(200,40)	
+				on_release:root.on_stop_button()
+
+
+		#############################################
+		#############################################
+		####	TEXT ITEM ###########################
+		#############################################
+		#############################################
+
+		Scatter:
+			id: scatter_background_texte
+			scale:0.5
+			size_hint:None,None
+			# pos_hint:{'x':0, 'y':0}
+			x: 0
+			y: 0
+			size:512,512
+			do_rotation: False
+			do_translation: False
+			do_scale: False
+
+			Image:
+				id: background_texte
+				source: 'widgets/background-texte.png'
+				size_hint:1,1
+				mipmap: True
+				size:1024,1024
+
+		Scatter:
+			id: text_content
+			scale:0.5
+			size_hint:None,None
+			pos_hint:{'x':0, 'y':0}
+
+			Label:
+				id: text_content_label
+				text: root.item['description'] or ''
+				font_name: TimeNR
+				markup: True
+				text_size:(root.width*2 - 100, root.height*2 - 50)
+				font_size: 26
+				halign: 'left'
+				valign: 'middle'
+				color: 0, 0, 0, 1
+				width: root.width*2 - 100 #self.texture_size[0]
+				height: self.texture_size[1]
+				# pos: self.texture_size[0]/2, root.height /2
+				pos: 50,50/2
+
+
+		#############################################
+		#############################################
+		####	PHOTO ITEM ##########################
+		#############################################
+		#############################################
+
+		Scatter:
+			id:scatter_date_photo
+			scale:0.5
+			size_hint:None,None
+			pos_hint:{'x':0, 'y':0}
+
+			Label:
+				text: root.item['date_crea'].upper() or ''
+				font_name: TimeNR
+				size_hint_y: None
+				height: self.texture_size[1]
+				width: self.texture_size[0]
+				font_size: 26
+				halign: 'left'
+				valign: 'bottom'
+				color: 1, 1, 1, 1
+				pos: 8, 8
+				canvas.before:
+					Color:
+						rgba: 0,0,0,1
+					Rectangle:
+						size:(self.texture_size[0] + 16, self.texture_size[1] + 16)
+		
+
+		Scatter:
+			id: scatter_legende_photo
+			scale: 0.5
+			size_hint:None,None
+			pos_hint:{'x':0,'y':0}
+
+			Label:
+				id: legendePhoto
+				text:root.item['freefield'].upper() or ''
+				# text_size: (4.5 * root.width/6, 150)
+				font_name: TimeNR
+				size_hint_y: None
+				font_size: 26
+				height: self.texture_size[1] 
+				width: self.texture_size[0]
+				valign: 'middle'
+				halign: 'left'
+				x:  8
+				y: - self.texture_size[1] - 8
+				color: (0, 0, 0, 1)
+				canvas.before:
+					Color:
+						rgba: 1,1,1,1
+					Rectangle:
+						pos:(0, -self.texture_size[1] - 16)
+						size:(root.width *2, self.texture_size[1] + 16)
+
+
+<CircularKeywordPicker>:
+	canvas:
+		# Color:
+  #       	rgba: 1,0,1,.3
+  #       Rectangle:
+  #       	size: self.size
+		Color: 
+			rgba: 0,0,0,1
+		Ellipse:
+            pos: self.width/2 - self.outer_radius/2 ,self.width/2 - self.outer_radius/2
+            size: (self.outer_radius, self.outer_radius)
+        Color:
+        	rgba: 0,0,0,1
+        Ellipse:
+        	pos: self.width/2 - self.inner_radius/2, self.width/2 - self.inner_radius/2
+        	# pos: (self.outer_radius - self.inner_radius)/2, (self.outer_radius - self.inner_radius)/2
+        	size: self.inner_radius, self.inner_radius 
+
+<Keyword>:
+	scale: 1 - self.delta /3
+	size_hint: None, None
+	do_rotation: False
+	do_scale: False
+	do_translation: False
+	auto_bring_to_frong: True
+
+	key_label: key_label
+	# canvas:
+	# 	Color:
+	# 		rgba: 1,1,1,1
+	# 	Rectangle:
+	# 		size: self.size
+
+	Label:
+		id: key_label
+		text:root.text
+		font_size: 16
+		height: self.texture_size[1]
+		width: self.texture_size[0]
+		color: (1 - root.delta/2, 1 - root.delta/2,1-root.delta/2,1) #(.5,.5,.5,1)
+		size_hint:None,None
+		halign: 'center'
+		valign: 'middle'
+
+# <Keyword>:
+# 	color: (1, 1, 1, 1) if self.selected else (.5, .5, .5, 1) 
+# 	canvas.before:
+# 		Color:
+# 			rgb: 1, 1, 1
+# 		Rectangle:
+#             pos: int(self.center_x - self.texture_size[0] / 2. - 32), int(self.center_y - 10)
+# 			size: 20, 20
+# 			source: 'widgets/circle%s.png' % ('_selected' if self.selected else '')
+
+<SizeSlider>:
+	canvas:
+		Color:
+			rgb: 1, 1, 1
+		Rectangle:
+			pos: self.x - 40, self.y
+			size: (500, 30)
+			source: 'widgets/taille.png'
+        Color:
+            rgb: 0.5490, 1, 1
+		Rectangle:
+			pos: self.x + self.value_min * self.width, self.center_y - 10
+			size: self.width * (self.value_max - self.value_min), 20

@@ -1,4 +1,31 @@
 *.py[cod]
+*.py.0
+*.py~
+
+
+#logs
+*.log
+
+#image files
+*.dds
+*.jpg
+*.png
+*.jpeg
+*.gif
+*.JPG
+
+*.wmv
+*.m4a
+*.mp4
+*.mov
+
+
+#font files
+*.ttf
+
+*.md5sum
+*.checksum
+*.DS_Store
 
 # C extensions
 *.so

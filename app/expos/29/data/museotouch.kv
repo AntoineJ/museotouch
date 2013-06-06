@@ -1,0 +1,498 @@
+#:kivy 1.0
+#:import math math
+#:set petita 'widgets/PetitaLight.ttf'
+#:set petita_medium 'widgets/PetitaMedium.ttf'
+#:set petita_bold 'widgets/PetitaBold.ttf'
+#:set arial 'widgets/Arial.ttf'
+#:set arialBold 'widgets/ArialBold.ttf'
+#:set voces 'widgets/voces.ttf'
+#:set futuraHeavy 'widgets/FuturaLT-Heavy.ttf'
+#:set futuraBook 'widgets/FuturaLT-Book.ttf'
+#:set color_keyword_hi [0.9098039215686274, 0.34509803921568627, 0.06666666666666667, 1] #get_color_from_hex('#e85811')
+#:set color_title_hi [0.8862745098039215, 0.19215686274509805, 0.15294117647058825, 1] #get_color_from_hex('#e23127')
+#:set color_normal [0.7764705882352941, 0.7764705882352941, 0.7764705882352941, 1] #get_color_from_hex('#c6c6c6'),
+#:set totalWidth 1920
+#:set diam_ratio 1.3
+
+<ImageItem>:
+	img_square: img_carre
+	border: 2 / self.scale
+	size_hint: None, None
+	size: 512, 512
+	scale: 0.6
+	container: container
+	scale_min: .48
+	scale_max: 1.3
+
+	btn_more_cross: btn_more_cross
+	btn_triangle1: btn_triangle1
+	#btn_triangle2: btn_triangle2
+	#btn_loupe: btn_loupe
+	img_more_cross: img_more_cross
+	bg_img: bg_img
+	description_text: descriptiontxt 
+	email_form: emailForm
+	share_button: shareButton
+	email1: email1
+	email2: email2
+	bg_txt: background_text
+	gallery: gallery
+	galleryLeft: galleryLeft
+	galleryRight: galleryRight
+
+	canvas.before:
+		StencilPush
+		# HORIZONTAL
+		Rectangle: 
+			pos:(0,25)
+			size: (512,462)
+		# PARTIE BASSE
+		Rectangle: 
+			pos:(25,0)
+			size: (512 - 50, 25)
+		# PARTIE HAUTE
+		Rectangle: 
+			pos:(25,512-25)
+			size: (512 - 50, 25)
+		# COIN BAS GAUCHE
+		Ellipse: 
+			pos: ( 0, 0)
+			size: (50,50)
+			angle_start:180
+			angle_end:270
+		# COIN BAS DROITE
+		Ellipse: 
+			pos: (self.width - 50, 0)
+			size: (50,50)
+			angle_start:90
+			angle_end:180
+		# COIN HAUT GAUCHE
+		Ellipse: 
+			pos: ( 0, 512-50)
+			size: (50,50)
+			angle_start:270
+			angle_end:360
+		# COIN HAUT DROITE
+		Ellipse: 
+			pos: ( 512-50, 512-50)
+			size: (50,50)
+			angle_start:0
+			angle_end:90
+		StencilUse
+	canvas.after:
+		StencilUnUse
+		# HORIZONTAL
+		Rectangle:
+			pos:(0,25)
+			size: (512,462)
+		# PARTIE BASSE
+		Rectangle: 
+			pos:(25,0)
+			size: (512 - 50, 25)
+		# PARTIE HAUTE
+		Rectangle: 
+			pos:(25,512-25)
+			size: (512 - 50, 25)
+		# COIN BAS GAUCHE
+		Ellipse: 
+			pos: (0, 0)
+			size: (50,50)
+			angle_start:180
+			angle_end:270
+		# COIN BAS DROITE
+		Ellipse: 
+			pos: ( self.width - 50, 0)
+			size: (50,50)
+			angle_start:90
+			angle_end:180
+		# COIN HAUT GAUCHE
+		Ellipse: 
+			pos: ( 0, 512-50)
+			size: (50,50)
+			angle_start:270
+			angle_end:360
+		# COIN HAUT DROITE
+		Ellipse: 
+			pos: ( 512-50, 512-50)
+			size: (50,50)
+			angle_start:0
+			angle_end:90
+		StencilPop
+
+	StencilView:
+		size: root.size
+
+		FloatLayout:
+			size: root.size
+			#size: (2048, root.height)
+			#pos:(0,0)
+			id: container
+			
+			# BACKGROUND IMAGE
+			FloatLayout:
+				size:(3000, root.height)
+				id:gallery
+
+				Image:
+					id: img_carre
+					source: root.source
+					#size_hint: (1 * (0.3 + 0.7 * root.flip_alpha), 1 * (0.3 + 0.7 * root.flip_alpha))
+					y: 0 + ((1-root.flip_alpha) * 141)
+					color: (1,1,1,1) if not root.isPlayingVideo else (0,0,0,1)
+
+			Image:
+				id: background_text
+				size:(512, 64)
+				source: 'widgets/background_txt.png'
+				y: - root.height/2 + 32
+
+			# TITLE
+			Label:
+				text: root.item['nom'].upper() or ''
+				font_name: futuraHeavy
+				#size_hint: 0.4, 0.16
+				height: self.texture_size[1] 
+				width: self.texture_size[0]
+				text_size:(375, 50)
+				font_size: 20 
+				color: 0, 0, 0, 1 * root.flip_alpha
+				pos: -50 , -215
+
+		# GALLERY LEFT
+		Scatter:
+			id: galleryLeft
+			size: (64,64)
+			x:0
+			y:root.height/2 - self.height/2  + ((1-root.flip_alpha) * (141+16))
+			scale: 0.5
+			do_scale: False
+			do_rotation: False
+			do_translation: False, False
+			Button: 
+				size: (64,64)
+				background_normal: 'widgets/btn_right_diaporama.png'
+				background_down: 'widgets/btn_right_diaporama_active.png'
+				on_release: root.display_prev_img()
+		# GALLERY RIGHT
+		Scatter:
+			id: galleryRight
+			size: (64,64)
+			x: root.width - self.width
+			y:root.height/2 - self.height/2 + ((1-root.flip_alpha) * (141+16))
+			scale: 0.5
+			do_scale: False
+			do_rotation: False
+			do_translation: False, False
+			Button: 
+				size: (64,64)
+				background_normal: 'widgets/btn_left_diaporama.png'
+				background_down: 'widgets/btn_left_diaporama_active.png'
+				on_release: root.display_next_img()
+
+		#BACKGROUND VERSO
+		Image:
+			id: bg_img
+			source: 'widgets/background_item.png'
+			color: root.my_color
+			size: 512, 303
+			y: -root.flip_alpha * 303
+
+		#TITRE VERSO
+		Label:
+			text:root.item['nom'].upper() or ''
+			font_name: futuraHeavy
+			font_size: root.size[0] / 25
+			width: self.texture_size[0]
+			height: self.texture_size[1]
+			x: root.width / 6
+			y: (root.width/2 - self.height/2 + 10) - 303 * root.flip_alpha
+			color: (0, 0, 0, 1 - root.flip_alpha) 
+		
+		#DESCRIPTION
+		Label:
+			id: descriptiontxt
+			text:root.item['description'] or ''
+			text_size: (4.5 * root.width/6, 256)
+			font_name: futuraBook
+			font_size: root.size[0] / 40
+			valign: 'top'
+			height: self.texture_size[1]
+			width: self.texture_size[0]
+			x: root.width / 6
+			#y: ((root.width/2) - self.height/2 - 75) - 303 * root.flip_alpha
+			y: ((root.width/2) - 265) - 303 * root.flip_alpha
+			color: (0, 0, 0, 1 - root.flip_alpha)
+
+		# BOUTON PLAY VIDEO
+		Scatter:
+			id: scatter_btn_play
+			size:250,50
+			do_scale:False
+			do_rotation:False
+			do_translation:False, False
+			scale: 0.5
+			x: root.width/6
+			y: root.description_text.y - root.description_text.height/2 if hasattr(root, 'video') else -150
+			Button:
+				id: btn_play
+				size:(250,50)
+				background_down: 'widgets/btn_play_active.png'
+				background_normal: 'widgets/btn_play.png'
+				on_release: root.on_btn_play()
+				background_color:(1,1,1, 1 - root.flip_alpha)
+				#x: root.description_text.x - 40
+				#y: (root.description_text.y - 303 * root.flip_alpha) if hasattr(root, 'video') #else (-150)
+
+		# STOP VIDEO BUTTON
+		Button:
+			size: (64,64)
+			pos: (root.width - self.width, root.height - self.height)
+			background_normal: 'widgets/btn_close.png'
+			background_down: 'widgets/btn_close.png'
+			on_release: root.on_stop_video()
+			background_color: (0,0,0,0) if not root.isPlayingVideo else (1,1,1,1)
+
+		# SHARE BUTTON
+		Scatter:
+			id:shareButton
+			size:120,50
+			do_scale: False
+			do_rotation: False
+			do_translation: False, False
+			scale:0.8
+			center_x: root.width/2
+			center_y: 30 - 303 * root.flip_alpha
+
+			Button:
+				size: (120,50)
+				background_down: 'widgets/btn_share.png'
+				background_normal: 'widgets/btn_share.png'
+				on_release: root.share_item()
+
+		# EMAIL TEXT INPUTS
+		BoxLayout:
+			id: emailForm
+			orientation: 'vertical'
+			width: 300
+			height:82
+			spacing:5
+			center_x: root.width/2
+			y: -303 if root.flip_front == False else -303
+
+			GridLayout:
+				cols: 2
+				spacing:0
+				padding:0
+
+				size_hint:(None,None)
+				height:62
+				width:300
+				minimum_height:31
+
+				# FIRST LINE
+				Image:
+					id: back_sender
+					source: 'widgets/form/form_mail_sender.png'
+					size: (200,31)
+					size_hint: (None,None)
+					
+					TextInput:
+						id: email1
+						text: 'Email emetteur'
+						multiline: False
+						focus: True if root.emailMode else False
+						font_size: 9
+						background_color:(1,1,1,0)
+						foreground_color:(0,0,0,1)
+						width:200
+						height:31
+						size_hint:(None,None)
+						pos:(back_sender.x , back_sender.y)
+						on_focus: root.leave_focus_1()
+
+				Button:
+					size_hint:(None, None)
+					size:(100,31)
+					background_normal:'widgets/form/form_mail_btn_ok.png'
+					background_down: 'widgets/form/form_mail_btn_ok_active.png'
+					on_release: root.check_email_form()
+				
+				# SECOND LINE
+				Image:
+					id: back_receiver
+					source: 'widgets/form/form_mail_receiver.png'
+					size: (200,31)
+					size_hint: (None,None)
+
+					TextInput:
+						id: email2
+						text: 'Email destinataire'
+						multiline: False
+						font_size: 9
+						focus: True if root.emailMode else False
+						background_color:(1,1,1,0)
+						foreground_color:(0,0,0,1)
+						width:200
+						height:31
+						pos: (back_receiver.x, back_receiver.y)
+						on_focus: root.leave_focus_2()
+
+				Button:
+					size: (100, 30)
+					size_hint:(None, None)
+					background_normal: 'widgets/form/form_mail_btn_cancel.png'
+					background_down: 'widgets/form/form_mail_btn_cancel_active.png'
+					on_release: root.share_item()
+
+			Label:
+				height: 20
+				width: 300
+				font_size:8
+				text: 'En envoyant ce mail vous acceptez de recevoir une newsletter.\nVous pourrez vous désinscrire dès le 1er mail.'
+
+
+		# MORE BUTTON
+		Button:
+			size: (48, 48)
+			pos: root.width -self.width,  0
+			background_color: (0, 0, 0, 0) 
+			on_release: root.on_btn_more()
+			
+			Image:
+				id:btn_triangle1
+				source: 'widgets/btn_triangle.png'
+				size:64,64
+				pos: root.width - self.width, 0
+				color: (1,1,1,1) if not root.flip_front else root.my_color if not root.isPlayingVideo else (0,0,0,0)
+
+			Scatter:
+				id: btn_more_cross
+				size:28,28
+				do_scale: False
+				do_rotation: False
+				do_translation: False, False,
+				scale: 1
+				pos: (root.width - self.width - 5 , 5)
+				rotation: 45 if root.flip_front == False else 0
+				Image:
+					id:img_more_cross
+					source:'widgets/btn_more.png'
+					size:28, 28
+					color: root.my_color if not root.flip_front else (0,0,0,1) if not root.isPlayingVideo else (0,0,0,0)
+
+		# LOUPE BUTTON
+#		Button:
+#			size: (32, 32)
+#			pos: 0,  root.height - self.height
+#			on_release: root.on_zoom()
+#			background_color: (0, 0, 0, 0)
+#			
+#			Image:
+#				id: btn_triangle2
+#				source: 'widgets/btn_triangle_inv.png'
+#				size:64,64
+#				pos: 0, root.height - self.height
+#				color: (1,1,1,1) if root.isLoupe else root.my_color if not root.isPlayingVideo else (#0,0,0,0)
+#
+#			Scatter:
+#				id: scatter_btn_loupe
+#				size: 28, 28
+#				do_scale: False
+#				do_rotation: False
+#				do_translation: False, False,
+#				scale: 1
+#				pos: (5, root.height - self.height - 5)
+#				Image:
+#					id:btn_loupe
+#					source:'widgets/btn_loupe.png'
+#					size: 28, 28
+#					color: root.my_color if root.isLoupe else (0,0,0,1) if not root.isPlayingVideo else (#0,0,0,0)
+
+		
+
+<ImageItemContent>:
+
+		#Button:
+		#	text: 'Voir les médias' if len(root.item.medias) else ''
+		#	text_size: (self.width, None)
+		#	size_hint_y: None
+		#	height: self.texture_size[1] + 10
+		#	font_name: petita_bold
+		#	font_size: 14
+		#	on_release: root.toggle_media() if len(root.item.medias) else None
+		#	background_color: (0, 0, 0, 0)
+		#	color: (.8, .8, .8, 1)
+
+	GridLayout:
+		cols: 1
+		pos_hint: {'x': 0.3}
+		size_hint_x: 0.7
+		size_hint_y: 0.5
+
+		canvas.before:
+			Color:
+				rgb: 1,1,1
+			#Rectangle:
+			#	pos: self.x, self.top - self.height * (1 - root.flip_alpha)
+			#	size: self.width, self.height * (1 - root.flip_alpha)
+
+		Label:
+			text: root.item.title
+			text_size: (self.width - 20, None)
+			valign: 'middle'
+			font_size: 18
+			font_name: voces
+			size_hint_y: None
+			height: max(102, self.texture_size[1])
+			#color: (0, 0, 0, 1 - root.flip_alpha)
+			color: (0, 0, 0, 0)
+
+		Label:
+			text: root.item.description
+			text_size: (self.width - 20, None)
+			size_hint_y: None
+			font_name: voces
+			font_size: 12
+			height: self.texture_size[1]
+			#color: (0, 0, 0, 1 - root.flip_alpha)
+			color: (0, 0, 0, 0)
+
+<ItemMediaBrowser>:
+	content: content
+	canvas:
+		Color:
+			rgb: 0, 0, 0
+		Rectangle:
+			size: self.size
+	BoxLayout:
+		orientation: 'vertical'
+		BoxLayout:
+			id: content
+		BoxLayout:
+			orientation: 'horizontal'
+			size_hint_y: None
+			spacing: 10
+			padding: 10
+			height: 64
+			Button:
+				text: '<'
+				on_release: root.index -= 1
+				font_name: petita_bold
+				background_color: (.1, .1, .1, .5)
+				font_size: 14
+			Button:
+				text: 'Fermer'
+				on_release: root.parent.toggle_media() if root.parent else None
+				font_name: petita_bold
+				background_color: (.1, .1, .1, .5)
+				font_size: 14
+			Button:
+				text: '>'
+				on_release: root.index += 1
+				font_name: petita_bold
+				background_color: (.1, .1, .1, .5)
+				font_size: 14
+
+<TopCursorNormal>:
+    pos_hint:{'y':0.43, 'x':0.5}
+  

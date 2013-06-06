@@ -1,0 +1,467 @@
+#:kivy 1.0
+#:import math math
+
+#:set futuraHeavy 'widgets/FuturaLT-Heavy.ttf'
+#:set futuraBook 'widgets/FuturaLT-Book.ttf'
+#:set TimeNR 'fonts/Times New Roman.ttf'
+#:set TimeNR 'fonts/OFLGoudyStMTT.ttf'
+#:set TimeNR-Italic 'fonts/Times New Roman Italic.ttf'
+#:set lato 'fonts/Lato-Regular.ttf'
+<ImageItem>:
+	img_square: img_carre
+	size_hint: None, None
+	size: 512, 512
+	# size: 800, 800
+	scale: .5
+	container: container
+	scale_min: .1
+	scale_max: 3
+	color: (1,1,1,1)
+
+	return_button: return_button
+	family_text: family_text
+	close_button: close_button
+	
+	canvas:
+		Color:
+			rgba: (0.2,0.5,0.85,1) if not self.color else self.color
+		Ellipse:
+			pos:  (self.width/4) -12 , (self.width/4 ) -12
+			size: (self.width/2 + 24, self.width/2 +24) if not hasattr(self, 'shape') else (self.shape.radius, self.shape.radius)
+			
+	FloatLayout:
+		size: root.size
+		id: container
+
+		# Label:
+		# 	text: root.item['nom'].upper() or ''
+		# 	font_name: TimeNR
+		# 	size_hint: None, None
+		# 	height: self.texture_size[1]
+		# 	width: self.texture_size[0]
+		# 	font_size: 26
+		# 	halign: 'left'
+		# 	valign: 'bottom'
+		# 	color: 1, 1, 1, 1
+		# 	pos: 0, root.height
+
+		StencilView:
+			size: (self.parent.parent.radius, self.parent.parent.radius) if hasattr(self.parent.parent, 'radius') else root.size
+			canvas.before:
+				StencilPush
+				Ellipse:
+					pos: (root.width/2 - root.radius/2, root.height/2 - root.radius/2) if hasattr(root, 'orig_radius') else (root.width/2 - 128, root.height/2 - 128)
+					size: (root.radius, root.radius) if hasattr(root, 'radius') else (256,256) 
+					angle_start:0
+					angle_end:360
+				StencilUse				
+			
+			canvas.after:
+				StencilUnUse
+				Ellipse:
+					pos: (root.width/2 - root.radius/2, root.height/2 - root.radius/2) if hasattr(root, 'radius') else (root.width/2 - 128, root.height/2 - 128)
+					size: (root.radius, root.radius) if hasattr(root, 'radius') else (256,256)
+					angle_start:0
+					angle_end:360
+				StencilPop
+			
+
+			Label:
+				id:family_text
+				text: root.item['freefield'] or ''
+				# size_hint_y: None
+				font_size: 30
+				text_size: (240,240) if not hasattr(root, 'radius') else (root.radius*2, root.radius*2)
+				height: self.texture_size[1]
+				# width: 30 #root.radius if hasattr(root, 'radius') else self.texture_size[0]
+				
+				# bold: True
+				# italic: True
+				halign: 'center'
+				valign: 'middle'
+				color: 0, 0, 0, 1
+				pos: root.width/2 - self.width/2, root.height/2 - self.height/2
+				canvas.before:
+					Color:
+						rgba: (root.red, root.green, root.blue, root.alpha - .5) if hasattr(root, 'alpha') else (1,1,1,0)
+					Rectangle:
+						pos: 120,120
+						size: 300,300
+
+
+			Image:
+				id: img_carre
+				source: root.source
+				color:(1,1,1,1) if not hasattr(root, 'alpha') else () 
+				size_hint:None,None
+				size: root.size
+				canvas:
+					Color:
+						# rgba: (1,1,1,0)  if root.scale < .6 else (0.2,0.5,0.85, (root.scale -.6) *5)
+						rgba: (0,0,0,0) if not hasattr(root, 'alpha') else (root.red, root.green, root.blue, (root.scale -root.default_scale) *5)
+						# rgba: (0,0,0,0) if not hasattr(root, 'alpha') else (root.red, root.green, root.blue, .8)
+					Rectangle:
+						pos: self.pos
+						size: self.size
+
+			Label:
+				id: return_button
+				text: 'Retour'
+				# font_name: TimeNR
+				# size_hint_y: None
+				font_size: 40
+				height: self.texture_size[1]
+				width: self.texture_size[0]
+				
+				halign: 'left'
+				valign: 'bottom'
+				color: 1, 1, 1, 1
+				pos: root.width/2 - self.width/2, root.height/2 - self.height/2 - 180
+				canvas.before:
+					Color:
+						rgba: (0.2,0.5,0.85,1) if not root.color else root.color
+					Rectangle:
+						pos: self.pos[0] -100, self.pos[1] -25
+						size:(self.width + 200, self.height + 50)	
+			Label:
+				id: close_button
+				text: 'Fermer'
+				# font_name: TimeNR
+				# size_hint_y: None
+				font_size: 40
+				height: self.texture_size[1]
+				width: self.texture_size[0]
+				
+				halign: 'left'
+				valign: 'bottom'
+				color: 1, 1, 1, 1
+				pos: root.width/2 - self.width/2, root.height/2 - self.height/2 - 165
+				canvas.before:
+					Color:
+						rgba: (0.2,0.5,0.85,1) if not root.color else root.color
+					Rectangle:
+						pos: self.pos[0] -100, self.pos[1] -25
+						size:(self.width + 200, self.height + 40)	
+
+<ContentContainer>:
+	size_hint: None, None
+	size: 360,240
+	scale: 1.5
+	scale_min:1
+	scale_max:4
+
+	title: title
+	stencil: stencil
+	img: img
+	stencil_layout: stencil_layout
+	next_button: next_button
+	prev_button: prev_button
+	scatter_text: scatter_text
+	description: description
+
+	canvas:
+		# Color:
+		# 	# rgba: 0.2,0.5,0.85,1
+		# 	rgba: 0,0,0,1
+		# Rectangle:
+		# 	pos:0,0
+		# 	size:self.size
+		Color:
+			# rgba: (0.2,0.5,0.85,1) if self.state == 'normal' else (1,1,1,1)
+			rgba: 1,0,0,0
+		Rectangle:
+			pos:0,0
+			size: self.size
+		
+		Color:
+			rgba: 0,0,0,1
+		Rectangle	
+			pos:20 + 3,20 +3
+			size: self.width -40 -6, self.height-40 - 6
+
+		Color:
+			rgba: (0.2,0.5,0.85,1) if not hasattr(self.img_item, 'color') else self.img_item.color
+		Line:
+			points: 20,20, 20,self.height-20, self.width-20,self.height-20, self.width-20,20
+			close: True
+			width: 3
+		# Line:
+		# 	points:self.width/2, self.height/2, self.item_pos[0], self.item_pos[1]
+		# 	width: 3
+		# Rectangle:
+		# 	pos:10,10
+		# 	size: self.size[0]-20, self.size[1] -20
+
+		# Color:
+		# 	rgb: 0,0,0
+		# Line:
+		# 	points: self.width/2, self.height/2, (self.width/2 + (self.x- self.img_item.x)) *-1, (self.height/2 + (self.y - self.img_item.y)) * -1
+		# 	width: 3
+	FloatLayout:
+		size: root.size
+
+		StencilView:
+			id: stencil
+			pos:20 + 3,20 +3
+			size_hint: None,None
+			# size: 314, root.height-20 - 3
+			size: root.width -46, root.height-46
+
+			canvas:
+				Color:
+					rgba: 0,0,0,1
+				Rectangle:
+					pos:23,23
+					size: self.size
+			
+			FloatLayout:
+				id: stencil_layout
+				size: self.size
+				pos:self.pos
+			# BoxLayout:
+			# 	id: stencil_layout
+			# 	orientation: 'horizontal'
+			# 	size: self.size
+			# 	pos:self.pos
+				
+				Image:
+					id: img
+					source: root.source
+					color:1,1,1,1
+					size_hint:None,None
+					pos: 20 + 3,20 + 3
+					# pos: 20 + 3,20 + 3
+					size: root.size[0] - 40 - 6, root.size[1] - 40 -6
+
+		
+		Scatter:
+			size:60,60
+			do_translation:False
+			do_scale:False
+			do_rotation:False
+			scale:.3
+			pos:root.size[0]-20 +5, root.size[1]-20 +5
+
+			Button:
+				size_hint:None,None
+				size: 60,60
+				pos: 0,0 #root.size[0]-20 -3, root.size[1]-20 -3 
+				background_down: 'widgets/btn-close-active.png'
+				background_normal: 'widgets/btn-close.png'
+				on_release: root.on_btn_close()
+
+			# canvas:
+			# 	Color:
+			# 		rgba: (0.2,0.5,0.85,0) if self.state == 'normal' else (1,1,1,1)
+			# 	Rectangle:
+			# 		pos:self.pos
+			# 		size: self.size
+			# 	Color:
+			# 		rgba: (1,1,1,1) if self.state == 'normal' else (0.2,0.5,0.85,1)
+			# 	Line:
+			# 		points: self.x,self.y, self.x+self.width,self.y+self.height
+			# 	Line:
+			# 		points: self.x, self.y+self.height, self.x+self.width,self.y
+		Scatter:
+			size:50,100
+			do_translation:False
+			do_scale:False
+			do_rotation:False
+			scale:.2
+			pos:root.size[0] - 10  , root.size[1]/2 - self.height/2 * self.scale
+
+			Button:
+				# id:next_button
+				id:prev_button
+				size_hint:None,None
+				size: 50,100
+				pos: 0,0 #root.size[0] - 10 - 3, root.size[1]/2 - 15
+				background_down: 'widgets/next-active.png'
+				background_normal: 'widgets/next.png'
+				# background_color: 1,1,1,0
+				# on_release:root.my_on_next_button()
+				on_release: root.my_on_prev_button()
+				
+				# canvas:
+				# 	Color:
+				# 		rgba: (1,1,1,0.1) if self.state == 'normal' else (0.2,0.5,0.85,1)
+				# 	Rectangle:
+				# 		pos: self.pos[0] -5, self.pos[1]-5
+				# 		size: self.size[0] +10, self.size[1] +10
+				# 	Color:
+				# 		rgba:1,1,1,1
+				# 	Line:
+				# 		points:self.x,self.y, self.x +self.width,self.y+self.height/2
+				# 	Line:
+				# 		points:self.x,self.y+self.height, self.x+self.width,self.y+self.height/2
+		Scatter:
+			size:50,100
+			do_translation:False
+			do_scale:False
+			do_rotation:False
+			scale:.2
+			pos:0, root.size[1]/2 - self.height/2 *self.scale
+			
+			Button:
+				# id:prev_button
+				id:next_button
+				size_hint:None,None
+				size: 50,100
+				pos: 0, 0
+				background_down: 'widgets/prev-active.png'
+				background_normal: 'widgets/prev.png'
+				# on_release: root.my_on_prev_button()
+				on_release:root.my_on_next_button()
+				# canvas:
+				# 	Color:
+				# 		rgba: (1,1,1,0.1) if self.state == 'normal' else (0.2,0.5,0.85,1)
+				# 	Rectangle:
+				# 		pos: self.pos[0] -5, self.pos[1]-5
+				# 		size: self.size[0] +10, self.size[1] +10
+				# 	Color:
+				# 		rgba: 1,1,1,1
+				# 	Line:
+				# 		points:self.x+self.width,self.y, self.x ,self.y+self.height/2
+				# 	Line:
+				# 		points:self.x,self.y+self.height/2, self.x+self.width,self.y+self.height
+				
+		Scatter:
+			id:scatter_text
+			scale:.5
+			# pos_hint:{'x':0, 'y':0}
+			size_hint:None,None
+			do_translation: False
+			do_scale: False
+			do_rotation: False
+			size: (root.width -40  ) *2 -16 , 242
+			pos: (16,-80) if root.img_item.isParent == True else (root.width-115, 60)
+
+			# canvas:
+			# 	Color:
+			# 		rgba: (0,0,0,.5) 
+			# 	Rectangle:
+			# 		pos:self.pos
+			# 		size: self.size
+			
+			FloatLayout:
+				size: (root.width -40 ) *2 -16 , 256
+
+				Label:
+					id:title
+					text: root.item['freefield'] or ''
+					# font_name: TimeNR
+					size_hint: None, None
+					height: self.texture_size[1]
+					width: self.texture_size[0]
+					font_size: 46
+					halign: 'left'
+					valign: 'bottom'
+					color: 1, 1, 1, 1
+					pos: root.scatter_text.x + 5, root.scatter_text.y + root.scatter_text.height - self.height
+					padding_y: 5
+					canvas.before:
+						Color:
+							rgba: (0,0,0,.5) 
+						Rectangle:
+							pos:self.pos[0] -5, self.pos[1] +5
+							size: self.size[0] +10, self.size[1] -10
+
+				Label:
+					id:description
+					text: root.item['description'] or ''
+					# font_name: TimeNR
+					text_size: ((root.width - 46)*2, None)
+					size_hint_y: None
+					height: self.texture_size[1]
+					width: self.texture_size[0]
+					font_size: 16
+					halign: 'left'
+					valign: 'top'
+					color: 1, 1, 1, 1
+					pos: root.scatter_text.x + 5, root.scatter_text.y + root.scatter_text.height - root.title.height - self.height
+					canvas.before:
+						Color:
+							rgba: (0,0,0,.5) 
+						Rectangle:
+							pos:self.pos[0] -5, self.pos[1]
+							size: self.size[0] +10, self.size[1]
+
+				Label:
+					text: root.img_item.details if hasattr(root.img_item, 'details') else ''
+					# font_name: lato
+					text_size: ((root.width - 46)*2, None)
+					size_hint_y: None
+					height: self.texture_size[1]
+					width: self.texture_size[0]
+					font_size: 16
+					halign: 'left'
+					valign: 'top'
+					markup: True
+					color: 1, 1, 1, 1
+					pos: root.scatter_text.x + 5, root.scatter_text.y + root.scatter_text.height - root.title.height - root.description.height - self.height -5
+					canvas.before:
+						Color:
+							rgba: (0,0,0,.5) 
+						Rectangle:
+							pos:self.pos[0] -5, self.pos[1]
+							size: self.size[0] +10, self.size[1]
+
+
+
+
+		#############################################
+		#############################################
+		####	PHOTO ITEM ##########################
+		#############################################
+		#############################################
+
+		# Scatter:
+		# 	id:scatter_date_photo
+		# 	scale:0.5
+		# 	size_hint:None,None
+		# 	pos_hint:{'x':0, 'y':0}
+
+		# 	Label:
+		# 		text: root.item['date_crea'].upper() or ''
+		# 		font_name: TimeNR
+		# 		size_hint_y: None
+		# 		height: self.texture_size[1]
+		# 		width: self.texture_size[0]
+		# 		font_size: 26
+		# 		halign: 'left'
+		# 		valign: 'bottom'
+		# 		color: 1, 1, 1, 1
+		# 		pos: 8, 8
+		# 		canvas.before:
+		# 			Color:
+		# 				rgba: 0,0,0,1
+		# 			Rectangle:
+		# 				size:(self.texture_size[0] + 16, self.texture_size[1] + 16)
+		
+
+		# Scatter:
+		# 	id: scatter_legende_photo
+		# 	scale: 0.5
+		# 	size_hint:None,None
+		# 	pos_hint:{'x':0,'y':0}
+
+		# 	Label:
+		# 		id: legendePhoto
+		# 		text:root.item['freefield'].upper() or ''
+		# 		# text_size: (4.5 * root.width/6, 150)
+		# 		font_name: TimeNR
+		# 		size_hint_y: None
+		# 		font_size: 26
+		# 		height: self.texture_size[1] 
+		# 		width: self.texture_size[0]
+		# 		valign: 'middle'
+		# 		halign: 'left'
+		# 		x:  8
+		# 		y: - self.texture_size[1] - 8
+		# 		color: (0, 0, 0, 1)
+		# 		canvas.before:
+		# 			Color:
+		# 				rgba: 1,1,1,1
+		# 			Rectangle:
+		# 				pos:(0, -self.texture_size[1] - 16)
+		# 				size:(root.width *2, self.texture_size[1] + 16)
