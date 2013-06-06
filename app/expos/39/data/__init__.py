@@ -903,29 +903,19 @@ def build(app):
             for child in app.root_images.children:
                 if isinstance(child, ImageItem):
                     previous_opacity = child.opacity
-                    previous_color = child.color
-                    child.opacity = 0
                     
-                    child.color = (0.055,0.447,0.537,1)
-
                     if str(id_keyword) in child.item.keywords:
-                        child.img_square.color = child.color
                         Animation.stop_all(child)
-                        anim = Animation(opacity = 1, d=1) + Animation(opacity = previous_opacity, d=5)
+                        anim = Animation(opacity=1, d=1) + Animation(opacity=1, d=3) + Animation(opacity = previous_opacity, d = 1)
                         anim.start(child)
                     else:
                         opacity_min = .1
                         Animation.stop_all(child)
-                        anim = Animation(opacity = opacity_min, d=1) + Animation(opacity=previous_opacity, d=5)
+                        anim = Animation(opacity = 0, d=1) + Animation(opacity=0, d=3) + Animation(opacity = previous_opacity, d = 1)
                         anim.start(child)
                         if hasattr(child, 'content_container') and child.content_container != None:
-                            anim2 = Animation(opacity = opacity_min, d=.5) + Animation(opacity = opacity_min, d=2) + Animation(opacity=1, d=1)
+                            anim2 = Animation(opacity = 0, d=.5) + Animation(opacity = 0, d=3) + Animation(opacity=1, d=1)
                             anim2.start(child.content_container)
-                    anim1 = Animation(color=(1,1,1,1), d=10)
-                    anim1.start(child.img_square)
-                    
-                    anim2 = Animation(color=previous_color, d=10)
-                    anim2.start(child)
 
     mediaButton = Button(
         background_normal='widgets/caption-media.png',
