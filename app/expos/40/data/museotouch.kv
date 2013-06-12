@@ -1,0 +1,202 @@
+#:kivy 1.0
+#:import math math
+
+#:set futuraBold 'widgets/fonts/FuturaLT-Bold.ttf'
+#:set futura 'widgets/fonts/FuturaLT-Oblique.ttf'
+#:set arial 'widgets/fonts/Arial.ttf'
+#:set arialB 'widgets/fonts/Arial Bold.ttf'
+#:set arialBI 'widgets/fonts/Arial Bold Italic.ttf'
+#:set arialI 'widgets/fonts/Arial Italic.ttf'
+
+# <GlassButton>:
+	
+
+<Glass>:
+	scale_min: .1
+	scale_max: 1
+	size_hint: None, None
+	do_collide_after_children: True
+	do_scale: False
+	# do_rotation: False
+
+	text_name: text_name
+	text_sub: text_sub
+	# close_button: close_button
+	bg_img: bg_img
+   
+    # canvas:
+    #     Color:
+    #         rgba: 1,0,1,.1
+    #     Rectangle:
+    #         pos: 0,0
+    #         size: self.size
+
+	FloatLayout:
+		id: container
+
+		Image:
+			source: 'widgets/loupe-viseur.png'
+			size_hint: None, None
+			size:300,300
+
+		Image:
+			id: bg_img
+			source: 'widgets/loupe-contour.png'
+			keep_data: True
+			size_hint: None, None
+			size:300,300
+			color: root.color
+
+		Button:
+			id: close_button
+			size_hint: None,None
+			size: 79,44
+			pos: 147,220
+			background_down:'widgets/btn-close-glass.png'
+			background_normal:'widgets/btn-close-glass.png'
+			background_color: root.color if self.state == 'normal' else (1,1,1,1)
+			on_release: root.remove()
+
+		Button:
+			id: text_name
+	        size_hint:None,None
+	        size: self.texture_size
+	        text: root.item['nom'].upper() if root.content == True else ''
+			# markup: True
+			font_name: futuraBold
+			font_size: 20
+	        background_color: 0,0,0,0
+			color: (1,1,1,1) if self.state == 'normal' else root.color
+			# x:15
+			# y:0
+			x:265 +10
+			y:152.5
+			padding_x: 10
+			text_size: ( 58*5 + 5*4, None)
+			width: 58*5 + 5*4 #self.texture_size[0] 
+			height: self.texture_size[1]
+			halign: 'left'
+	        on_release: root.open_main_item()
+
+			canvas.before:
+				Color:
+					rgba: root.color if self.state == 'normal' else (1,1,1,1)
+				Rectangle:
+					pos: self.x - 20, self.y
+					# pos:0,0
+					size: 58*5 + 5*4, self.texture_size[1] 
+					# size: self.texture_size[0], self.texture_size[1] 
+		Label:
+			text: '>' if root.content == True else ''
+			font_size: 20
+			font_name: arial
+			text_size: None, None
+			color: (1,1,1,1) if root.text_name.state == 'normal' else root.color
+			y: 152.5
+			x: 548
+			size: self.texture_size
+
+		Label:
+			id: text_sub
+            text: root.item['calannee'].upper() + ' [font='+futura+']' + root.item['datation'].upper() + '[/font]' if  root.content == True else ''
+			markup: True
+			font_name: futuraBold
+			font_size: 20
+			color: (1,1,1,1)
+			x:265
+			y:150 - 2.5 - root.text_sub.height
+			padding_x: 10
+			text_size: (None, None)
+			width: self.texture_size[0]
+			height: self.texture_size[1]
+
+			canvas.before:
+				Color:
+					rgba: root.color
+				Rectangle:
+					pos:self.x -10, self.y
+					size: 58*5 + 5*4, self.texture_size[1] 
+					# size: self.texture_size[0], self.texture_size[1] 
+<ImageItem>:
+	text_content_label: text_content_label
+	text_content: text_content
+	img_square: img_carre
+	close_button: close_button
+
+	size_hint: None, None
+	size: 512, 512
+	size: self.img_square.width, self.img_square.height + self.text_content_label.height /2
+	scale: .5
+	container: container
+	scale_min: .3
+	scale_max: 10
+	auto_bring_to_front: True
+	# do_scale: False
+	
+	canvas:
+		Color: 
+			rgb: 0,1,0,1
+		Rectangle:
+			pos: 0,0
+			size: self.size
+
+	FloatLayout:
+		id: container
+
+		# add shadow background
+        canvas.before:
+            Color:
+                rgba: 1,1,1,1
+            BorderImage:
+                source: 'widgets/shadow32.png'
+                border: (26,26,26,26)
+                size:(root.width+52, root.height+52)
+                pos: (-26,-26)
+		
+		Scatter:
+			id: text_content
+			scale:0.5
+			size_hint:None,None
+			do_scale: False
+			do_translation: False
+			do_rotation: False
+			x: 0
+			y: 0 #-root.text_content_label.texture_size[1]/2 + 15
+
+			Label:
+				id: text_content_label
+				text: '[size=30]' + root.name.upper() + '[/size]\n' + '[size=30]' + root.subtitle.upper() + '[/size]\n' + '[font='+arial+'][size=30]' + root.description + '[/size][/font]' + '\n' + '[font='+arialI+'][size=20]' + root.copyright + '[/size][/font]' or ''
+				font_name: futuraBold
+				# mipmap: True
+				markup: True
+				font_size: 20
+				color: root.color
+				padding: (0,15) 
+				x:15
+				y:15 
+				text_size: ((root.width)*2 -50, None)
+				width: (root.width)* 2 -50
+				height: self.texture_size[1] if root.text != '' else 0
+
+				canvas.before:
+					Color:
+						rgba: 1,1,1,1
+					Rectangle:
+						pos:0,0
+						size: root.width * 1/self.parent.scale, self.texture_size[1] 
+		Image:
+			id:img_carre
+			source: root.source
+			size:self.texture_size[0], self.texture_size[1]
+			color: 1,1,1,1
+			pos: (0, root.text_content_label.texture_size[1]/2 ) if root.text != '' else (0,0)
+
+	Button:
+		id: close_button
+		background_down: 'widgets/btn-close-active.png'
+		background_normal: 'widgets/btn-close.png'
+		size_hint: None,None
+		size:(120,120)
+		on_release:root.on_close()
+		center_x: root.width
+		center_y: root.height
