@@ -41,6 +41,135 @@
 
 
 
+<<<<<<< HEAD
+=======
+<ImageItemContent>:
+	GridLayout:
+		cols: 1
+		rows: 3
+		pos_hint: {'top': 1}
+		size_hint_x: 1
+		padding: 5
+
+		Label:
+			text: 'SCORE'
+			text_size: (self.width, None)
+			font_size: 50
+
+		# Image:
+		# 	source: root.source
+		# 	size_hint: (None, None)
+
+		GridLayout:
+			cols: 1
+			rows: 3
+			pos_hint: {'bottom': 0.3}
+			size_hint_x: 1
+			padding: 5
+
+			Label:
+				text: root.item.title
+				text_size: (self.width, None)
+				font_size: 24
+
+			Label:
+				text: root.item.freefield
+				text_size: (self.width, None)
+				font_size: 24
+
+			Label:
+				text: root.item.origin_ex
+				text_size: (self.width, None)
+				font_size: 24
+
+
+
+
+	# GridLayout:
+	# 	cols: 1
+	# 	rows_default_height: 30
+	# 	pos_hint: {'top': 0.7}
+	# 	size_hint_x: 0.3
+	# 	padding: 5
+
+	# 	# Label:
+	# 	# 	text: 'Datation'
+	# 	# 	text_size: (self.width, None)
+	# 	# 	size_hint_y: None
+	# 	# 	height: self.texture_size[1] + 10
+	# 	# 	font_size: 14
+	# 	# Label:
+	# 	# 	text: root.item.datation if root.item.datation.strip() != '' else root.item.date_crea
+	# 	# 	text_size: (self.width, None)
+	# 	# 	size_hint_y: None
+	# 	# 	height: self.texture_size[1] + 10
+	# 	# 	font_size: 12
+	# 	Label:
+	# 		text: 'Origine'
+	# 		text_size: (self.width, None)
+	# 		size_hint_y: None
+	# 		height: self.texture_size[1] + 10
+	# 		font_size: 14
+	# 	Label:
+	# 		text: u'%s' % (root.item.origin_ex)
+	# 		text_size: (self.width, None)
+	# 		size_hint_y: None
+	# 		height: self.texture_size[1] + 10
+	# 		font_size: 12
+	# 	# Label:
+	# 	# 	text: 'Taille'
+	# 	# 	text_size: (self.width, None)
+	# 	# 	size_hint_y: None
+	# 	# 	height: self.texture_size[1] + 10
+	# 	# 	font_size: 14
+	# 	# Label:
+	# 	# 	text: u'%d' % (root.item.taille)
+	# 	# 	text_size: (self.width, None)
+	# 	# 	size_hint_y: None
+	# 	# 	height: self.texture_size[1] + 10
+	# 	# 	font_size: 12
+	# 	Label:
+	# 		text: 'Informations' if root.item.freefield else ''
+	# 		text_size: (self.width, None)
+	# 		size_hint_y: None
+	# 		height: self.texture_size[1] + 10
+	# 		font_size: 14
+	# 	Label:
+	# 		text: root.item.freefield or ''
+	# 		text_size: (self.width, None)
+	# 		size_hint_y: None
+	# 		height: self.texture_size[1] + 10
+	# 		font_size: 12
+
+	# GridLayout:
+	# 	cols: 1
+	# 	pos_hint: {'x': 0.3}
+	# 	size_hint_x: 0.7
+
+	# 	canvas.before:
+	# 		Color:
+	# 			rgb: .1, .1, .1
+	# 		Rectangle:
+	# 			pos: self.x, self.top - self.height * (1 - root.flip_alpha)
+	# 			size: self.width, self.height * (1 - root.flip_alpha)
+
+	# 	Label:
+	# 		text: root.item.title
+	# 		text_size: (self.width - 20, None)
+	# 		valign: 'middle'
+	# 		font_size: 16
+	# 		size_hint_y: None
+	# 		height: max(102, self.texture_size[1])
+	# 		color: (1, 1, 1, 1 - root.flip_alpha)
+
+	# 	Label:
+	# 		text: root.item.description
+	# 		text_size: (self.width - 20, None)
+	# 		size_hint_y: None
+	# 		height: self.texture_size[1]
+	# 		color: (1, 1, 1, 1 - root.flip_alpha)
+
+>>>>>>> 7ef6b1470654a4fa1aa886ee9ed395a913d816d1
 
 <CircularSlider>:
     angle_min: self.value_min * 180

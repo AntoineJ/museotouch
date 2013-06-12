@@ -16,7 +16,7 @@ class ImageMapItem(Image):
     def on_touch_down(self, touch):
         if not self.collide_point(*touch.pos):
             return
-        return self.toggle_active(touch)
+        return self.toggle_active(touch.pos)
 
     def texture_update(self, *largs):
         if not self.source:
@@ -28,8 +28,8 @@ class ImageMapItem(Image):
             self.texture = texture
             self._coreimage = image
 
-    def toggle_active(self, touch):
-        x, y = touch.pos
+    def toggle_active(self, pos):
+        x, y = pos
         x -= self.x
         y -= self.y
         x = int(x)
@@ -53,12 +53,23 @@ class ImageMapItem(Image):
                 else self.source_original
         return True
 
+class GlassItem(ImageMapItem):
+
+    def on_touch_down(self, touch):
+        pass
+
+    def toggle_active(self, pos):
+        ret = super(GlassItem, self).toggle_active(pos)
+        if ret == True:
+            return self.source
+
 class ImageMap(FloatLayout):
 
     suffix = StringProperty('')
     sources = ListProperty([])
     active_ids = ListProperty([])
     show_one_cat_only = BooleanProperty(False)
+    glass = BooleanProperty(False)
 
     def __init__(self, **kwargs):
         self._update_images = Clock.create_trigger(self.update_images, -1)
@@ -77,10 +88,16 @@ class ImageMap(FloatLayout):
             if len(parts) != 2:
                 continue
             filename_suffix = '%s%s.%s' % (parts[0], self.suffix, parts[1])
-            image = ImageMapItem(source=filename,
-                    pos_hint={'x': 0, 'y': 0},
-                    source_original=filename,
-                    source_active=filename_suffix)
+            if self.glass:
+                image = GlassItem(source=filename,
+                        pos_hint={'x': 0, 'y': 0},
+                        source_original=filename,
+                        source_active=filename_suffix)
+            else:
+                image = ImageMapItem(source=filename,
+                        pos_hint={'x': 0, 'y': 0},
+                        source_original=filename,
+                        source_active=filename_suffix)
             image.bind(active=self.on_child_active)
             self.add_widget(image)
 
@@ -92,3 +109,10 @@ class ImageMap(FloatLayout):
         self.active_ids = [get_id(x.source_original) for x \
                 in self.children if x.active]
         #print 'Image map "orig" changed to', self.active_ids
+
+    def find_glass_item(self, pos):
+        for child in self.children:
+            if isinstance(child, GlassItem):
+                filename = child.toggle_active(pos)
+                if filename:
+                    return self.get_filename_id(filename)

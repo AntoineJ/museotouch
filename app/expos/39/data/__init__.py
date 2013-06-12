@@ -532,7 +532,7 @@ ImageItem.remove_from_space = remove_from_space
 
 def on_remove(self):
     # self.app.child_position
-    filename = self.item.filename
+    # filename = self.item.filename
     # self.app.images_pos[filename] = {
     #     'center': self.center,
     #     'rotation': self.rotation,
@@ -678,6 +678,7 @@ def build(app):
                                     width=3,
                                     dash_offset=5)              
 
+
         for c in app.space.constraints:
             if c.a != None and c.b != None:
                 if hasattr(c, 'draw') and c.draw == True:
@@ -689,15 +690,15 @@ def build(app):
                     if hasattr(c.a, 'sprite') and hasattr(c.b, 'sprite'):
                         if c.a.sprite() != None and c.b.sprite() != None:
                             opacity = min(c.a.sprite().opacity, c.b.sprite().opacity)
+                            with constraints_layout.canvas:
+                                Color(1,1,1,opacity) 
+                                Line(   points=[p1x,p1y, p2x,p2y],
+                                        width=1,
+                                        dash_offset=5)
                         else:
                             app.space.remove(c)
 
-                    with constraints_layout.canvas:
-                        Color(1,1,1,opacity) 
-                        # Color(0.2,0.5,0.85,1)
-                        Line(   points=[p1x,p1y, p2x,p2y],
-                                width=1,
-                                dash_offset=5)
+                        
             else:
                 app.space.remove(c)
 
@@ -898,24 +899,39 @@ def build(app):
     match = {'media': 286, 'objet': 285, 'usage': 287}
 
     def magnify_items(button):
-        if hasattr(button, 'cat'):
+        if hasattr(button, 'cat') and button.opacity == 1:
             id_keyword = match[button.cat]
             for child in app.root_images.children:
                 if isinstance(child, ImageItem):
-                    previous_opacity = child.opacity
+                    def reset_child(dt):
+                        child.previous_opacity = 0
                     
+                    Clock.unschedule(reset_child)
+                    if not hasattr(child, 'previous_opacity') or child.opacity != 0:
+                        child.previous_opacity = child.opacity
+
+                                        
                     if str(id_keyword) in child.item.keywords:
                         Animation.stop_all(child)
-                        anim = Animation(opacity=1, d=1) + Animation(opacity=1, d=3) + Animation(opacity = previous_opacity, d = 1)
+                        anim = Animation(opacity=1, d=1) + Animation(opacity=1, d=3) + Animation(opacity = child.previous_opacity, d = 1)
                         anim.start(child)
                     else:
                         opacity_min = .1
                         Animation.stop_all(child)
-                        anim = Animation(opacity = 0, d=1) + Animation(opacity=0, d=3) + Animation(opacity = previous_opacity, d = 1)
+                        anim = Animation(opacity = 0, d=1) + Animation(opacity=0, d=3) + Animation(opacity = child.previous_opacity, d = 1)
                         anim.start(child)
                         if hasattr(child, 'content_container') and child.content_container != None:
+                            Animation.stop_all(child.content_container)
                             anim2 = Animation(opacity = 0, d=.5) + Animation(opacity = 0, d=3) + Animation(opacity=1, d=1)
                             anim2.start(child.content_container)
+                    
+                    Clock.schedule_once(reset_child, 5)
+            for child in app.root.children:
+                if isinstance(child, Button) and hasattr(child, 'cat') and child != button:
+                    print 'found one button : ', child.cat
+                    Animation.stop_all(child)
+                    anim= Animation(opacity = 0, d=1) + Animation(opacity = 0, d= 3) + Animation(opacity=1, d= 1)
+                    anim.start(child)
 
     mediaButton = Button(
         background_normal='widgets/caption-media.png',

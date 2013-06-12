@@ -689,7 +689,8 @@ class MuseotouchApp(App):
         if self.calendar:
             self.calendar.bind(update=self.trigger_objects_filtering)
         
-        self.trigger_objects_filtering()
+        if not hasattr(root, 'hide_items'):
+            self.trigger_objects_filtering()
 
 
         parent = self.root.parent
