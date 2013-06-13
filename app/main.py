@@ -43,7 +43,7 @@ from kivy.support import install_twisted_reactor
 install_twisted_reactor()
 
 # from pdb import set_trace as rrr
-import time
+import time, socket
 
 class MuseotouchApp(App):
 
@@ -904,9 +904,13 @@ class MuseotouchApp(App):
             makedirs(join(self.expo_dir, 'otherfiles'))
         # filepath = join(self.expo_dir, 'otherfiles', no_url(req.url))
         filepath = join(self.expo_dir, 'otherfiles', basename(req.url))
-        output = open(filepath, 'wb')
-        output.write(result) # fichier sauvegarde
-        output.close()
+        
+        try:
+            output = open(filepath, 'wb')
+            output.write(result) # fichier sauvegarde
+            output.close()
+        except TypeError, e:
+            print e
         self.url_requests.remove(req)
         if not self.url_requests: # si c'etait le dernier fichier
             if hasattr(self, 'root'):
