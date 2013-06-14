@@ -9,7 +9,7 @@ Config.set('kivy', 'log_level', 'debug')
 
 from random import random, randint
 from os.path import join, dirname, exists, basename, isfile
-from os import makedirs
+from os import makedirs, remove
 from zipfile import ZipFile
 from kivy.app import App
 from kivy.uix.floatlayout import FloatLayout
@@ -43,7 +43,7 @@ from kivy.support import install_twisted_reactor
 install_twisted_reactor()
 
 # from pdb import set_trace as rrr
-import time, socket
+import time
 
 class MuseotouchApp(App):
 
@@ -911,6 +911,11 @@ class MuseotouchApp(App):
             output.close()
         except TypeError, e:
             print e
+            if isfile(filepath):
+                    remove(filepath)
+            else:    ## Show an error ##
+                    print("Error: %s file not found while removing" % filepath)
+
         self.url_requests.remove(req)
         if not self.url_requests: # si c'etait le dernier fichier
             if hasattr(self, 'root'):
