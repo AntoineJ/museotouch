@@ -343,6 +343,9 @@ def build(app):
     root.add_widget(scat)
     but.english = False
 
+    def change_expo(but):
+        app.show_expo(12)
+
     scat2 = Scatter( size=(85,85), 
                     do_scale=False, 
                     do_rotation=False,
@@ -356,7 +359,7 @@ def build(app):
                     background_normal='widgets/btn-loupe.png',
                     background_down='widgets/btn-loupe.png',
                     on_press=increase_button,
-                    on_release=add_glass)
+                    on_release=change_expo)
                     # center=(75, Window.height-75))
     scat2.add_widget(but2)
     root.add_widget(scat2)

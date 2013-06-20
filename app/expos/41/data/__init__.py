@@ -1,3 +1,7 @@
+from kivy.properties import StringProperty, ObjectProperty, NumericProperty, \
+        BooleanProperty, ListProperty
+
+
 from os.path import join
 from glob import glob
 from kivy.uix.floatlayout import FloatLayout
@@ -11,6 +15,19 @@ from museolib.widgets.slider import SizeSlider
 from museolib.widgets.basket import Basket
 from kivy.utils import platform
 
+
+class QuizzItem(Scatter):
+    item = ObjectProperty()
+    image = StringProperty('')
+    question = StringProperty('')
+    bonneReponse = StringProperty('')
+    mauvaiseReponse = StringProperty('')
+
+
+
+
+
+
 def build(app):
     # Here, you must return a root widget that will be used for app
     # You also have app instance in parameter.
@@ -19,6 +36,21 @@ def build(app):
     # Our root widget
     root = FloatLayout()
 
+    question = QuizzItem(
+        app=app,
+        item = app.db.items[0])
+
+    root.add_widget(question)
+
+
+
+
+    # -------------------------------------------------------------------------
+    # Add a date slider to our root widget.
+    print '***********************'
+    print dir(app.db.items[0].medias)
+    print app.db.items
+    print '***********************'
 
     # -------------------------------------------------------------------------
     # Create a basket widget
