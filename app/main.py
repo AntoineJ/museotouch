@@ -624,7 +624,7 @@ class MuseotouchApp(App):
 
     def _build_app(self):
         # Import the module
-        modexpo = load_source('__expo__', join(
+        modexpo = load_source('__expo__'+self.expo_id, join(
             self.expo_data_dir, '__init__.py'))
 
         # link with the db. later, we need to change it to real one.
@@ -703,13 +703,24 @@ class MuseotouchApp(App):
         parent.add_widget(self.root)
         return root
 
+    def change_expo(self, expo_id):
+        self.reset(go_to_menu=False)
+        # check if expo is available on the disk
+        self.expo_dir = self.get_expo_dir(expo_id)
+        self.expo_data_dir = join(self.expo_dir, 'data')
+        self.expo_img_dir = join(self.expo_dir, 'images')
+        resource_add_path(self.expo_data_dir)
+        self.expo_id = expo_id
+
+        self.build_app()
+
     def show_expo(self, expo_id, popup=None):
         # check if expo is available on the disk
         self.expo_dir = self.get_expo_dir(expo_id)
         self.expo_data_dir = join(self.expo_dir, 'data')
         self.expo_img_dir = join(self.expo_dir, 'images')
         resource_add_path(self.expo_data_dir)
-
+        self.expo_id = expo_id
         # be able to run offline too.
         force_sync = True
         if force_sync:
@@ -722,7 +733,6 @@ class MuseotouchApp(App):
             self.sync_expo(expo_id, popup)
         else:
             self.build_app()
-
 
     #
     # Synchronisation of an exhibition
@@ -1160,11 +1170,15 @@ class MuseotouchApp(App):
                 size_hint=(.5, .5))
         popup.open()
 
-    def reset(self, *l):
+    def reset(self, go_to_menu=True, *l ):
         # reset the whole app, restart from scratch.
         from kivy.core.window import Window
         for child in Window.children[:]:
             Window.remove_widget(child)
+
+        if '__expo__' in sys.modules:  
+            del(sys.modules["__expo__"])
+            __expo__ = None 
 
         # remove everything from the current expo
         if hasattr(self, 'expo_data_dir'):
@@ -1172,8 +1186,9 @@ class MuseotouchApp(App):
             Builder.unload_file(join(self.expo_data_dir, 'museotouch.kv'))
             self.expo_dir = self.expo_data_dir = self.expo_img_dir = None
 
-        # restart with selector.
-        Window.add_widget(self.build_selector())
+        if go_to_menu == True:
+            # restart with selector.
+            Window.add_widget(self.build_selector())
         
 import sys, traceback
 if __name__ in ('__main__', '__android__'):
