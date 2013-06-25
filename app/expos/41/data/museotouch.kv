@@ -1,6 +1,13 @@
 #:kivy 1.0
 #:import math math
 
+#:set futuraBold 'widgets/fonts/FuturaLT-Bold.ttf'
+#:set futura 'widgets/fonts/FuturaLT-Oblique.ttf'
+#:set arial 'widgets/fonts/Arial.ttf'
+#:set arialB 'widgets/fonts/Arial Bold.ttf'
+#:set arialBI 'widgets/fonts/Arial Bold Italic.ttf'
+#:set arialI 'widgets/fonts/Arial Italic.ttf'
+
 <ImageItem>:
     border: 2 / self.scale
     size_hint: None, None
@@ -41,10 +48,18 @@
 
 
 <QuizzItem>:
+    labelTitre: labelTitre
+    # labelMauvaiseReponse: labelMauvaiseReponse
+    labelReponse: labelReponse
+    btnMauvaiseReponse: btnMauvaiseReponse
+    btnBonneReponse: btnBonneReponse
+    btnContinuez: btnContinuez
+    photo: photo
     size_hint: (None, None)
-    size: 300,400
+    size: 230, 354
     pos: 100,100
     scale: 1
+    do_scale: False
 
     canvas:
         Color:
@@ -53,16 +68,17 @@
             pos: 0,0
             size: self.size
         Color:
-            rgb: 1,0,1
+            rgb: 117/255.,113/255.,81/255.
         Line:
-            width: 2
-            points: 20,130,280,130
+            width: 1 if not root.correction else 0.1
+            points: 10,85,220,85
 
     Image:
+        id: photo
         pos_hint: (None, None)
-        pos: 0, 200
-        size: 300,200
-        source: root.item.filename
+        pos: 0, 124
+        size: 230,230
+        source: ''
         size_hint: (None, None)
 
     # Image:
@@ -72,39 +88,95 @@
 
 
     Label:
+        id: labelTitre
         size_hint: (None, None)
         pos_hint: (None, None)
-        color: 0,0,0,1
-        pos: 10, 140
-        text: root.item.title
-        text_size: (280, 50)
+        color: 117/255.,113/255.,81/255.,1
+        pos: 10, 90
+        text: ''
+        text_size: (210, 32)
         # shorten: True
-        size: (280, 50)
-        font_size: 14
+        size: (210, 32)
+        font_size: 10
         halign: 'left'
         valign: 'middle'
+        font_name: futuraBold
 
     Button:
+        id: btnMauvaiseReponse
         size_hint: (None, None)
-        color: 0,0,0,1
-        pos: 10, 70
-        text: root.item.freefield
-        text_size: (260, 50)
-        size: (280, 50)
-        font_size: 14
+        background_color: 117/255.,113/255.,81/255.,1
+        color: 1,1,1,1
+        pos: (10, 10)
+        text: ''
+        text_size: (190, 32)
+        size: (210, 32)
+        font_size: 10
         halign: 'left'
         valign: 'middle'
+        font_name: futuraBold
 
     Button:
+        id: btnBonneReponse
         size_hint: (None, None)
-        color: 0,0,0,1
-        pos: 10,10
-        text: root.item.origin_ex
-        text_size: (260, 50)
-        size: (280, 50)
-        font_size: 14
+        background_color: 117/255.,113/255.,81/255.,1
+        color: 1,1,1,1
+        pos: (10,10) 
+        text: ''
+        text_size: (190, 32)
+        size: (210, 32)
+        font_size: 10
         halign: 'left'
         valign: 'middle'
+        font_name: futuraBold
+
+    Button:
+        id: btnContinuez
+        size_hint: (None, None)
+        pos: 10,100
+        text: 'CONTINUEZ'
+        text_size: 190,32
+        size: 210,32
+        font_size: 10
+        halign: 'center'
+        valign: 'middle'
+        font_name: futuraBold
+        opacity: 0
+
+    # Label:
+    #     id: labelMauvaiseReponse
+    #     size_hint: (None, None)
+    #     pos_hint: (None, None)
+    #     color: 117/255.,113/255.,81/255.,1
+    #     pos: 10, 45
+    #     # text: root.item.description2 if root.correction and not root.bonneReponse else ''
+    #     text: root.item.description2
+    #     # text: ''
+    #     text_size: (210, 80)
+    #     # shorten: True
+    #     size: (210, 80)
+    #     font_size: 7
+    #     halign: 'justify'
+    #     valign: 'middle'
+    #     font_name: arial
+
+    Label:
+        id: labelReponse
+        size_hint: (None, None)
+        pos_hint: (None, None)
+        color: 117/255.,113/255.,81/255.,1
+        pos: 10, 45
+        text: ''
+        # text: ''
+        text_size: (210, 80)
+        # shorten: True
+        size: (210, 80)
+        font_size: 7
+        halign: 'justify'
+        valign: 'middle'
+        font_name: arial
+
+
 
 
 
