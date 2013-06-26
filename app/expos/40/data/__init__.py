@@ -357,6 +357,7 @@ def build(app):
     but.english = False
 
     def change_expo(but):
+
         app.change_expo(str(41))
         # app.show_expo(str(41))
 
@@ -374,6 +375,7 @@ def build(app):
                     background_down='widgets/btn-loupe.png',
                     on_press=increase_button,
                     on_release=add_glass)
+
     scat2.add_widget(but2)
     root.add_widget(scat2)
     scat2.center = (Window.width - 75, 75)

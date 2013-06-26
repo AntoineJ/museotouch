@@ -1,45 +1,334 @@
 #:kivy 1.0
 #:import math math
 
+#:set futuraBold 'widgets/fonts/FuturaLT-Bold.ttf'
+#:set futura 'widgets/fonts/FuturaLT-Oblique.ttf'
+#:set arial 'widgets/fonts/Arial.ttf'
+#:set arialB 'widgets/fonts/Arial Bold.ttf'
+#:set arialBI 'widgets/fonts/Arial Bold Italic.ttf'
+#:set arialI 'widgets/fonts/Arial Italic.ttf'
+
 <ImageItem>:
-	border: 2 / self.scale
-	size_hint: None, None
-	size: 512, 512
-	scale: 0.30
-	container: container
-	scale_min: .3
-	scale_max: 10
-	canvas:
-		Color:
-			rgb: 1, 1, 1
-		Rectangle:
-			pos: -self.border, -self.border
-			size: self.width + self.border * 2, self.height + self.border * 2
-		Color:
-			rgb: 0, 0, 0
-		Rectangle:
-			size: self.size
+    border: 2 / self.scale
+    size_hint: None, None
+    size: 512, 512
+    scale: 0.30
+    container: container
+    scale_min: .3
+    scale_max: 10
+    canvas:
+        Color:
+            rgb: 1, 1, 1
+        Rectangle:
+            pos: -self.border, -self.border
+            size: self.width + self.border * 2, self.height + self.border * 2
+        Color:
+            rgb: 0, 0, 0
+        Rectangle:
+            size: self.size
 
-	FloatLayout:
-		size: root.size
+    FloatLayout:
+        size: root.size
 
-		FloatLayout:
-			id: container
+        FloatLayout:
+            id: container
 
-		Image:
-			source: root.source
-			size_hint: (1 * (0.3 + 0.7 * root.flip_alpha), 1 * (0.3 + 0.7 * root.flip_alpha))
-			pos_hint: {'top': 1}
+        Image:
+            source: root.source
+            size_hint: (1 * (0.3 + 0.7 * root.flip_alpha), 1 * (0.3 + 0.7 * root.flip_alpha))
+            pos_hint: {'top': 1}
 
-	Button:
-		background_color: (1, 1, 1, root.alpha_button)
-		size: (64, 64)
-		pos: 512 - 70, 512 - 70
-		background_down: 'widgets/btn_moreinfo_down.png'
-		background_normal: 'widgets/btn_moreinfo.png'
-		on_release: root.on_btn_moreinfo()
+    Button:
+        background_color: (1, 1, 1, root.alpha_button)
+        size: (64, 64)
+        pos: 512 - 70, 512 - 70
+        background_down: 'widgets/btn_moreinfo_down.png'
+        background_normal: 'widgets/btn_moreinfo.png'
+        on_release: root.on_btn_moreinfo()
 
 
+<QuizzItem>:
+    labelTitre: labelTitre
+    # labelMauvaiseReponse: labelMauvaiseReponse
+    labelReponse: labelReponse
+    btnMauvaiseReponse: btnMauvaiseReponse
+    btnBonneReponse: btnBonneReponse
+    btnContinuez: btnContinuez
+    photo: photo
+    labelScore: labelScore
+    # ligne: ligne
+    size_hint: (None, None)
+    size: 230, 354
+    pos: 100,100
+    scale: 1
+    do_scale: False
+
+    canvas.before:
+        Color:
+            rgb: 1,1,1
+        Rectangle:
+            pos: 0,0
+            size: self.size
+        Rectangle:
+            pos: -50,350
+            size: 50,50
+        Color:
+            rgb: 117/255.,113/255.,81/255.
+        Line:
+            width: 1 
+            points: (10,85,220,85) if not root.correction else (10,375,220,375)
+
+
+    Label:
+        id: labelScore
+        size_hint: (None, None)
+        pos_hint: (None, None)
+        color: 117/255.,113/255.,81/255.,1
+        pos: -50, 350
+        text: str(root.score)
+        text_size: (50, 50)
+        # shorten: True
+        size: (50,50)
+        font_size: 25
+        halign: 'left'
+        valign: 'middle'
+        font_name: futuraBold
+
+    Image:
+        id: photo
+        pos_hint: (None, None)
+        pos: 0, 124
+        size: 230,230
+        source: ''
+        size_hint: (None, None)
+
+    # Image:
+    #   source: root.source
+    #   size_hint: (None, None)
+
+
+
+    Label:
+        id: labelTitre
+        size_hint: (None, None)
+        pos_hint: (None, None)
+        color: 117/255.,113/255.,81/255.,1
+        pos: 10, 90
+        text: ''
+        text_size: (210, 32)
+        # shorten: True
+        size: (210, 32)
+        font_size: 10
+        halign: 'left'
+        valign: 'middle'
+        font_name: futuraBold
+
+    Button:
+        id: btnMauvaiseReponse
+        size_hint: (None, None)
+        background_color: 117/255.,113/255.,81/255.,1
+        color: 1,1,1,1
+        pos: (10, 10)
+        text: ''
+        text_size: (190, 32)
+        size: (210, 32)
+        font_size: 10
+        halign: 'left'
+        valign: 'middle'
+        font_name: futuraBold
+
+    Button:
+        id: btnBonneReponse
+        size_hint: (None, None)
+        background_color: 117/255.,113/255.,81/255.,1
+        color: 1,1,1,1
+        pos: (10,10) 
+        text: ''
+        text_size: (190, 32)
+        size: (210, 32)
+        font_size: 10
+        halign: 'left'
+        valign: 'middle'
+        font_name: futuraBold
+
+    Button:
+        id: btnContinuez
+        size_hint: (None, None)
+        pos: 10,100
+        text: 'CONTINUEZ'
+        text_size: 190,32
+        size: 210,32
+        font_size: 10
+        halign: 'center'
+        valign: 'middle'
+        font_name: futuraBold
+        opacity: 0
+
+    # Label:
+    #     id: labelMauvaiseReponse
+    #     size_hint: (None, None)
+    #     pos_hint: (None, None)
+    #     color: 117/255.,113/255.,81/255.,1
+    #     pos: 10, 45
+    #     # text: root.item.description2 if root.correction and not root.bonneReponse else ''
+    #     text: root.item.description2
+    #     # text: ''
+    #     text_size: (210, 80)
+    #     # shorten: True
+    #     size: (210, 80)
+    #     font_size: 7
+    #     halign: 'justify'
+    #     valign: 'middle'
+    #     font_name: arial
+
+    Label:
+        id: labelReponse
+        size_hint: (None, None)
+        pos_hint: (None, None)
+        color: 117/255.,113/255.,81/255.,1
+        pos: 10, 45
+        text: ''
+        # text: ''
+        text_size: (210, 80)
+        # shorten: True
+        size: (210, 80)
+        font_size: 10
+        halign: 'justify'
+        valign: 'middle'
+        font_name: arial
+
+
+
+
+
+<ImageItemContent>:
+    GridLayout:
+        cols: 1
+        rows: 3
+        pos_hint: {'top': 1}
+        size_hint_x: 1
+        padding: 5
+
+        Label:
+            text: 'SCORE'
+            text_size: (self.width, None)
+            font_size: 50
+
+        # Image:
+        #   source: root.source
+        #   size_hint: (None, None)
+
+        GridLayout:
+            cols: 1
+            rows: 3
+            pos_hint: {'bottom': 0.3}
+            size_hint_x: 1
+            padding: 5
+
+            Label:
+                text: root.item.title
+                text_size: (self.width, None)
+                font_size: 24
+
+            Label:
+                text: root.item.freefield
+                text_size: (self.width, None)
+                font_size: 24
+
+            Label:
+                text: root.item.origin_ex
+                text_size: (self.width, None)
+                font_size: 24
+
+
+
+
+
+
+
+    # GridLayout:
+    #   cols: 1
+    #   rows_default_height: 30
+    #   pos_hint: {'top': 0.7}
+    #   size_hint_x: 0.3
+    #   padding: 5
+
+    #   # Label:
+    #   #   text: 'Datation'
+    #   #   text_size: (self.width, None)
+    #   #   size_hint_y: None
+    #   #   height: self.texture_size[1] + 10
+    #   #   font_size: 14
+    #   # Label:
+    #   #   text: root.item.datation if root.item.datation.strip() != '' else root.item.date_crea
+    #   #   text_size: (self.width, None)
+    #   #   size_hint_y: None
+    #   #   height: self.texture_size[1] + 10
+    #   #   font_size: 12
+    #   Label:
+    #       text: 'Origine'
+    #       text_size: (self.width, None)
+    #       size_hint_y: None
+    #       height: self.texture_size[1] + 10
+    #       font_size: 14
+    #   Label:
+    #       text: u'%s' % (root.item.origin_ex)
+    #       text_size: (self.width, None)
+    #       size_hint_y: None
+    #       height: self.texture_size[1] + 10
+    #       font_size: 12
+    #   # Label:
+    #   #   text: 'Taille'
+    #   #   text_size: (self.width, None)
+    #   #   size_hint_y: None
+    #   #   height: self.texture_size[1] + 10
+    #   #   font_size: 14
+    #   # Label:
+    #   #   text: u'%d' % (root.item.taille)
+    #   #   text_size: (self.width, None)
+    #   #   size_hint_y: None
+    #   #   height: self.texture_size[1] + 10
+    #   #   font_size: 12
+    #   Label:
+    #       text: 'Informations' if root.item.freefield else ''
+    #       text_size: (self.width, None)
+    #       size_hint_y: None
+    #       height: self.texture_size[1] + 10
+    #       font_size: 14
+    #   Label:
+    #       text: root.item.freefield or ''
+    #       text_size: (self.width, None)
+    #       size_hint_y: None
+    #       height: self.texture_size[1] + 10
+    #       font_size: 12
+
+    # GridLayout:
+    #   cols: 1
+    #   pos_hint: {'x': 0.3}
+    #   size_hint_x: 0.7
+
+    #   canvas.before:
+    #       Color:
+    #           rgb: .1, .1, .1
+    #       Rectangle:
+    #           pos: self.x, self.top - self.height * (1 - root.flip_alpha)
+    #           size: self.width, self.height * (1 - root.flip_alpha)
+
+    #   Label:
+    #       text: root.item.title
+    #       text_size: (self.width - 20, None)
+    #       valign: 'middle'
+    #       font_size: 16
+    #       size_hint_y: None
+    #       height: max(102, self.texture_size[1])
+    #       color: (1, 1, 1, 1 - root.flip_alpha)
+
+    #   Label:
+    #       text: root.item.description
+    #       text_size: (self.width - 20, None)
+    #       size_hint_y: None
+    #       height: self.texture_size[1]
+    #       color: (1, 1, 1, 1 - root.flip_alpha)
 
 
 <CircularSlider>:
@@ -99,25 +388,25 @@
             text: root.text_max
 
 <Keyword>:
-	color: (1, 1, 1, 1) if self.selected else (.5, .5, .5, 1) 
-	canvas.before:
-		Color:
-			rgb: 1, 1, 1
-		Rectangle:
+    color: (1, 1, 1, 1) if self.selected else (.5, .5, .5, 1) 
+    canvas.before:
+        Color:
+            rgb: 1, 1, 1
+        Rectangle:
             pos: int(self.center_x - self.texture_size[0] / 2. - 32), int(self.center_y - 10)
-			size: 20, 20
-			source: 'widgets/circle%s.png' % ('_selected' if self.selected else '')
+            size: 20, 20
+            source: 'widgets/circle%s.png' % ('_selected' if self.selected else '')
 
 <SizeSlider>:
-	canvas:
-		Color:
-			rgb: 1, 1, 1
-		Rectangle:
-			pos: self.x - 40, self.y
-			size: (500, 30)
-			source: 'widgets/taille.png'
+    canvas:
+        Color:
+            rgb: 1, 1, 1
+        Rectangle:
+            pos: self.x - 40, self.y
+            size: (500, 30)
+            source: 'widgets/taille.png'
         Color:
             rgb: 0.5490, 1, 1
-		Rectangle:
-			pos: self.x + self.value_min * self.width, self.center_y - 10
-			size: self.width * (self.value_max - self.value_min), 20
+        Rectangle:
+            pos: self.x + self.value_min * self.width, self.center_y - 10
+            size: self.width * (self.value_max - self.value_min), 20
