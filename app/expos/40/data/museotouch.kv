@@ -17,7 +17,6 @@
 	size_hint: None, None
 	do_collide_after_children: True
 	do_scale: False
-	# do_rotation: False
 
 	text_name: text_name
 	text_sub: text_sub
@@ -57,6 +56,14 @@
 			background_color: root.color if self.state == 'normal' else (1,1,1,1)
 			on_release: root.remove()
 
+		# Button:
+		# 	text:
+		# 	canvas.before:
+		# 		Color:
+		# 			rgba: root.color if self.state == 'normal' else (1,1,1,1)
+		# 		Rectangle:
+		# 			pos: self.x - 20, self.y
+		# 			size: 58*5 + 5*4, self.texture_size[1] 
 		Button:
 			id: text_name
 	        size_hint:None,None
@@ -86,16 +93,24 @@
 					# pos:0,0
 					size: 58*5 + 5*4, self.texture_size[1] 
 					# size: self.texture_size[0], self.texture_size[1] 
-		Label:
-			text: '>' if root.content == True else ''
-			font_size: 20
-			font_name: arial
-			text_size: None, None
-			color: (1,1,1,1) if root.text_name.state == 'normal' else root.color
-			y: 152.5
+		# Label:
+		# 	text: '>' if root.content == True else ''
+		# 	font_size: 20
+		# 	font_name: futuraBold
+		# 	text_size: None, None
+		# 	color: (1,1,1,1) if root.text_name.state == 'normal' else root.color
+		# 	y: 152.5
+		# 	x: 548
+		# 	size: self.texture_size
+		Image:
+			source: 'widgets/arrow-right.png'
+			size_hint: None, None
+			size: 16,16
+			opacity: 1 if root.content == True else 0
 			x: 548
-			size: self.texture_size
+			center_y: root.text_name.center_y
 
+# + root.item['sub1'] 
 		Label:
 			id: text_sub
             text: root.item['calannee'].upper() + ' [font='+futura+']' + root.item['datation'].upper() + '[/font]' if  root.content == True else ''
