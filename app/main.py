@@ -711,8 +711,22 @@ class MuseotouchApp(App):
         self.expo_img_dir = join(self.expo_dir, 'images')
         resource_add_path(self.expo_data_dir)
         self.expo_id = expo_id
+        
+        force_sync = True
+        popup=None
+        
+        if force_sync:
+            # create popup
+            if popup is None:
+                popup = Popup(title='Chargement...', size_hint=(None, None), opacity=0,
+                        size=(300, 300), auto_dismiss=False)
+                popup.open()
 
-        self.build_app()
+            # synchronize it !
+            self.sync_expo(expo_id, popup)
+
+        else:
+            self.build_app()
 
     def show_expo(self, expo_id, popup=None):
         # check if expo is available on the disk
