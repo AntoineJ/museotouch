@@ -19,13 +19,77 @@ from museolib.widgets.basket import Basket
 from kivy.utils import platform
 from random import choice, randint, sample, shuffle
 from kivy.animation import Animation
+from kivy.core.window import Window
+
+
+class QuizzMere(FloatLayout):
+    
+    app = ObjectProperty()
+
+    # Defini si on a un ou deux joueurs
+    deuxJoueurs = BooleanProperty(False)
+
+    Joueur1 = ObjectProperty()
+    Joueur2 = ObjectProperty()
+
+    # Item associé à la question
+    item = ObjectProperty()
+
+    # Liste d'id de question
+    ordreQuestion = ListProperty([])
+
+    # numero de la question en cours
+    numeroQuestion = NumericProperty(0)
+
+    # Images de bonne et mauvaise réponse
+    medias = ListProperty(None)
+
+    def __init__(self, **kwargs):
+        super(QuizzMere, self).__init__(**kwargs)
+
+        # Definition de l'ordre des question
+        self.ordreQuestion = sample(range(len(self.app.db.items)), min(5,len(self.app.db.items)))
+
+        self.item = self.app.db.items[self.ordreQuestion[self.numeroQuestion]]
+
+        Joueur1 = QuizzItem(app=self.app, mere=self)
+        self.add_widget(Joueur1)
+
+        if self.deuxJoueurs:
+            Joueur2 = QuizzItem(app=self.app, mere=self)
+            self.add_widget(Joueur2)
+
+
+        self.rebuild()
+
+
+    def rebuild(self):
+        self.medias = []
+
+        # Ajout des images de bonne/mauvaise reponse
+        for filedata in self.item.data:
+            if self.item.data.index(filedata) == 0:
+                continue
+            else:
+                fileurl = filedata['fichier']
+                filename = basename(fileurl)
+                filepath = join(self.app.expo_dir, 'otherfiles', filename)
+                if isfile(filepath) and getsize(filepath) > 0:
+                    self.medias.append(filepath)
+    
+    def do_bonne_reponse(self, fils):
+        pass
+
 
 
 class QuizzItem(Scatter):
 
     app = ObjectProperty()
 
-    # Item associé à la question
+    # Classe Mere
+    mere = ObjectProperty()
+
+    #- Item associé à la question 
     item = ObjectProperty()
 
     # Permet d'avoir une position aléatoire entre les deux réponses
@@ -37,13 +101,13 @@ class QuizzItem(Scatter):
     # Permet de savoir si on est en phase de correction
     correction = BooleanProperty(False)
 
-    # Liste d'id de question
+    #- Liste d'id de question
     ordreQuestion = ListProperty([])
 
-    # numero de la question en cours
+    #- numero de la question en cours
     numeroQuestion = NumericProperty(0)
 
-    # Images de bonne et mauvaise réponse
+    #- Images de bonne et mauvaise réponse
     medias = ListProperty(None)
 
     # Score du joueur
@@ -59,9 +123,9 @@ class QuizzItem(Scatter):
         super(QuizzItem, self).__init__(**kwargs)
 
         # Definition de l'ordre des question. A revoir pour le mode 2 joueurs
-        self.ordreQuestion = sample(range(len(self.app.db.items)), min(5,len(self.app.db.items)))
+        # self.ordreQuestion = sample(range(len(self.app.db.items)), min(5,len(self.app.db.items)))
 
-        self.item = self.app.db.items[self.ordreQuestion[self.numeroQuestion]]
+        self.item = self.mere.item
 
         # Position aléatoire des réponses
         self.position = choice([0,1])   
@@ -101,12 +165,12 @@ class QuizzItem(Scatter):
         if not self.correction:
             return
 
-        self.numeroQuestion += 1
+        self.mere.numeroQuestion += 1
 
-        if self.numeroQuestion >= len(self.app.db.items):
+        if self.numeroQuestion >= len(self.mere.app.db.items):
             self.parent.remove_widget(self)
         else:
-            self.item = self.app.db.items[self.ordreQuestion[self.numeroQuestion]]
+            self.mere.item = self.mere.app.db.items[self.mere.ordreQuestion[self.mere.numeroQuestion]]
             self.rebuild()
 
     # Affiche la bonne reponse
@@ -120,14 +184,14 @@ class QuizzItem(Scatter):
         # self.labelTitre.pos = (10,370)
         if self.bonneReponse:
             self.labelTitre.text = 'BONNE REPONSE !'
-            self.labelReponse.text = self.item['description']
-            if len(self.medias) > 0:
-                self.photo.source = self.medias[0]
+            self.labelReponse.text = self.mere.item['description']
+            if len(self.mere.medias) > 0:
+                self.photo.source = self.mere.medias[0]
         else:
             self.labelTitre.text = 'MAUVAISE REPONSE ...'
-            self.labelReponse.text = self.item['description2']
-            if len(self.medias) > 0:
-                self.photo.source = self.medias[1]
+            self.labelReponse.text = self.mere.item['description2']
+            if len(self.mere.medias) > 0:
+                self.photo.source = self.mere.medias[1]
 
         anim2 = Animation(y=340, d=.2)
         anim2.start(self.btnBonneReponse)
@@ -147,23 +211,23 @@ class QuizzItem(Scatter):
 
     def rebuild(self):
 
-        self.medias = []
+        # self.medias = []
 
-        # Ajout des images de bonne/mauvaise reponse
-        for filedata in self.item.data:
-            if self.item.data.index(filedata) == 0:
-                continue
-            else:
-                fileurl = filedata['fichier']
-                filename = basename(fileurl)
-                filepath = join(self.app.expo_dir, 'otherfiles', filename)
-                if isfile(filepath) and getsize(filepath) > 0:
-                    self.medias.append(filepath)
+        # # Ajout des images de bonne/mauvaise reponse
+        # for filedata in self.item.data:
+        #     if self.item.data.index(filedata) == 0:
+        #         continue
+        #     else:
+        #         fileurl = filedata['fichier']
+        #         filename = basename(fileurl)
+        #         filepath = join(self.app.expo_dir, 'otherfiles', filename)
+        #         if isfile(filepath) and getsize(filepath) > 0:
+        #             self.medias.append(filepath)
 
-        self.labelTitre.text = self.item['nom']
-        self.btnMauvaiseReponse.text = self.item['freefield']
-        self.btnBonneReponse.text = self.item['orig_geo_prec']
-        self.photo.source= self.item.filename
+        self.labelTitre.text = self.mere.item['nom']
+        self.btnMauvaiseReponse.text = self.mere.item['freefield']
+        self.btnBonneReponse.text = self.mere.item['orig_geo_prec']
+        self.photo.source= self.mere.item.filename
         self.labelReponse.text = ''
         # self.labelMauvaiseReponse.opacity = 0
 
@@ -205,12 +269,62 @@ def build(app):
     bgmap = Image(source = 'widgets/background.jpg', size=(1920,1080))
     root.add_widget(bgmap)
 
-    question = QuizzItem(app=app)
+    question = QuizzMere(app=app, deuxJoueurs=False)
+
+    # question = QuizzItem(app=app)
 
     root.add_widget(question)
 
- 
+    #### BUTTONS TO SWITCH TO EXPO
 
+    def increase_button(but):
+        scat = but.parent
+        anim = Animation(scale=1.3, d=.05) + Animation(scale=1, d=.05)
+        Animation.stop_all(scat)
+        anim.start(scat)
+    
+    def change_expo(but):
+        app.change_expo(str(40))
+
+    scat = Scatter( size=(85,85), 
+                    do_scale=False, 
+                    do_rotation=False,
+                    do_translation=False,
+                    scale=1,
+                    size_hint=(None,None),
+                    rotation=180 ,
+                    center=(75, 75))    
+
+    but = Button(   size=(85,85),
+                    size_hint= (None,None),
+                    background_normal='widgets/btn-loupe.png',
+                    background_down='widgets/btn-loupe.png',
+                    on_press=increase_button,
+                    on_release=change_expo)
+    scat.add_widget(but)
+    root.add_widget(scat)
+    scat.center = (75, 75)
+
+    scat2 = Scatter( size=(85,85), 
+                    do_scale=False, 
+                    do_rotation=False,
+                    do_translation=False,
+                    scale=1,
+                    size_hint=(None,None),
+                    rotation=180 ,
+                    center=(75, 75))    
+
+    but2 = Button(   size=(85,85),
+                    size_hint= (None,None),
+                    background_normal='widgets/btn-loupe.png',
+                    background_down='widgets/btn-loupe.png',
+                    on_press=increase_button,
+                    on_release=change_expo)
+    scat2.add_widget(but2)
+    root.add_widget(scat2)
+    scat2.center = (Window.width- 75, Window.height -75)
+
+    root.hide_items = True
 
     # -------------------------------------------------------------------------
     # Add a date slider to our root widget.

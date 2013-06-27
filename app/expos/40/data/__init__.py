@@ -18,7 +18,7 @@ from museolib.widgets.imagemap import ImageMap
 from museolib.widgets.basket import Basket
 from museolib.widgets.imageitem import ImageItem
 
-import random
+import random, time
 
 from kivy.utils import platform
 
@@ -308,15 +308,15 @@ def build(app):
             center_x = but.parent.center_x
             center_y = but.parent.center_y
             if but.english:
+                x = center_x - 150
+                y = center_y + 150 
+                center_x += 150
+                center_y -= 150                
+            else:                
                 x = center_x + 150
                 y = center_y - 150 
                 center_x -= 150
                 center_y += 150
-            else:                
-                x = center_x - 150
-                y = center_y + 150 
-                center_x += 150
-                center_y -= 150
             glass = Glass(  center=(x,y),
                             size=(300,300),
                             app= app,
@@ -330,7 +330,6 @@ def build(app):
 
     def increase_button(but):
         scat = but.parent
-        # but.parent.scale = 1.5
         anim = Animation(scale=1.3, d=.05) + Animation(scale=1, d=.05)
         Animation.stop_all(scat)
         anim.start(scat)
@@ -354,12 +353,10 @@ def build(app):
     scat.add_widget(but)
     root.add_widget(scat)
     scat.center = (75, Window.height-75)
-    but.english = False
+    but.english = True
 
     def change_expo(but):
-
         app.change_expo(str(41))
-        # app.show_expo(str(41))
 
     scat2 = Scatter(size=(85,85), 
                     do_scale=False, 
@@ -379,7 +376,7 @@ def build(app):
     scat2.add_widget(but2)
     root.add_widget(scat2)
     scat2.center = (Window.width - 75, 75)
-    but2.english = True
+    but2.english = False
 
     scat3 = Scatter(size=(130,130), 
                     do_scale=False, 
@@ -429,7 +426,117 @@ def build(app):
 
     # Clock.schedule_interval(anim_buttons, 2)
 
+    ##### MODE VEILLE
 
+    helpLayout = FloatLayout()
+
+    helpQuizz1Scat = Scatter(size=(320,90),
+                                do_scale=False,
+                                do_rotation=False,
+                                do_translation=False,
+                                scale=1,
+                                rotation=-45)
+    helpQuizz1 = Image( source='widgets/pop-up-help-quiz.png',
+                        size=(320,90))
+    helpQuizz1Scat.add_widget(helpQuizz1)
+    helpLayout.add_widget(helpQuizz1Scat)
+    helpQuizz1Scat.center=(150,150)
+    
+    helpQuizz2Scat = Scatter(size=(320,90),
+                                do_scale=False,
+                                do_rotation=False,
+                                do_translation=False,
+                                scale=1,
+                                rotation=90+45)
+    helpQuizz2 = Image( source='widgets/pop-up-help-quiz.png',
+                        size=(320,90))
+    helpQuizz2Scat.add_widget(helpQuizz2)
+    helpLayout.add_widget(helpQuizz2Scat)
+    helpQuizz2Scat.center=(Window.width-150,Window.height-150)
+    
+    helpExpo1Scat = Scatter(size=(320,90),
+                                do_scale=False,
+                                do_rotation=False,
+                                do_translation=False,
+                                scale=1,
+                                rotation=-135)
+    helpExpo1 = Image( source='widgets/pop-up-help-loupe.png',
+                        size=(320,90))
+    helpExpo1Scat.add_widget(helpExpo1)
+    helpLayout.add_widget(helpExpo1Scat)
+    helpExpo1Scat.center=(150,Window.height-150)
+    
+    helpExpo2Scat = Scatter(size=(320,90),
+                                do_scale=False,
+                                do_rotation=False,
+                                do_translation=False,
+                                scale=1,
+                                rotation=45)
+    helpExpo2 = Image( source='widgets/pop-up-help-loupe.png',
+                        size=(320,90))
+    helpExpo2Scat.add_widget(helpExpo2)
+    helpLayout.add_widget(helpExpo2Scat)
+    helpExpo2Scat.center=(Window.width-150,150)
+
+    root.add_widget(helpLayout)
+
+
+    def anim_clues(dt):
+        Animation.stop_all(helpExpo1Scat)
+        Animation.stop_all(helpExpo2Scat)
+        Animation.stop_all(helpQuizz1Scat)
+        Animation.stop_all(helpQuizz2Scat)
+
+        delta = 5
+        dt = dt /10
+
+        anim = Animation(center_x=helpExpo1Scat.center_x + delta, center_y=helpExpo1Scat.center_y - delta, d=dt/2) + Animation(center=helpExpo1Scat.center, d=dt/2)
+        anim.start(helpExpo1Scat)
+        anim = Animation(center_x=helpExpo2Scat.center_x - delta, center_y=helpExpo2Scat.center_y + delta, d=dt/2) + Animation(center=helpExpo2Scat.center, d=dt/2)
+        anim.start(helpExpo2Scat)
+        anim = Animation(center_x=helpQuizz1Scat.center_x + delta, center_y=helpQuizz1Scat.center_y + delta, d=dt/2) + Animation(center_x=helpQuizz1Scat.center_x , center_y=helpQuizz1Scat.center_y , d=dt/2)
+        anim.start(helpQuizz1Scat)
+        anim = Animation(center_x=helpQuizz2Scat.center_x - delta, center_y=helpQuizz2Scat.center_y - delta, d=dt/2) + Animation(center_x=helpQuizz2Scat.center_x , center_y=helpQuizz2Scat.center_y , d=dt/2)
+        anim.start(helpQuizz2Scat)
+
+    # Clock.schedule_interval(anim_clues, 2)
+
+    def toggle_help_layout(show=True):
+        Animation.stop_all(helpLayout)
+        if show:
+            anim = Animation(opacity=1, d=1)
+            anim.start(helpLayout)
+        else:
+            anim = Animation(opacity=0, d=1)
+            anim.start(helpLayout)
+
+    def launch_screensaver(dt):
+        delay = time.time() - app.last_touch_time
+        if delay > 15:
+            Clock.schedule_interval(anim_clues, 2)
+            toggle_help_layout(show=True)
+            Clock.unschedule(launch_screensaver)
+
+    Clock.schedule_interval(launch_screensaver, 1)
+
+    def stop_screensaver():
+        Clock.unschedule(anim_clues)
+        Clock.schedule_interval(launch_screensaver, 1)
+        toggle_help_layout(show=False)
+
+    app.last_touch_time = 0
+    def on_touch_app(touch):
+        app.last_touch_time = touch.time_start
+        for child in root.children[:]:
+            if child.dispatch('on_touch_down', touch):
+                stop_screensaver()
+                return True
+
+    root.on_touch_down = on_touch_app
+
+    ##### FIN VEILLE
+
+    
     root.hide_items = True
     # -------------------------------------------------------------------------
     # Create a basket widget
