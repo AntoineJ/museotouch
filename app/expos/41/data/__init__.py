@@ -32,12 +32,21 @@ class QuizzSelector(Scatter):
             self.img_active_2.opacity = 1    
     
     def on_release(self, but, stro):
-        print self.english
         if stro == 'but1':
             self.img_active_1.opacity = 0
         elif stro == 'but2':
             self.img_active_2.opacity = 0
 
+
+class QuizzButton(Button):
+    disabled = BooleanProperty(False)
+
+    def on_touch_down(self, touch):
+        if not self.disabled:
+            ret = super(QuizzButton, self).on_touch_down(touch)
+            return ret
+        return
+        
 class QuizzMere(FloatLayout):
     
     app = ObjectProperty()
