@@ -8,6 +8,56 @@
 #:set arialBI 'widgets/fonts/Arial Bold Italic.ttf'
 #:set arialI 'widgets/fonts/Arial Italic.ttf'
 
+#:set gHeight 1080
+#:set gWidth 1920
+
+<QuizzSelector>:
+    do_scale: False
+    do_rotation: False
+    do_translation: False
+    size: 180,180
+
+    img_active_1: img_active_1
+    img_active_2: img_active_2
+
+    Image:
+        source: 'widgets/quizzSelector/btn-player.png'
+        size: 180,180
+
+    Image:
+        id: img_active_1
+        source: 'widgets/quizzSelector/btn-player-active1.png'
+        size: 180,180
+        opacity:0
+
+    Image:
+        id: img_active_2
+        source: 'widgets/quizzSelector/btn-player-active2.png'
+        size: 180,180
+        opacity: 0
+
+    Button:
+        id: but1
+        size_hint: None, None
+        background_down: 'widgets/quizzSelector/btn-player-1pl.png'
+        background_normal: 'widgets/quizzSelector/btn-player-1pl.png'
+        size: 70, 70
+        center: 51,129
+        on_press: root.on_press(root, 'but1')
+        on_release: root.on_release(root, 'but1')
+
+    Button:
+        id: but2
+        size_hint: None, None
+        # pos_hint: None
+        background_down: 'widgets/quizzSelector/btn-player-2pl.png'
+        background_normal: 'widgets/quizzSelector/btn-player-2pl.png'
+        size: 70, 70
+        center: 110,70
+        on_press: root.on_press(root, 'but2')
+        on_release: root.on_release(root, 'but2')
+
+
 <ImageItem>:
     border: 2 / self.scale
     size_hint: None, None
@@ -123,8 +173,9 @@
         valign: 'middle'
         font_name: futuraBold
 
-    Button:
+    QuizzButton:
         id: btnMauvaiseReponse
+        # disabled: True
         size_hint: (None, None)
         background_color: 117/255.,113/255.,81/255.,1
         color: 1,1,1,1

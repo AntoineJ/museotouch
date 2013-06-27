@@ -19,6 +19,92 @@ from museolib.widgets.basket import Basket
 from kivy.utils import platform
 from random import choice, randint, sample, shuffle
 from kivy.animation import Animation
+from kivy.core.window import Window
+
+class QuizzSelector(Scatter):
+
+    english = BooleanProperty(False)
+    
+    def on_press(self, but, stro):
+        if stro == 'but1':
+            self.img_active_1.opacity = 1
+        elif stro == 'but2':
+            self.img_active_2.opacity = 1    
+    
+    def on_release(self, but, stro):
+        if stro == 'but1':
+            self.img_active_1.opacity = 0
+        elif stro == 'but2':
+            self.img_active_2.opacity = 0
+
+
+class QuizzButton(Button):
+    disabled = BooleanProperty(False)
+
+    def on_touch_down(self, touch):
+        if not self.disabled:
+            ret = super(QuizzButton, self).on_touch_down(touch)
+            return ret
+        return
+        
+class QuizzMere(FloatLayout):
+    
+    app = ObjectProperty()
+
+    # Defini si on a un ou deux joueurs
+    deuxJoueurs = BooleanProperty(False)
+
+    Joueur1 = ObjectProperty()
+    Joueur2 = ObjectProperty()
+
+    # Item associé à la question
+    item = ObjectProperty()
+
+    # Liste d'id de question
+    ordreQuestion = ListProperty([])
+
+    # numero de la question en cours
+    numeroQuestion = NumericProperty(0)
+
+    # Images de bonne et mauvaise réponse
+    medias = ListProperty(None)
+
+    def __init__(self, **kwargs):
+        super(QuizzMere, self).__init__(**kwargs)
+
+        # Definition de l'ordre des question
+        self.ordreQuestion = sample(range(len(self.app.db.items)), min(5,len(self.app.db.items)))
+
+        self.item = self.app.db.items[self.ordreQuestion[self.numeroQuestion]]
+
+        Joueur1 = QuizzItem(app=self.app, mere=self)
+        self.add_widget(Joueur1)
+
+        if self.deuxJoueurs:
+            Joueur2 = QuizzItem(app=self.app, mere=self)
+            self.add_widget(Joueur2)
+
+
+        self.rebuild()
+
+
+    def rebuild(self):
+        self.medias = []
+
+        # Ajout des images de bonne/mauvaise reponse
+        for filedata in self.item.data:
+            if self.item.data.index(filedata) == 0:
+                continue
+            else:
+                fileurl = filedata['fichier']
+                filename = basename(fileurl)
+                filepath = join(self.app.expo_dir, 'otherfiles', filename)
+                if isfile(filepath) and getsize(filepath) > 0:
+                    self.medias.append(filepath)
+    
+    def do_bonne_reponse(self, fils):
+        pass
+
 
 
 class QuizzMere(FloatLayout):
@@ -276,6 +362,7 @@ class QuizzItem(Scatter):
         #     self.mere.item = self.mere.app.db.items[self.mere.ordreQuestion[self.mere.numeroQuestion]]
         #     self.rebuild()
 
+
     # Affiche la bonne reponse
     def transform_ui(self):
 
@@ -378,10 +465,71 @@ def build(app):
 
     # question = QuizzItem(app=app)
 
+
+    # question = QuizzItem(app=app)
+
     root.add_widget(question)
 
- 
+    #### BUTTONS TO SWITCH TO EXPO
 
+    def increase_button(but):
+        scat = but.parent
+        anim = Animation(scale=1.3, d=.05) + Animation(scale=1, d=.05)
+        Animation.stop_all(scat)
+        anim.start(scat)
+    
+    def change_expo(but):
+        app.change_expo(str(40))
+
+    scat = Scatter( size=(85,85), 
+                    do_scale=False, 
+                    do_rotation=False,
+                    do_translation=False,
+                    scale=1,
+                    size_hint=(None,None),
+                    rotation=180 ,
+                    center=(75, 75))    
+
+    but = Button(   size=(85,85),
+                    size_hint= (None,None),
+                    background_normal='widgets/btn-loupe.png',
+                    background_down='widgets/btn-loupe.png',
+                    on_press=increase_button,
+                    on_release=change_expo)
+    scat.add_widget(but)
+    root.add_widget(scat)
+    scat.center = (75, 75)
+
+    scat2 = Scatter( size=(85,85), 
+                    do_scale=False, 
+                    do_rotation=False,
+                    do_translation=False,
+                    scale=1,
+                    size_hint=(None,None),
+                    rotation=180 ,
+                    center=(75, 75))    
+
+    but2 = Button(   size=(85,85),
+                    size_hint= (None,None),
+                    background_normal='widgets/btn-loupe.png',
+                    background_down='widgets/btn-loupe.png',
+                    on_press=increase_button,
+                    on_release=change_expo)
+    scat2.add_widget(but2)
+    root.add_widget(scat2)
+    scat2.center = (Window.width- 75, Window.height -75)
+
+
+    ###### BUTTONS TO SELECT A QUIZZ
+
+    quizzSelector1 = QuizzSelector(english=False, pos=(Window.width - 180, 0))
+    root.add_widget(quizzSelector1)
+
+
+    quizzSelector2 = QuizzSelector(english=True, rotation= 180, pos=(0, Window.height -180))
+    root.add_widget(quizzSelector2)
+    quizzSelector2.pos = pos=(0, Window.height -180)
+    root.hide_items = True
 
     # -------------------------------------------------------------------------
     # Add a date slider to our root widget.

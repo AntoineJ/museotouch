@@ -49,10 +49,10 @@
 		Button:
 			id: close_button
 			size_hint: None,None
-			size: 79,44
+			size: 81,50
 			pos: 147,220
-			background_down:'widgets/btn-close-glass.png'
-			background_normal:'widgets/btn-close-glass.png'
+			background_down:'widgets/close-loupe-FR.png' if not root.english else 'widgets/close-loupe-EN.png'
+			background_normal:'widgets/close-loupe-FR.png' if not root.english else 'widgets/close-loupe-EN.png'
 			background_color: root.color if self.state == 'normal' else (1,1,1,1)
 			on_release: root.remove()
 
