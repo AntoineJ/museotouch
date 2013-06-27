@@ -21,6 +21,22 @@ from random import choice, randint, sample, shuffle
 from kivy.animation import Animation
 from kivy.core.window import Window
 
+class QuizzSelector(Scatter):
+
+    english = BooleanProperty(False)
+    
+    def on_press(self, but, stro):
+        if stro == 'but1':
+            self.img_active_1.opacity = 1
+        elif stro == 'but2':
+            self.img_active_2.opacity = 1    
+    
+    def on_release(self, but, stro):
+        print self.english
+        if stro == 'but1':
+            self.img_active_1.opacity = 0
+        elif stro == 'but2':
+            self.img_active_2.opacity = 0
 
 class QuizzMere(FloatLayout):
     
@@ -324,6 +340,16 @@ def build(app):
     root.add_widget(scat2)
     scat2.center = (Window.width- 75, Window.height -75)
 
+
+    ###### BUTTONS TO SELECT A QUIZZ
+
+    quizzSelector1 = QuizzSelector(english=False, pos=(Window.width - 180, 0))
+    root.add_widget(quizzSelector1)
+
+
+    quizzSelector2 = QuizzSelector(english=True, rotation= 180, pos=(0, Window.height -180))
+    root.add_widget(quizzSelector2)
+    quizzSelector2.pos = pos=(0, Window.height -180)
     root.hide_items = True
 
     # -------------------------------------------------------------------------
