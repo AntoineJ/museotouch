@@ -21,11 +21,172 @@ from random import choice, randint, sample, shuffle
 from kivy.animation import Animation
 
 
+class QuizzMere(FloatLayout):
+    
+    app = ObjectProperty()
+
+    # Defini si on a un ou deux joueurs
+    deuxJoueurs = BooleanProperty(False)
+
+
+    Joueur1 = ObjectProperty()
+    Joueur2 = ObjectProperty()
+
+    # Item associé à la question
+    item = ObjectProperty()
+
+    # Permet de savoir si on est en phase de correction
+    correction = BooleanProperty(False)
+
+    # Liste d'id de question
+    ordreQuestion = ListProperty([])
+
+    # numero de la question en cours
+    numeroQuestion = NumericProperty(0)
+
+    # Permet de savoir si les 2 joueurs sont pret à continuer (peut etre mettre une variable par personne)
+    sync_continuer = BooleanProperty(False)
+
+    # Images de bonne et mauvaise réponse
+    medias = ListProperty(None)
+
+    def __init__(self, **kwargs):
+        super(QuizzMere, self).__init__(**kwargs)
+
+        # Definition de l'ordre des question
+        self.ordreQuestion = sample(range(len(self.app.db.items)), min(5,len(self.app.db.items)))
+
+        self.item = self.app.db.items[self.ordreQuestion[self.numeroQuestion]]
+
+        self.Joueur1 = QuizzItem(app=self.app, mere=self)
+        self.add_widget(self.Joueur1)
+
+        if self.deuxJoueurs:
+            self.Joueur2 = QuizzItem(app=self.app, mere=self)
+            self.add_widget(self.Joueur2)
+
+
+        self.rebuild()
+
+
+    def rebuild(self):
+        self.medias = []
+        self.correction = False
+        self.sync_continuer = False
+
+        # Ajout des images de bonne/mauvaise reponse
+        for filedata in self.item.data:
+            if self.item.data.index(filedata) == 0:
+                continue
+            else:
+                fileurl = filedata['fichier']
+                filename = basename(fileurl)
+                filepath = join(self.app.expo_dir, 'otherfiles', filename)
+                if isfile(filepath) and getsize(filepath) > 0:
+                    self.medias.append(filepath)
+
+    
+    def bonne_reponse(self, fils):
+        if self.correction:
+            return
+
+        self.correction = True
+
+        if fils == self.Joueur1:    
+            self.Joueur1.bonneReponse = True
+            self.Joueur1.correction = True
+            self.Joueur1.transform_ui()
+            self.Joueur1.score += 2
+
+            self.Joueur2.bonneReponse = False
+            self.Joueur2.correction = True
+            self.Joueur2.transform_ui()
+        else: 
+            self.Joueur2.bonneReponse = True
+            self.Joueur2.correction = True
+            self.Joueur2.transform_ui()
+            self.Joueur2.score += 2
+
+            self.Joueur1.bonneReponse = False
+            self.Joueur1.correction = True
+            self.Joueur1.transform_ui()
+
+
+
+
+    def mauvaise_reponse(self, fils):
+        if self.correction:
+            return
+
+        self.correction = True
+
+        if fils == self.Joueur1:        
+            self.Joueur1.bonneReponse = False
+            self.Joueur1.correction = True
+            self.Joueur1.score -= 1
+            self.Joueur1.transform_ui()
+
+            self.Joueur2.bonneReponse = False
+            self.Joueur2.correction = True
+            self.Joueur2.transform_ui()
+        else: 
+            self.Joueur2.bonneReponse = False
+            self.Joueur2.correction = True
+            self.Joueur2.score -= 1
+            self.Joueur2.transform_ui()
+
+            self.Joueur1.bonneReponse = False
+            self.Joueur1.correction = True
+            self.Joueur1.transform_ui()
+
+
+
+    def continuer(self, fils):
+        if not self.correction:
+            return
+
+        print self.parent, fils
+
+        if not self.deuxJoueurs:
+            self.numeroQuestion += 1
+
+            if self.numeroQuestion >= len(self.app.db.items):
+                self.parent.remove_widget(self)
+            else:
+                self.item = self.app.db.items[self.ordreQuestion[self.numeroQuestion]]
+                self.rebuild()
+                self.Joueur1.rebuild()
+        elif self.sync_continuer:
+            fils.btnContinuez.unbind(on_release = fils.do_continue)
+            fils.btnContinuez.text = 'EN ATTENTE DU DEUXIEME JOUEUR'
+            self.numeroQuestion += 1
+
+            if self.numeroQuestion >= len(self.app.db.items):
+                self.parent.remove_widget(self)
+            else:
+                self.item = self.app.db.items[self.ordreQuestion[self.numeroQuestion]]
+                self.rebuild()
+                self.Joueur1.rebuild()
+                self.Joueur1.btnContinuez.bind(on_release = self.Joueur1.do_continue)
+                self.Joueur2.rebuild()
+                self.Joueur2.btnContinuez.bind(on_release = self.Joueur2.do_continue)
+        else:
+            fils.btnContinuez.unbind(on_release = fils.do_continue)
+            fils.btnContinuez.text = 'EN ATTENTE DU DEUXIEME JOUEUR'
+            self.sync_continuer = True
+
+
+
+
+
 class QuizzItem(Scatter):
 
     app = ObjectProperty()
 
-    # Item associé à la question
+    # Classe Mere
+    mere = ObjectProperty()
+
+    #- Item associé à la question 
     item = ObjectProperty()
 
     # Permet d'avoir une position aléatoire entre les deux réponses
@@ -37,13 +198,13 @@ class QuizzItem(Scatter):
     # Permet de savoir si on est en phase de correction
     correction = BooleanProperty(False)
 
-    # Liste d'id de question
+    #- Liste d'id de question
     ordreQuestion = ListProperty([])
 
-    # numero de la question en cours
+    #- numero de la question en cours
     numeroQuestion = NumericProperty(0)
 
-    # Images de bonne et mauvaise réponse
+    #- Images de bonne et mauvaise réponse
     medias = ListProperty(None)
 
     # Score du joueur
@@ -59,9 +220,9 @@ class QuizzItem(Scatter):
         super(QuizzItem, self).__init__(**kwargs)
 
         # Definition de l'ordre des question. A revoir pour le mode 2 joueurs
-        self.ordreQuestion = sample(range(len(self.app.db.items)), min(5,len(self.app.db.items)))
+        # self.ordreQuestion = sample(range(len(self.app.db.items)), min(5,len(self.app.db.items)))
 
-        self.item = self.app.db.items[self.ordreQuestion[self.numeroQuestion]]
+        self.item = self.mere.item
 
         # Position aléatoire des réponses
         self.position = choice([0,1])   
@@ -82,32 +243,38 @@ class QuizzItem(Scatter):
         if self.correction:
             return
 
-        self.bonneReponse = True
-        self.correction = True
-        self.transform_ui()
+        self.mere.bonne_reponse(self)
 
-        self.score += 2
+        # self.bonneReponse = True
+        # self.correction = True
+        # self.transform_ui()
+
+        # self.score += 2
 
 
     def do_mauvaise_reponse(self, kwargs):
         if self.correction:
             return
 
-        self.bonneReponse = False
-        self.correction = True
-        self.transform_ui()
+        self.mere.mauvaise_reponse(self)
+
+        # self.bonneReponse = False
+        # self.correction = True
+        # self.transform_ui()
 
     def do_continue(self, kwargs):
         if not self.correction:
             return
 
-        self.numeroQuestion += 1
+        self.mere.continuer(self)
 
-        if self.numeroQuestion >= len(self.app.db.items):
-            self.parent.remove_widget(self)
-        else:
-            self.item = self.app.db.items[self.ordreQuestion[self.numeroQuestion]]
-            self.rebuild()
+        # self.mere.numeroQuestion += 1
+
+        # if self.numeroQuestion >= len(self.mere.app.db.items):
+        #     self.parent.remove_widget(self)
+        # else:
+        #     self.mere.item = self.mere.app.db.items[self.mere.ordreQuestion[self.mere.numeroQuestion]]
+        #     self.rebuild()
 
     # Affiche la bonne reponse
     def transform_ui(self):
@@ -120,14 +287,14 @@ class QuizzItem(Scatter):
         # self.labelTitre.pos = (10,370)
         if self.bonneReponse:
             self.labelTitre.text = 'BONNE REPONSE !'
-            self.labelReponse.text = self.item['description']
-            if len(self.medias) > 0:
-                self.photo.source = self.medias[0]
+            self.labelReponse.text = self.mere.item['description']
+            if len(self.mere.medias) > 0:
+                self.photo.source = self.mere.medias[0]
         else:
             self.labelTitre.text = 'MAUVAISE REPONSE ...'
-            self.labelReponse.text = self.item['description2']
-            if len(self.medias) > 0:
-                self.photo.source = self.medias[1]
+            self.labelReponse.text = self.mere.item['description2']
+            if len(self.mere.medias) > 0:
+                self.photo.source = self.mere.medias[1]
 
         anim2 = Animation(y=340, d=.2)
         anim2.start(self.btnBonneReponse)
@@ -147,23 +314,23 @@ class QuizzItem(Scatter):
 
     def rebuild(self):
 
-        self.medias = []
+        # self.medias = []
 
-        # Ajout des images de bonne/mauvaise reponse
-        for filedata in self.item.data:
-            if self.item.data.index(filedata) == 0:
-                continue
-            else:
-                fileurl = filedata['fichier']
-                filename = basename(fileurl)
-                filepath = join(self.app.expo_dir, 'otherfiles', filename)
-                if isfile(filepath) and getsize(filepath) > 0:
-                    self.medias.append(filepath)
+        # # Ajout des images de bonne/mauvaise reponse
+        # for filedata in self.item.data:
+        #     if self.item.data.index(filedata) == 0:
+        #         continue
+        #     else:
+        #         fileurl = filedata['fichier']
+        #         filename = basename(fileurl)
+        #         filepath = join(self.app.expo_dir, 'otherfiles', filename)
+        #         if isfile(filepath) and getsize(filepath) > 0:
+        #             self.medias.append(filepath)
 
-        self.labelTitre.text = self.item['nom']
-        self.btnMauvaiseReponse.text = self.item['freefield']
-        self.btnBonneReponse.text = self.item['orig_geo_prec']
-        self.photo.source= self.item.filename
+        self.labelTitre.text = self.mere.item['nom']
+        self.btnMauvaiseReponse.text = self.mere.item['freefield']
+        self.btnBonneReponse.text = self.mere.item['orig_geo_prec']
+        self.photo.source= self.mere.item.filename
         self.labelReponse.text = ''
         # self.labelMauvaiseReponse.opacity = 0
 
@@ -178,6 +345,8 @@ class QuizzItem(Scatter):
         self.btnBonneReponse.y = 10
 
 
+        # self.btnContinuez.bind(on_release = self.do_continue)
+        self.btnContinuez.text = 'CONTINUEZ'
 
 
         if self.position:
@@ -205,7 +374,9 @@ def build(app):
     bgmap = Image(source = 'widgets/background.jpg', size=(1920,1080))
     root.add_widget(bgmap)
 
-    question = QuizzItem(app=app)
+    question = QuizzMere(app=app, deuxJoueurs=True)
+
+    # question = QuizzItem(app=app)
 
     root.add_widget(question)
 
