@@ -624,8 +624,12 @@ class MuseotouchApp(App):
 
     def _build_app(self):
         # Import the module
-        modexpo = load_source('__expo__'+self.expo_id, join(
-            self.expo_data_dir, '__init__.py'))
+        if '__expo__'+self.expo_id not in sys.modules:
+            modexpo = load_source('__expo__'+self.expo_id, join(
+                self.expo_data_dir, '__init__.py'))
+        else:
+            modexpo = sys.modules['__expo__'+self.expo_id]
+
 
         # link with the db. later, we need to change it to real one.
         Builder.load_file(join(self.expo_data_dir, 'museotouch.kv'))
@@ -712,7 +716,7 @@ class MuseotouchApp(App):
         resource_add_path(self.expo_data_dir)
         self.expo_id = expo_id
         
-        force_sync = True
+        force_sync = False
         popup=None
         
         if force_sync:
@@ -1189,10 +1193,6 @@ class MuseotouchApp(App):
         from kivy.core.window import Window
         for child in Window.children[:]:
             Window.remove_widget(child)
-
-        if '__expo__' in sys.modules:  
-            del(sys.modules["__expo__"])
-            __expo__ = None 
 
         # remove everything from the current expo
         if hasattr(self, 'expo_data_dir'):
