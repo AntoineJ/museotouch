@@ -35,6 +35,7 @@ class QuizzSelector(Scatter):
         if stro == 'but1':
             self.img_active_1.opacity = 0
         elif stro == 'but2':
+            print but.english
             self.img_active_2.opacity = 0
 
 
@@ -53,6 +54,7 @@ class QuizzMere(FloatLayout):
 
     # Defini si on a un ou deux joueurs
     deuxJoueurs = BooleanProperty(False)
+    english = BooleanProperty(False)
 
     Joueur1 = ObjectProperty()
     Joueur2 = ObjectProperty()

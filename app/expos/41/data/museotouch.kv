@@ -82,8 +82,14 @@
     do_scale: False
 
     canvas.before:
+         # add shadow background
         Color:
-            rgb: 1,1,1
+            rgba: 1,1,1,1
+        BorderImage:
+            source: 'widgets/shadow32.png'
+            border: (26,26,26,26)
+            size:(root.width+52, root.height+52)
+            pos: (-26,-26)
         Rectangle:
             pos: 0,0
             size: self.size
@@ -208,6 +214,7 @@
         font_name: futuraBold
         opacity: 0
 
+       
     # Label:
     #     id: labelMauvaiseReponse
     #     size_hint: (None, None)
