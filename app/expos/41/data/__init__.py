@@ -253,11 +253,14 @@ class QuizzMere(FloatLayout):
                 self.item = self.app.db.items[self.ordreQuestion[self.numeroQuestion]]
                 self.rebuild()
                 self.Joueur1.rebuild()
-                self.Joueur1.btnContinuez.bind(on_release = self.Joueur1.do_continue)
+                # self.Joueur1.btnContinuez.disabled = False
+                # self.Joueur1.btnContinuez.bind(on_release = self.Joueur1.do_continue)
                 self.Joueur2.rebuild()
-                self.Joueur2.btnContinuez.bind(on_release = self.Joueur2.do_continue)
+                # self.Joueur2.btnContinuez.disabled = False
+                # self.Joueur2.btnContinuez.bind(on_release = self.Joueur2.do_continue)
         else:
-            fils.btnContinuez.unbind(on_release = fils.do_continue)
+            # fils.btnContinuez.unbind(on_release = fils.do_continue)
+            fils.btnContinuez.disabled = False
             fils.btnContinuez.text = 'EN ATTENTE DU DEUXIEME JOUEUR'
             self.sync_continuer = True
 
@@ -393,9 +396,12 @@ class QuizzItem(Scatter):
 
         self.btnContinuez.opacity = 1
         self.btnContinuez.y = 10
+        self.btnContinuez.disabled = False
 
         # self.btnBonneReponse.opacity = 0
         self.btnMauvaiseReponse.opacity = 0
+
+
 
 
 
@@ -434,6 +440,7 @@ class QuizzItem(Scatter):
 
         # self.btnContinuez.bind(on_release = self.do_continue)
         self.btnContinuez.text = 'CONTINUEZ'
+        self.btnContinuez.disabled = True
 
 
         if self.position:
