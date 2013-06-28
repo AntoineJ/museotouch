@@ -8,9 +8,6 @@
 #:set arialBI 'widgets/fonts/Arial Bold Italic.ttf'
 #:set arialI 'widgets/fonts/Arial Italic.ttf'
 
-# <GlassButton>:
-	
-
 <Glass>:
 	scale_min: .1
 	scale_max: 1
@@ -22,13 +19,9 @@
 	text_sub: text_sub
 	# close_button: close_button
 	bg_img: bg_img
-   
-    # canvas:
-    #     Color:
-    #         rgba: 1,0,1,.1
-    #     Rectangle:
-    #         pos: 0,0
-    #         size: self.size
+
+	text_name2: text_name2
+	scatContent: scatContent
 
 	FloatLayout:
 		id: container
@@ -56,14 +49,6 @@
 			background_color: root.color if self.state == 'normal' else (1,1,1,1)
 			on_release: root.remove()
 
-		# Button:
-		# 	text:
-		# 	canvas.before:
-		# 		Color:
-		# 			rgba: root.color if self.state == 'normal' else (1,1,1,1)
-		# 		Rectangle:
-		# 			pos: self.x - 20, self.y
-		# 			size: 58*5 + 5*4, self.texture_size[1] 
 		Button:
 			id: text_name
 	        size_hint:None,None
@@ -74,8 +59,6 @@
 			font_size: 20
 	        background_color: 0,0,0,0
 			color: (1,1,1,1) if self.state == 'normal' else root.color
-			# x:15
-			# y:0
 			x:265 +10
 			y:152.5
 			padding_x: 10
@@ -83,7 +66,7 @@
 			width: 58*5 + 5*4 #self.texture_size[0] 
 			height: self.texture_size[1]
 			halign: 'left'
-	        on_release: root.open_main_item()
+	        on_release: root.open_main_item("1")
 
 			canvas.before:
 				Color:
@@ -92,16 +75,7 @@
 					pos: self.x - 20, self.y
 					# pos:0,0
 					size: 58*5 + 5*4, self.texture_size[1] 
-					# size: self.texture_size[0], self.texture_size[1] 
-		# Label:
-		# 	text: '>' if root.content == True else ''
-		# 	font_size: 20
-		# 	font_name: futuraBold
-		# 	text_size: None, None
-		# 	color: (1,1,1,1) if root.text_name.state == 'normal' else root.color
-		# 	y: 152.5
-		# 	x: 548
-		# 	size: self.texture_size
+
 		Image:
 			source: 'widgets/arrow-right.png'
 			size_hint: None, None
@@ -110,7 +84,6 @@
 			x: 548
 			center_y: root.text_name.center_y
 
-# + root.item['sub1'] 
 		Label:
 			id: text_sub
             text: root.item['calannee'].upper() + ' [font='+futura+']' + root.item['datation'].upper() + '[/font]' if  root.content == True else ''
@@ -131,7 +104,80 @@
 				Rectangle:
 					pos:self.x -10, self.y
 					size: 58*5 + 5*4, self.texture_size[1] 
-					# size: self.texture_size[0], self.texture_size[1] 
+
+		Scatter:
+			id: scatContent
+			do_scale: False
+			do_translation: False
+			do_rotation: False
+			scale: 1
+			rotation: -60
+			pos: 100, -90
+			# pos: 255, 60
+			size: 310,120
+			canvas:
+				Color: 
+					rgba: 1,1,1,0
+				Rectangle:
+					pos: 0,0
+					size: self.size
+
+			Button:
+				id: text_name2
+		        size_hint:None,None
+		        size: self.texture_size
+		        text: root.item2['nom'].upper() if root.content2 == True else ''
+				# markup: True
+				font_name: futuraBold
+				font_size: 20
+		        background_color: 0,0,0,0
+				color: (1,1,1,1) if self.state == 'normal' else root.color
+				x:20
+				y:92.5
+				padding_x: 10
+				text_size: ( 58*5 + 5*4, None)
+				width: 58*5 + 5*4 #self.texture_size[0] 
+				height: self.texture_size[1]
+				halign: 'left'
+		        on_release: root.open_main_item("2")
+
+				canvas.before:
+					Color:
+						rgba: root.color if self.state == 'normal' else (1,1,1,1)
+					Rectangle:
+						pos: self.x - 20, self.y
+						# pos:0,0
+						size: 58*5 + 5*4, self.texture_size[1] 
+
+			Image:
+				source: 'widgets/arrow-right.png'
+				size_hint: None, None
+				size: 16,16
+				opacity: 1 if root.content2 == True else 0
+				x: 290
+				center_y: root.text_name2.center_y
+
+			Label:
+				id: text_sub2
+	            text: root.item2['calannee'].upper() + ' [font='+futura+']' + root.item2['datation'].upper() + '[/font]' if  root.content2 == True else ''
+				markup: True
+				font_name: futuraBold
+				font_size: 20
+				color: (1,1,1,1)
+				x:10
+				y:90 - 2.5 - root.text_sub.height
+				padding_x: 10
+				text_size: (None, None)
+				width: self.texture_size[0]
+				height: self.texture_size[1]
+
+				canvas.before:
+					Color:
+						rgba: root.color
+					Rectangle:
+						pos:self.x -10, self.y
+						size: 58*5 + 5*4, self.texture_size[1] 
+
 <ImageItem>:
 	text_content_label: text_content_label
 	text_content: text_content

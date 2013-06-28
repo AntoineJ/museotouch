@@ -89,8 +89,10 @@ class Glass(Scatter):
     app = ObjectProperty(None)
 
     content = BooleanProperty(False)
+    content2 = BooleanProperty(False)
     english = BooleanProperty(False)
     item = ObjectProperty(None)
+    item2 = ObjectProperty(None)
     
     color = ObjectProperty((0,0,0,0))
     width_orig = NumericProperty(300)
@@ -120,47 +122,71 @@ class Glass(Scatter):
         key_id = self.match_filename_keyword(filename_id)
         its = []
         for item in self.app.db.items:
-            if key_id in item.keywords:
+            if key_id in item.keywords and len(item.children) > 0:
                 it = {}
                 it["item"] = item
                 its.append(it)
 
         if len(its) > 0:
-            it = random.choice(its)
-            self.item = it["item"]
+            self.item = its[0]["item"]
             self.content = True
+            if len(its) > 1:
+                self.item2 = its[1]["item"]
+                self.content2 = True
             self.get_children()
 
-    def get_children(self):
-        children_ids = self.item.children
+    def look_for_children(self, ids):
         children_items = []
-        if len(children_ids) > 0:
-            for child_id in children_ids:
+        if len(ids) > 0:
+            for child_id in ids:
                 for item in self.app.db.items:
                     if item.id == int(child_id):
                         children_items.append(item)
-        
-        if len(children_items) > 0:
-            i = 0
-            for child in children_items:
-                if i == 0: 
-                    margin=0
-                else: 
-                    margin = 5
-                but = GlassButton(
-                    background_normal=child.filename, 
-                    background_down=child.filename, 
-                    color= self.color,
-                    size= (58,58),
-                    pos= (255 + margin + 58*i , 60),
-                    item=child)
-                but.bind(on_release = self.open_child_content)
-                self.add_widget(but)
-                self.child_thumbs.append(but)
-                i += 1
+        return children_items
+
+    def create_glass_button(self, parent, fn, pos, item):
+        but = GlassButton(
+            background_normal=fn, 
+            background_down=fn, 
+            color= self.color,
+            size= (58,58),
+            pos= pos,
+            item=item)
+        but.bind(on_release = self.open_child_content)
+        parent.add_widget(but)
+        self.child_thumbs.append(but)
+
+    def get_children(self):
+        if self.content == True:
+            children_ids = self.item.children
+            children_items = self.look_for_children(children_ids)
+            
+            if len(children_items) > 0:
+                i = 0
+                for child in children_items:
+                    if i == 0: 
+                        margin=0
+                    else: 
+                        margin = 5
+                    self.create_glass_button(fn=child.filename, parent=self, pos=(255 + margin + 58*i , 60), item=child)
+                    i += 1
+        if self.content2 == True:
+            children_ids = self.item2.children
+            children_items = children_items = self.look_for_children(children_ids)
+            if len(children_items) > 0:
+                i = 0
+                for child in children_items:
+                    if i == 0: 
+                        margin=0
+                    else: 
+                        margin = 5
+                    self.create_glass_button(fn=child.filename, parent=self.scatContent, pos=(0 + margin + 58*i , 0), item=child)
+                    i += 1
+            
 
     def remove_content(self):
         self.content = False
+        self.content2 = False
         for child in self.image_items[:]:
             if child != None:
                 child.on_close()
@@ -168,26 +194,8 @@ class Glass(Scatter):
         
         for child in self.child_thumbs[:]:
             if child:
-                self.remove_widget(child)
+                child.parent.remove_widget(child)
             self.child_thumbs.remove(child)
-
-    # def pixel(self, x,y):
-    #     x -= self.x
-    #     y -= self.y
-    #     x = int(x)
-    #     y = int(y)
-    #     y = self.height - y 
-    #     coreimage = self.img._coreimage
-    #     # coreimage = self.coreimage
-    #     try:
-    #         color = coreimage.read_pixel(x,y)
-    #     except IndexError:
-    #         print IndexError
-    #         return False
-    #     if color[-1] <= 0.1:
-    #         return False
-
-    #     return True
 
     def on_touch_down(self, touch):
         x, y = touch.x, touch.y
@@ -271,8 +279,11 @@ class Glass(Scatter):
     def open_child_content(self, but):
         self.open_content(but.item)
 
-    def open_main_item(self):
-        self.open_content(self.item)
+    def open_main_item(self, ido):
+        if ido == "1":
+            self.open_content(self.item)
+        elif ido == "2":
+            self.open_content(self.item2)
 
 def build(app):
     # Here, you must return a root widget that will be used for app
