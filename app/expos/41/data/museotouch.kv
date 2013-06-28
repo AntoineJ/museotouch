@@ -97,6 +97,16 @@
         on_release: root.on_btn_moreinfo()
 
 
+
+<QuizzMere>
+    canvas.before:
+        Color:
+            rgba: (1,1,1,1) if root.deuxJoueurs else (1,1,1,0)
+        Line: 
+            width: 2
+            points: (root.J1x, root.J1y, root.J2x, root.J2y) if root.deuxJoueurs else (0,0,0,0)
+
+
 <QuizzItem>:
     labelTitre: labelTitre
     # labelMauvaiseReponse: labelMauvaiseReponse

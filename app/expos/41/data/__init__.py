@@ -43,6 +43,7 @@ class QuizzButton(Button):
 
     def on_touch_down(self, touch):
         if not self.disabled:
+            print 'ici'
             ret = super(QuizzButton, self).on_touch_down(touch)
             return ret
         return
@@ -118,6 +119,11 @@ class QuizzMere(FloatLayout):
     Joueur1 = ObjectProperty()
     Joueur2 = ObjectProperty()
 
+    J1x = NumericProperty(0)
+    J1y = NumericProperty(0)
+    J2x = NumericProperty(0) 
+    J2y = NumericProperty(0)
+
     # Item associé à la question
     item = ObjectProperty()
 
@@ -145,12 +151,15 @@ class QuizzMere(FloatLayout):
         self.item = self.app.db.items[self.ordreQuestion[self.numeroQuestion]]
 
         self.Joueur1 = QuizzItem(app=self.app, mere=self)
+        self.J1x = self.Joueur1.center_x
+        self.J1y = self.Joueur1.center_y
         self.add_widget(self.Joueur1)
 
         if self.deuxJoueurs:
             self.Joueur2 = QuizzItem(app=self.app, mere=self)
             self.add_widget(self.Joueur2)
-
+            self.J2x = self.Joueur2.center_x
+            self.J2y = self.Joueur2.center_y
 
         self.rebuild()
 
@@ -171,12 +180,24 @@ class QuizzMere(FloatLayout):
                 if isfile(filepath) and getsize(filepath) > 0:
                     self.medias.append(filepath)
 
-    
+    def update_pos(self, fils, center_x, center_y):
+        if fils == self.Joueur1:
+            self.J1x = center_x
+            self.J1y = center_y
+        else:
+            self.J2x = center_x
+            self.J2y = center_y
+
     def bonne_reponse(self, fils):
         if self.correction:
             return
 
         self.correction = True
+        self.Joueur1.btnBonneReponse.disabled = True
+        self.Joueur1.btnMauvaiseReponse.disabled = True
+        if self.deuxJoueurs:        
+            self.Joueur2.btnBonneReponse.disabled = True
+            self.Joueur2.btnMauvaiseReponse.disabled = True
 
         if fils == self.Joueur1:    
             self.Joueur1.bonneReponse = True
@@ -184,9 +205,10 @@ class QuizzMere(FloatLayout):
             self.Joueur1.transform_ui()
             self.Joueur1.score += 2
 
-            self.Joueur2.bonneReponse = False
-            self.Joueur2.correction = True
-            self.Joueur2.transform_ui()
+            if self.deuxJoueurs:
+                self.Joueur2.bonneReponse = False
+                self.Joueur2.correction = True
+                self.Joueur2.transform_ui()
         else: 
             self.Joueur2.bonneReponse = True
             self.Joueur2.correction = True
@@ -205,6 +227,12 @@ class QuizzMere(FloatLayout):
             return
 
         self.correction = True
+        self.Joueur1.btnBonneReponse.disabled = True
+        self.Joueur1.btnMauvaiseReponse.disabled = True
+        
+        if self.deuxJoueurs:
+            self.Joueur2.btnBonneReponse.disabled = True      
+            self.Joueur2.btnMauvaiseReponse.disabled = True
 
         if fils == self.Joueur1:        
             self.Joueur1.bonneReponse = False
@@ -212,9 +240,10 @@ class QuizzMere(FloatLayout):
             self.Joueur1.score -= 1
             self.Joueur1.transform_ui()
 
-            self.Joueur2.bonneReponse = False
-            self.Joueur2.correction = True
-            self.Joueur2.transform_ui()
+            if self.deuxJoueurs:
+                self.Joueur2.bonneReponse = False
+                self.Joueur2.correction = True
+                self.Joueur2.transform_ui()
         else: 
             self.Joueur2.bonneReponse = False
             self.Joueur2.correction = True
@@ -243,7 +272,7 @@ class QuizzMere(FloatLayout):
                 self.rebuild()
                 self.Joueur1.rebuild()
         elif self.sync_continuer:
-            fils.btnContinuez.unbind(on_release = fils.do_continue)
+            # fils.btnContinuez.unbind(on_release = fils.do_continue)
             fils.btnContinuez.text = 'EN ATTENTE DU DEUXIEME JOUEUR'
             self.numeroQuestion += 1
 
@@ -260,7 +289,7 @@ class QuizzMere(FloatLayout):
                 # self.Joueur2.btnContinuez.bind(on_release = self.Joueur2.do_continue)
         else:
             # fils.btnContinuez.unbind(on_release = fils.do_continue)
-            fils.btnContinuez.disabled = False
+            fils.btnContinuez.disabled = True
             fils.btnContinuez.text = 'EN ATTENTE DU DEUXIEME JOUEUR'
             self.sync_continuer = True
 
@@ -320,6 +349,7 @@ class QuizzItem(Scatter):
         else:
             self.btnMauvaiseReponse.y = 47
 
+        self.center = (randint(200,1720), randint(200,880))
 
         self.rebuild()
 
@@ -327,6 +357,13 @@ class QuizzItem(Scatter):
         self.btnMauvaiseReponse.bind(on_release= self.do_mauvaise_reponse)
         self.btnBonneReponse.bind(on_release= self.do_bonne_reponse)
         self.btnContinuez.bind(on_release= self.do_continue)
+
+    def on_touch_move(self, touch):
+        ret = super(QuizzItem, self).on_touch_move(touch)
+
+        self.mere.update_pos(self, self.center_x, self.center_y)
+
+        return ret
 
     def do_bonne_reponse(self, kwargs):
         if self.correction:
@@ -354,7 +391,7 @@ class QuizzItem(Scatter):
     def do_continue(self, kwargs):
         if not self.correction:
             return
-
+        print 'pouet'
         self.mere.continuer(self)
 
         # self.mere.numeroQuestion += 1
@@ -436,6 +473,8 @@ class QuizzItem(Scatter):
         self.btnMauvaiseReponse.opacity = 1
         self.btnMauvaiseReponse.y = 10
         self.btnBonneReponse.y = 10
+        self.btnBonneReponse.disabled = False
+        self.btnMauvaiseReponse.disabled = False
 
 
         # self.btnContinuez.bind(on_release = self.do_continue)
