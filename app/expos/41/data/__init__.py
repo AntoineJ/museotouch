@@ -43,7 +43,6 @@ class QuizzButton(Button):
 
     def on_touch_down(self, touch):
         if not self.disabled:
-            print 'ici'
             ret = super(QuizzButton, self).on_touch_down(touch)
             return ret
         return
@@ -413,12 +412,12 @@ class QuizzItem(Scatter):
         anim1.start(self.labelTitre)
         # self.labelTitre.pos = (10,370)
         if self.bonneReponse:
-            self.labelTitre.text = 'BONNE REPONSE !'
+            self.labelTitre.text = 'BONNE RÉPONSE !'
             self.labelReponse.text = self.mere.item['description']
             if len(self.mere.medias) > 0:
                 self.photo.source = self.mere.medias[0]
         else:
-            self.labelTitre.text = 'MAUVAISE REPONSE ...'
+            self.labelTitre.text = 'MAUVAISE REPONSE...'
             self.labelReponse.text = self.mere.item['description2']
             if len(self.mere.medias) > 0:
                 self.photo.source = self.mere.medias[1]
@@ -457,9 +456,9 @@ class QuizzItem(Scatter):
         #         if isfile(filepath) and getsize(filepath) > 0:
         #             self.medias.append(filepath)
 
-        self.labelTitre.text = self.mere.item['nom']
-        self.btnMauvaiseReponse.text = self.mere.item['freefield']
-        self.btnBonneReponse.text = self.mere.item['orig_geo_prec']
+        self.labelTitre.text = self.mere.item['nom'].upper()
+        self.btnMauvaiseReponse.text = self.mere.item['freefield'].upper()
+        self.btnBonneReponse.text = self.mere.item['orig_geo_prec'].upper()
         self.photo.source= self.mere.item.filename
         self.labelReponse.text = ''
         # self.labelMauvaiseReponse.opacity = 0
