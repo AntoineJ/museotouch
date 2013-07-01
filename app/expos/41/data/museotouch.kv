@@ -125,8 +125,6 @@
         pos: -64, root.height-60
         opacity: 0
 
-
-
     Label:
         id: labelScore
         size_hint: (None, None)
@@ -141,7 +139,6 @@
         halign: 'center'
         valign: 'middle'
         font_name: futuraBold
-
 
     Label:
         size_hint: None,None
@@ -264,98 +261,9 @@
         color: 117/255.,113/255.,81/255.,1
         pos: 10, 45
         text: ''
-        # text: ''
-        text_size: (210, 80)
-        # shorten: True
+        text_size: (210, None)
         size: (210, 80)
         font_size: 10
         halign: 'justify'
         valign: 'middle'
         font_name: arial
-
-
-
-
-
-# <ImageItem>:
-#     border: 2 / self.scale
-#     size_hint: None, None
-#     size: 512, 512
-#     scale: 0.30
-#     container: container
-#     scale_min: .3
-#     scale_max: 10
-#     canvas:
-#         Color:
-#             rgb: 1, 1, 1
-#         Rectangle:
-#             pos: -self.border, -self.border
-#             size: self.width + self.border * 2, self.height + self.border * 2
-#         Color:
-#             rgb: 0, 0, 0
-#         Rectangle:
-#             size: self.size
-
-#     FloatLayout:
-#         size: root.size
-
-#         FloatLayout:
-#             id: container
-
-#         Image:
-#             source: root.source
-#             size_hint: (1 * (0.3 + 0.7 * root.flip_alpha), 1 * (0.3 + 0.7 * root.flip_alpha))
-#             pos_hint: {'top': 1}
-
-#     Button:
-#         background_color: (1, 1, 1, root.alpha_button)
-#         size: (64, 64)
-#         pos: 512 - 70, 512 - 70
-#         background_down: 'widgets/btn_moreinfo_down.png'
-#         background_normal: 'widgets/btn_moreinfo.png'
-#         on_release: root.on_btn_moreinfo()
-
-
-# <ImageItemContent>:
-#     GridLayout:
-#         cols: 1
-#         rows: 3
-#         pos_hint: {'top': 1}
-#         size_hint_x: 1
-#         padding: 5
-
-#         Label:
-#             text: 'SCORE'
-#             text_size: (self.width, None)
-#             font_size: 50
-
-#         # Image:
-#         #   source: root.source
-#         #   size_hint: (None, None)
-
-#         GridLayout:
-#             cols: 1
-#             rows: 3
-#             pos_hint: {'bottom': 0.3}
-#             size_hint_x: 1
-#             padding: 5
-
-#             Label:
-#                 text: root.item.title
-#                 text_size: (self.width, None)
-#                 font_size: 24
-
-#             Label:
-#                 text: root.item.freefield
-#                 text_size: (self.width, None)
-#                 font_size: 24
-
-#             Label:
-#                 text: root.item.origin_ex
-#                 text_size: (self.width, None)
-#                 font_size: 24
-
-
-
-
-

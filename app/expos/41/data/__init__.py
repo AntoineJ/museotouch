@@ -176,7 +176,6 @@ class QuizzMere(FloatLayout):
 
         self.rebuild()
 
-
     def rebuild(self):
         if self.item['english'] == []:
             self.english = False
@@ -503,7 +502,7 @@ class QuizzItem(Scatter):
                 self.labelTitre.text = 'GOOD ANSWER !'
                 self.labelReponse.text = self.mere.item['english']['description']
             else:
-                self.labelTitre.text = 'BONNE RÉPONSE !'
+                self.labelTitre.text = u'BONNE RÉPONSE !'
                 self.labelReponse.text = self.mere.item['description']
 
             if len(self.mere.medias) > 0:
@@ -513,8 +512,8 @@ class QuizzItem(Scatter):
                 self.labelTitre.text = 'BAD ANSWER...'
                 self.labelReponse.text = self.mere.item['english']['description2']
             else:
-                self.labelTitre.text = 'MAUVAISE RÉPONSE...'
-                self.labelReponse.text = self.mere.item['description2']
+                self.labelTitre.text = u'MAUVAISE RÉPONSE...'
+                self.labelReponse.text = str(self.mere.item['description2'])
             if len(self.mere.medias) > 0:
                 self.photo.source = self.mere.medias[1]
 
