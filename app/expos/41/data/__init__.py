@@ -345,7 +345,13 @@ class QuizzMere(FloatLayout):
             self.numeroQuestion += 1
 
             if self.numeroQuestion >= len(self.app.db.items):
-                self.parent.remove_widget(self)
+                if self.Joueur1.score > 2:
+                    self.Joueur1.victoire = True
+                else:
+                    self.Joueur1.victoire = False
+
+                self.Joueur1.affichage_final()
+
             else:
                 self.item = self.app.db.items[self.ordreQuestion[self.numeroQuestion]]
                 self.rebuild()
@@ -361,7 +367,18 @@ class QuizzMere(FloatLayout):
             self.numeroQuestion += 1
 
             if self.numeroQuestion >= len(self.app.db.items):
-                self.parent.remove_widget(self)
+                if self.Joueur1.score > self.Joueur2.score:
+                    self.Joueur1.victoire = True
+                    self.Joueur2.victoire = False
+                elif self.Joueur1.score == self.Joueur2.score:
+                    self.Joueur1.victoire = True
+                    self.Joueur2.victoire = True
+                else:
+                    self.Joueur1.victoire = False
+                    self.Joueur2.victoire = True
+                
+                self.Joueur1.affichage_final()
+                self.Joueur2.affichage_final()
             else:
                 self.item = self.app.db.items[self.ordreQuestion[self.numeroQuestion]]
                 self.rebuild()
@@ -413,6 +430,9 @@ class QuizzItem(Scatter):
 
     # Score du joueur
     score = NumericProperty(0)
+
+    # Permet de savoir si on a gagné la partie
+    victoire = BooleanProperty(False)
 
     # image = StringProperty('')
     # question = StringProperty('')
@@ -534,6 +554,16 @@ class QuizzItem(Scatter):
 
 
 
+    def affichage_final(self):
+        if self.victoire:
+            self.labelTitre.text = 'BRAVO\nVOUS HONOREZ L\'EMPEREUR'
+            self.photo.source = 'widget/win-laurier.png'
+
+        else:
+            self.labelTitre.text = 'L\'EMPEREUR A TRANCHÉ...\nVOUS AVEZ PERDU'
+            self.photo.source = 'widget/win-laurier.png' 
+
+        self.btnContinuez.text = 'RECOMMENCER'   
 
 
 
