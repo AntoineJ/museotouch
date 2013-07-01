@@ -225,6 +225,22 @@ class QuizzMere(FloatLayout):
                 self.Joueur2.bonneReponse = False
                 self.Joueur2.correction = True
                 self.Joueur2.transform_ui()
+
+                if self.Joueur1.score > self.Joueur2.score:
+                    self.Joueur1.imageScoreWin.opacity = 1
+                    self.Joueur1.imageScoreLose.opacity = 0
+                    self.Joueur2.imageScoreWin.opacity = 0
+                    self.Joueur2.imageScoreLose.opacity = 1
+                elif self.Joueur1.score == self.Joueur2.score:
+                    self.Joueur1.imageScoreWin.opacity = 1
+                    self.Joueur1.imageScoreLose.opacity = 0
+                    self.Joueur2.imageScoreWin.opacity = 1
+                    self.Joueur2.imageScoreLose.opacity = 0
+                else:
+                    self.Joueur1.imageScoreWin.opacity = 0
+                    self.Joueur1.imageScoreLose.opacity = 1
+                    self.Joueur2.imageScoreWin.opacity = 1
+                    self.Joueur2.imageScoreLose.opacity = 0
         else: 
             self.Joueur2.bonneReponse = True
             self.Joueur2.correction = True
@@ -234,6 +250,22 @@ class QuizzMere(FloatLayout):
             self.Joueur1.bonneReponse = False
             self.Joueur1.correction = True
             self.Joueur1.transform_ui()
+
+            if self.Joueur1.score > self.Joueur2.score:
+                self.Joueur1.imageScoreWin.opacity = 1
+                self.Joueur1.imageScoreLose.opacity = 0
+                self.Joueur2.imageScoreWin.opacity = 0
+                self.Joueur2.imageScoreLose.opacity = 1
+            elif self.Joueur1.score == self.Joueur2.score:
+                self.Joueur1.imageScoreWin.opacity = 1
+                self.Joueur1.imageScoreLose.opacity = 0
+                self.Joueur2.imageScoreWin.opacity = 1
+                self.Joueur2.imageScoreLose.opacity = 0
+            else:
+                self.Joueur1.imageScoreWin.opacity = 0
+                self.Joueur1.imageScoreLose.opacity = 1
+                self.Joueur2.imageScoreWin.opacity = 1
+                self.Joueur2.imageScoreLose.opacity = 0
 
 
 
@@ -260,6 +292,23 @@ class QuizzMere(FloatLayout):
                 self.Joueur2.bonneReponse = False
                 self.Joueur2.correction = True
                 self.Joueur2.transform_ui()
+
+                if self.Joueur1.score > self.Joueur2.score:
+                    self.Joueur1.imageScoreWin.opacity = 1
+                    self.Joueur1.imageScoreLose.opacity = 0
+                    self.Joueur2.imageScoreWin.opacity = 0
+                    self.Joueur2.imageScoreLose.opacity = 1
+                elif self.Joueur1.score == self.Joueur2.score:
+                    self.Joueur1.imageScoreWin.opacity = 1
+                    self.Joueur1.imageScoreLose.opacity = 0
+                    self.Joueur2.imageScoreWin.opacity = 1
+                    self.Joueur2.imageScoreLose.opacity = 0
+                else:
+                    self.Joueur1.imageScoreWin.opacity = 0
+                    self.Joueur1.imageScoreLose.opacity = 1
+                    self.Joueur2.imageScoreWin.opacity = 1
+                    self.Joueur2.imageScoreLose.opacity = 0
+
         else: 
             self.Joueur2.bonneReponse = False
             self.Joueur2.correction = True
@@ -269,6 +318,22 @@ class QuizzMere(FloatLayout):
             self.Joueur1.bonneReponse = False
             self.Joueur1.correction = True
             self.Joueur1.transform_ui()
+
+            if self.Joueur1.score > self.Joueur2.score:
+                self.Joueur1.imageScoreWin.opacity = 1
+                self.Joueur1.imageScoreLose.opacity = 0
+                self.Joueur2.imageScoreWin.opacity = 0
+                self.Joueur2.imageScoreLose.opacity = 1
+            elif self.Joueur1.score == self.Joueur2.score:
+                self.Joueur1.imageScoreWin.opacity = 1
+                self.Joueur1.imageScoreLose.opacity = 0
+                self.Joueur2.imageScoreWin.opacity = 1
+                self.Joueur2.imageScoreLose.opacity = 0
+            else:
+                self.Joueur1.imageScoreWin.opacity = 0
+                self.Joueur1.imageScoreLose.opacity = 1
+                self.Joueur2.imageScoreWin.opacity = 1
+                self.Joueur2.imageScoreLose.opacity = 0
 
 
 
@@ -315,7 +380,6 @@ class QuizzMere(FloatLayout):
             else:
                 fils.btnContinuez.text = 'WAITING FOR PLAYER TWO'
             self.sync_continuer = True
-
 
 
 
@@ -473,6 +537,8 @@ class QuizzItem(Scatter):
 
 
 
+
+
     def rebuild(self):
 
         Animation.stop_all(self)
@@ -536,6 +602,12 @@ class QuizzItem(Scatter):
 
         self.labelTitre.y = 90
 
+        # if self.mere.other_score(self) > self.score:
+        #     self.imageScoreWin.opacity = 0
+        #     self.imageScoreLose.opacity = 1
+        # else:
+        #     self.imageScoreWin.opacity = 1
+        #     self.imageScoreLose.opacity = 0
 
 
 
