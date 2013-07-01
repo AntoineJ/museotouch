@@ -100,14 +100,14 @@
             width: 1.5
             close: True
             cap: 'square'
-        # Rectangle:
-        #     pos: -60,354-100
-        #     size: 60,100
+        Rectangle:
+            pos: 0,0
+            size: self.size
         Color:
             rgb: 117/255.,113/255.,81/255.
         Line:
             width: 1 
-            points: (10,85,220,85) if not root.correction else (10,375,220,375)
+            points: (10,85,220,85) if not root.correction else (10,self.height - 45,220,self.height - 45)
 
     Image:
         source: 'widgets/score-win.png'
@@ -148,11 +148,13 @@
 
     Image:
         id: photo
+        keep_ratio: False
+        allow_stretch: True
         pos_hint: (None, None)
+        size_hint: (None, None)
         pos: 0, 124
         size: 230,230
         source: ''
-        size_hint: (None, None)
 
     Label:
         id: labelTitre
@@ -164,7 +166,7 @@
         text_size: (210, 32)
         # shorten: True
         size: (210, 32)
-        font_size: 10
+        font_size: 12
         halign: 'left'
         valign: 'middle'
         font_name: futuraBold
@@ -234,11 +236,25 @@
         size_hint: (None, None)
         pos_hint: (None, None)
         color: 117/255.,113/255.,81/255.,1
-        pos: 10, 45
+        pos: 10, 55
         text: ''
         text_size: (210, None)
-        size: (210, 80)
+        size: (210, self.texture_size[1])
         font_size: 10
         halign: 'justify'
-        valign: 'middle'
+        valign: 'bottom'
         font_name: arial
+
+    # Label:
+    #     id: labelReponse
+    #     size_hint: (None, None)
+    #     pos_hint: (None, None)
+    #     color: 117/255.,113/255.,81/255.,1
+    #     pos: 10, 45
+    #     text: ''
+    #     text_size: (210, None)
+    #     size: (210, 80)
+    #     font_size: 10
+    #     halign: 'justify'
+    #     valign: 'middle'
+    #     font_name: arial

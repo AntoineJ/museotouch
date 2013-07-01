@@ -275,7 +275,6 @@ class QuizzMere(FloatLayout):
         if not self.correction:
             return
 
-
         if not self.deuxJoueurs:
             self.numeroQuestion += 1
 
@@ -427,12 +426,6 @@ class QuizzItem(Scatter):
     # Affiche la bonne reponse
     def transform_ui(self):
 
-        anim = Animation(size=(230,400), d=0.2)
-        anim.start(self)
-
-        anim1 = Animation(y=370, d=0.2)
-        anim1.start(self.labelTitre)
-        # self.labelTitre.pos = (10,370)
         if self.bonneReponse:
             if self.mere.english:
                 self.labelTitre.text = 'GOOD ANSWER !'
@@ -453,19 +446,28 @@ class QuizzItem(Scatter):
             if len(self.mere.medias) > 0:
                 self.photo.source = self.mere.medias[1]
 
-        anim2 = Animation(y=340, d=.2)
+        #TODO: dessiner la ligne en haut
+        self.labelReponse.texture_update() # nécessaire pour actualiser la variable texture_size du label
+        self.labelTitre.texture_update() # nécessaire pour actualiser la variable texture_size du label
+
+        global_height = self.labelReponse.y + self.labelReponse.height + 10 + 210 + self.labelTitre.height + 60
+
+        anim = Animation(size=(230, global_height), d=0.2)
+        anim.start(self)
+
+        anim2 = Animation(y=global_height - 85, d=.2)
         anim2.start(self.btnBonneReponse)
 
-        #TODO: dessiner la ligne en haut
+        anim1 = Animation(y= global_height - 40, d=0.2)
+        anim1.start(self.labelTitre)
 
-        anim3 = Animation(size= (210,210), y=120, x=10, d=.2)
+        anim3 = Animation(size= (210,210), y=self.labelReponse.y + self.labelReponse.height + 10, x=10, d=.2)
         anim3.start(self.photo)
 
         self.btnContinuez.opacity = 1
         self.btnContinuez.y = 10
         self.btnContinuez.disabled = False
 
-        # self.btnBonneReponse.opacity = 0
         self.btnMauvaiseReponse.opacity = 0
 
 
