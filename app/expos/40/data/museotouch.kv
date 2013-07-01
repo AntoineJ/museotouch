@@ -190,7 +190,7 @@
 	scale: .5
 	container: container
 	scale_min: .3
-	scale_max: 10
+	scale_max: 2
 	auto_bring_to_front: True
 	# do_scale: False
 	
@@ -248,7 +248,7 @@
 		Image:
 			id:img_carre
 			source: root.source
-			size:self.texture_size[0], self.texture_size[1]
+			size: self.texture_size[0]/2, self.texture_size[1]/2
 			color: 1,1,1,1
 			pos: (0, root.text_content_label.texture_size[1]/2 ) if root.text != '' else (0,0)
 
