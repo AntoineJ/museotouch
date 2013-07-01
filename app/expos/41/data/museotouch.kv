@@ -74,6 +74,8 @@
     btnContinuez: btnContinuez
     photo: photo
     labelScore: labelScore
+    imageScoreWin: imageScoreWin
+    imageScoreLose: imageScoreLose
     # ligne: ligne
     size_hint: (None, None)
     size: 230, 354
@@ -110,15 +112,18 @@
             points: (10,85,220,85) if not root.correction else (10,self.height - 45,220,self.height - 45)
 
     Image:
+        id: imageScoreWin
         source: 'widgets/score-win.png'
         size: 62,62
         pos: -64, root.height-60
-        opacity: 0
+        opacity: 1
     
     Image:
+        id: imageScoreLose
         source: 'widgets/score-lose.png'
         size: 62,62
         pos: -64, root.height-60
+        opacity: 0
 
     Label:
         id: labelScore
@@ -201,7 +206,27 @@
         font_name: futuraBold
 
     QuizzButton:
+        canvas.before:
+            Color: 
+                rgba: (224/255., 224/255., 224/255., 1) if self.state == 'down' else (0.5, 0.5, 0.5, 1)
+            Line:
+                width: 8
+                circle: 26, 26, 8
+            Line:
+                width: 8
+                circle: 204, 26, 8
+            Rectangle: 
+                pos: 26,10
+                size: 210-32, 32
+
+
+
+
         id: btnContinuez
+        # background_normal: 'widgets/btn-restart.png'
+        # background_down: 'widgets/btn-restart.png'
+        background_color: 1,1,1,0
+        font_color: 0,0,0,1
         size_hint: (None, None)
         pos: 10,100
         text: 'CONTINUEZ'
