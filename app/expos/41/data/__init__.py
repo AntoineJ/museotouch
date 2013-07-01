@@ -24,6 +24,8 @@ from kivy.core.window import Window
 class QuizzSelector(Scatter):
 
     english = BooleanProperty(False)
+
+    app = ObjectProperty()
     
     def on_press(self, but, stro):
         if stro == 'but1':
@@ -34,8 +36,11 @@ class QuizzSelector(Scatter):
     def on_release(self, but, stro):
         if stro == 'but1':
             self.img_active_1.opacity = 0
+            question = QuizzMere(app=self.app, deuxJoueurs=False, english = self.english)
+            self.parent.add_widget(question)
         elif stro == 'but2':
-            print but.english
+            question = QuizzMere(app=self.app, deuxJoueurs=True, english = self.english)
+            self.parent.add_widget(question)
             self.img_active_2.opacity = 0
 
 
@@ -48,71 +53,74 @@ class QuizzButton(Button):
             return ret
         return
         
+# class QuizzMere(FloatLayout):
+    
+#     app = ObjectProperty()
+
+#     # Defini si on a un ou deux joueurs
+#     deuxJoueurs = BooleanProperty(False)
+#     english = BooleanProperty(False)
+
+#     Joueur1 = ObjectProperty()
+#     Joueur2 = ObjectProperty()
+
+#     # Item associé à la question
+#     item = ObjectProperty()
+
+#     # Liste d'id de question
+#     ordreQuestion = ListProperty([])
+
+#     # numero de la question en cours
+#     numeroQuestion = NumericProperty(0)
+
+#     # Images de bonne et mauvaise réponse
+#     medias = ListProperty(None)
+
+#     def __init__(self, **kwargs):
+#         super(QuizzMere, self).__init__(**kwargs)
+
+#         # Definition de l'ordre des question
+#         self.ordreQuestion = sample(range(len(self.app.db.items)), min(5,len(self.app.db.items)))
+
+#         self.item = self.app.db.items[self.ordreQuestion[self.numeroQuestion]]
+
+#         Joueur1 = QuizzItem(app=self.app, mere=self)
+#         self.add_widget(Joueur1)
+
+#         if self.deuxJoueurs:
+#             Joueur2 = QuizzItem(app=self.app, mere=self)
+#             self.add_widget(Joueur2)
+
+
+#         self.rebuild()
+
+
+#     def rebuild(self):
+#         self.medias = []
+
+#         # Ajout des images de bonne/mauvaise reponse
+#         for filedata in self.item.data:
+#             if self.item.data.index(filedata) == 0:
+#                 continue
+#             else:
+#                 fileurl = filedata['fichier']
+#                 filename = basename(fileurl)
+#                 filepath = join(self.app.expo_dir, 'otherfiles', filename)
+#                 if isfile(filepath) and getsize(filepath) > 0:
+#                     self.medias.append(filepath)
+    
+#     def do_bonne_reponse(self, fils):
+#         pass
+
+
+
 class QuizzMere(FloatLayout):
     
     app = ObjectProperty()
 
-    # Defini si on a un ou deux joueurs
-    deuxJoueurs = BooleanProperty(False)
+    # Indique si le quizz est en anglais
     english = BooleanProperty(False)
 
-    Joueur1 = ObjectProperty()
-    Joueur2 = ObjectProperty()
-
-    # Item associé à la question
-    item = ObjectProperty()
-
-    # Liste d'id de question
-    ordreQuestion = ListProperty([])
-
-    # numero de la question en cours
-    numeroQuestion = NumericProperty(0)
-
-    # Images de bonne et mauvaise réponse
-    medias = ListProperty(None)
-
-    def __init__(self, **kwargs):
-        super(QuizzMere, self).__init__(**kwargs)
-
-        # Definition de l'ordre des question
-        self.ordreQuestion = sample(range(len(self.app.db.items)), min(5,len(self.app.db.items)))
-
-        self.item = self.app.db.items[self.ordreQuestion[self.numeroQuestion]]
-
-        Joueur1 = QuizzItem(app=self.app, mere=self)
-        self.add_widget(Joueur1)
-
-        if self.deuxJoueurs:
-            Joueur2 = QuizzItem(app=self.app, mere=self)
-            self.add_widget(Joueur2)
-
-
-        self.rebuild()
-
-
-    def rebuild(self):
-        self.medias = []
-
-        # Ajout des images de bonne/mauvaise reponse
-        for filedata in self.item.data:
-            if self.item.data.index(filedata) == 0:
-                continue
-            else:
-                fileurl = filedata['fichier']
-                filename = basename(fileurl)
-                filepath = join(self.app.expo_dir, 'otherfiles', filename)
-                if isfile(filepath) and getsize(filepath) > 0:
-                    self.medias.append(filepath)
-    
-    def do_bonne_reponse(self, fils):
-        pass
-
-
-
-class QuizzMere(FloatLayout):
-    
-    app = ObjectProperty()
-
     # Defini si on a un ou deux joueurs
     deuxJoueurs = BooleanProperty(False)
 
@@ -120,6 +128,7 @@ class QuizzMere(FloatLayout):
     Joueur1 = ObjectProperty()
     Joueur2 = ObjectProperty()
 
+    # Coordonnées pour tracer la ligne blanche
     J1x = NumericProperty(0)
     J1y = NumericProperty(0)
     J2x = NumericProperty(0) 
@@ -151,21 +160,27 @@ class QuizzMere(FloatLayout):
 
         self.item = self.app.db.items[self.ordreQuestion[self.numeroQuestion]]
 
+        if self.item['english'] == []:
+            self.english = False
+
         self.Joueur1 = QuizzItem(app=self.app, mere=self)
         self.J1x = self.Joueur1.center_x
-        self.J1y = self.Joueur1.center_y
+        self.J1y = self.Joueur1.y + 200
         self.add_widget(self.Joueur1)
 
         if self.deuxJoueurs:
             self.Joueur2 = QuizzItem(app=self.app, mere=self)
             self.add_widget(self.Joueur2)
             self.J2x = self.Joueur2.center_x
-            self.J2y = self.Joueur2.center_y
+            self.J2y = self.Joueur2.y + 200
 
         self.rebuild()
 
 
     def rebuild(self):
+        if self.item['english'] == []:
+            self.english = False
+
         self.medias = []
         self.correction = False
         self.sync_continuer = False
@@ -181,13 +196,13 @@ class QuizzMere(FloatLayout):
                 if isfile(filepath) and getsize(filepath) > 0:
                     self.medias.append(filepath)
 
-    def update_pos(self, fils, center_x, center_y):
+    def update_pos(self, fils, center_x, y):
         if fils == self.Joueur1:
             self.J1x = center_x
-            self.J1y = center_y
+            self.J1y = y + 200
         else:
             self.J2x = center_x
-            self.J2y = center_y
+            self.J2y = y + 200
 
     def bonne_reponse(self, fils):
         if self.correction:
@@ -261,7 +276,6 @@ class QuizzMere(FloatLayout):
         if not self.correction:
             return
 
-        print self.parent, fils
 
         if not self.deuxJoueurs:
             self.numeroQuestion += 1
@@ -274,7 +288,12 @@ class QuizzMere(FloatLayout):
                 self.Joueur1.rebuild()
         elif self.sync_continuer:
             # fils.btnContinuez.unbind(on_release = fils.do_continue)
-            fils.btnContinuez.text = 'EN ATTENTE DU DEUXIEME JOUEUR'
+            if not self.english:
+                fils.btnContinuez.text = 'EN ATTENTE DU DEUXIEME JOUEUR'
+            else:
+                fils.btnContinuez.text = 'WAITING FOR PLAYER TWO'
+
+
             self.numeroQuestion += 1
 
             if self.numeroQuestion >= len(self.app.db.items):
@@ -291,7 +310,10 @@ class QuizzMere(FloatLayout):
         else:
             # fils.btnContinuez.unbind(on_release = fils.do_continue)
             fils.btnContinuez.disabled = True
-            fils.btnContinuez.text = 'EN ATTENTE DU DEUXIEME JOUEUR'
+            if not self.english:
+                fils.btnContinuez.text = 'EN ATTENTE DU DEUXIEME JOUEUR'
+            else:
+                fils.btnContinuez.text = 'WAITING FOR PLAYER TWO'
             self.sync_continuer = True
 
 
@@ -362,7 +384,7 @@ class QuizzItem(Scatter):
     def on_touch_move(self, touch):
         ret = super(QuizzItem, self).on_touch_move(touch)
 
-        self.mere.update_pos(self, self.center_x, self.center_y)
+        self.mere.update_pos(self, self.center_x, self.y)
 
         return ret
 
@@ -392,7 +414,6 @@ class QuizzItem(Scatter):
     def do_continue(self, kwargs):
         if not self.correction:
             return
-        print 'pouet'
         self.mere.continuer(self)
 
         # self.mere.numeroQuestion += 1
@@ -414,13 +435,22 @@ class QuizzItem(Scatter):
         anim1.start(self.labelTitre)
         # self.labelTitre.pos = (10,370)
         if self.bonneReponse:
-            self.labelTitre.text = 'BONNE RÉPONSE !'
-            self.labelReponse.text = self.mere.item['description']
+            if self.mere.english:
+                self.labelTitre.text = 'GOOD ANSWER !'
+                self.labelReponse.text = self.mere.item['english']['description']
+            else:
+                self.labelTitre.text = 'BONNE RÉPONSE !'
+                self.labelReponse.text = self.mere.item['description']
+
             if len(self.mere.medias) > 0:
                 self.photo.source = self.mere.medias[0]
         else:
-            self.labelTitre.text = 'MAUVAISE REPONSE...'
-            self.labelReponse.text = self.mere.item['description2']
+            if self.mere.english:
+                self.labelTitre.text = 'BAD ANSWER...'
+                self.labelReponse.text = self.mere.item['english']['description2']
+            else:
+                self.labelTitre.text = 'MAUVAISE RÉPONSE...'
+                self.labelReponse.text = self.mere.item['description2']
             if len(self.mere.medias) > 0:
                 self.photo.source = self.mere.medias[1]
 
@@ -445,6 +475,11 @@ class QuizzItem(Scatter):
 
     def rebuild(self):
 
+        Animation.stop_all(self)
+        Animation.stop_all(self.photo)
+        Animation.stop_all(self.btnBonneReponse)
+        Animation.stop_all(self.labelTitre)
+
         # self.medias = []
 
         # # Ajout des images de bonne/mauvaise reponse
@@ -457,10 +492,15 @@ class QuizzItem(Scatter):
         #         filepath = join(self.app.expo_dir, 'otherfiles', filename)
         #         if isfile(filepath) and getsize(filepath) > 0:
         #             self.medias.append(filepath)
-
-        self.labelTitre.text = self.mere.item['nom'].upper()
-        self.btnMauvaiseReponse.text = self.mere.item['freefield'].upper()
-        self.btnBonneReponse.text = self.mere.item['orig_geo_prec'].upper()
+        if self.mere.english:
+            self.labelTitre.text = self.mere.item['english']['nom'].upper()
+            self.btnMauvaiseReponse.text = self.mere.item['english']['freefield'].upper()
+            self.btnBonneReponse.text = self.mere.item['english']['orig_geo_prec'].upper()
+        else:
+            self.labelTitre.text = self.mere.item['nom'].upper()
+            self.btnMauvaiseReponse.text = self.mere.item['freefield'].upper()
+            self.btnBonneReponse.text = self.mere.item['orig_geo_prec'].upper()
+        
         self.photo.source= self.mere.item.filename
         self.labelReponse.text = ''
         # self.labelMauvaiseReponse.opacity = 0
@@ -479,7 +519,10 @@ class QuizzItem(Scatter):
 
 
         # self.btnContinuez.bind(on_release = self.do_continue)
-        self.btnContinuez.text = 'CONTINUEZ'
+        if self.mere.english:
+            self.btnContinuez.text = 'CONTINUE'
+        else:
+            self.btnContinuez.text = 'CONTINUEZ'
         self.btnContinuez.disabled = True
 
 
@@ -508,14 +551,14 @@ def build(app):
     bgmap = Image(source = 'widgets/background.jpg', size=(1920,1080))
     root.add_widget(bgmap)
 
-    question = QuizzMere(app=app, deuxJoueurs=True)
+    # question = QuizzMere(app=app, deuxJoueurs=True)
 
     # question = QuizzItem(app=app)
 
 
     # question = QuizzItem(app=app)
 
-    root.add_widget(question)
+    # root.add_widget(question)
 
     #### BUTTONS TO SWITCH TO EXPO
 
@@ -527,6 +570,8 @@ def build(app):
     
     def change_expo(but):
         app.change_expo(str(40))
+
+
 
     scat = Scatter( size=(85,85), 
                     do_scale=False, 
@@ -569,11 +614,11 @@ def build(app):
 
     ###### BUTTONS TO SELECT A QUIZZ
 
-    quizzSelector1 = QuizzSelector(english=False, pos=(Window.width - 180, 0))
+    quizzSelector1 = QuizzSelector(english=False, pos=(Window.width - 180, 0), app = app)
     root.add_widget(quizzSelector1)
 
 
-    quizzSelector2 = QuizzSelector(english=True, rotation= 180, pos=(0, Window.height -180))
+    quizzSelector2 = QuizzSelector(english=True, rotation= 180, pos=(0, Window.height -180), app= app)
     root.add_widget(quizzSelector2)
     quizzSelector2.pos = pos=(0, Window.height -180)
     root.hide_items = True
