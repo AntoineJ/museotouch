@@ -20,6 +20,8 @@ from kivy.utils import platform
 from random import choice, randint, sample, shuffle
 from kivy.animation import Animation
 from kivy.core.window import Window
+from kivy.graphics import Line, Color
+from kivy.uix.label import Label
 
 class QuizzSelector(Scatter):
 
@@ -36,11 +38,16 @@ class QuizzSelector(Scatter):
     def on_release(self, but, stro):
         if stro == 'but1':
             self.img_active_1.opacity = 0
-            question = QuizzMere(app=self.app, deuxJoueurs=False, english = self.english)
-            self.parent.add_widget(question)
+            if self.app.limite < 4:
+                self.app.limite += 1
+                question = QuizzMere(app=self.app, deuxJoueurs=False, english = self.english)
+                self.parent.add_widget(question)
+
         elif stro == 'but2':
-            question = QuizzMere(app=self.app, deuxJoueurs=True, english = self.english)
-            self.parent.add_widget(question)
+            if self.app.limite < 4:
+                self.app.limite += 1
+                question = QuizzMere(app=self.app, deuxJoueurs=True, english = self.english)
+                self.parent.add_widget(question)
             self.img_active_2.opacity = 0
 
 
@@ -53,64 +60,6 @@ class QuizzButton(Button):
             return ret
         return
         
-# class QuizzMere(FloatLayout):
-    
-#     app = ObjectProperty()
-
-#     # Defini si on a un ou deux joueurs
-#     deuxJoueurs = BooleanProperty(False)
-#     english = BooleanProperty(False)
-
-#     Joueur1 = ObjectProperty()
-#     Joueur2 = ObjectProperty()
-
-#     # Item associé à la question
-#     item = ObjectProperty()
-
-#     # Liste d'id de question
-#     ordreQuestion = ListProperty([])
-
-#     # numero de la question en cours
-#     numeroQuestion = NumericProperty(0)
-
-#     # Images de bonne et mauvaise réponse
-#     medias = ListProperty(None)
-
-#     def __init__(self, **kwargs):
-#         super(QuizzMere, self).__init__(**kwargs)
-
-#         # Definition de l'ordre des question
-#         self.ordreQuestion = sample(range(len(self.app.db.items)), min(5,len(self.app.db.items)))
-
-#         self.item = self.app.db.items[self.ordreQuestion[self.numeroQuestion]]
-
-#         Joueur1 = QuizzItem(app=self.app, mere=self)
-#         self.add_widget(Joueur1)
-
-#         if self.deuxJoueurs:
-#             Joueur2 = QuizzItem(app=self.app, mere=self)
-#             self.add_widget(Joueur2)
-
-
-#         self.rebuild()
-
-
-#     def rebuild(self):
-#         self.medias = []
-
-#         # Ajout des images de bonne/mauvaise reponse
-#         for filedata in self.item.data:
-#             if self.item.data.index(filedata) == 0:
-#                 continue
-#             else:
-#                 fileurl = filedata['fichier']
-#                 filename = basename(fileurl)
-#                 filepath = join(self.app.expo_dir, 'otherfiles', filename)
-#                 if isfile(filepath) and getsize(filepath) > 0:
-#                     self.medias.append(filepath)
-    
-#     def do_bonne_reponse(self, fils):
-#         pass
 
 
 
@@ -124,9 +73,17 @@ class QuizzMere(FloatLayout):
     # Defini si on a un ou deux joueurs
     deuxJoueurs = BooleanProperty(False)
 
+    # indique que le widget est entrain de se fermer
+    closing = BooleanProperty(False)
+
 
     Joueur1 = ObjectProperty()
     Joueur2 = ObjectProperty()
+
+    P1 = ObjectProperty((-100,-100))
+    P2 = ObjectProperty((-100,-100))
+    R1 = NumericProperty(0)
+    R2 = NumericProperty(0)
 
     # Coordonnées pour tracer la ligne blanche
     J1x = NumericProperty(0)
@@ -163,13 +120,22 @@ class QuizzMere(FloatLayout):
         if self.item['english'] == []:
             self.english = False
 
+
         self.Joueur1 = QuizzItem(app=self.app, mere=self)
+        if self.P1 != (-100,-100):
+            self.Joueur1.rotation = self.R1
+            self.Joueur1.pos = self.P1
+            
         self.J1x = self.Joueur1.center_x
         self.J1y = self.Joueur1.y + 200
         self.add_widget(self.Joueur1)
 
         if self.deuxJoueurs:
             self.Joueur2 = QuizzItem(app=self.app, mere=self)
+            if self.P2 != (-100,-100):
+                self.Joueur2.rotation = self.R2
+                self.Joueur2.pos = self.P2
+                
             self.add_widget(self.Joueur2)
             self.J2x = self.Joueur2.center_x
             self.J2y = self.Joueur2.y + 200
@@ -396,6 +362,35 @@ class QuizzMere(FloatLayout):
                 fils.btnContinuez.text = 'WAITING FOR PLAYER TWO'
             self.sync_continuer = True
 
+    def other_score(self, fils):
+        if fils ==  self.Joueur1:
+            return self.Joueur2.score
+        else:
+            return self.Joueur1.score
+
+    def close(self, kwarg):
+        if not self.closing:
+            self.closing = True
+            self.Joueur1.btnClose.unbind(on_release = self.close)
+            if self.deuxJoueurs:
+                self.Joueur2.btnClose.unbind(on_release = self.close)
+
+            self.app.limite -= 1
+
+            self.parent.remove_widget(self)
+
+    def restart(self, kwarg):
+        if not self.closing:
+            self.closing = True
+
+            if self.deuxJoueurs:
+                question = QuizzMere(app=self.app, deuxJoueurs=True, english = self.english, P1=self.Joueur1.pos, R1= self.Joueur1.rotation, P2=self.Joueur2.pos, R2= self.Joueur2.rotation)
+            else:
+                question = QuizzMere(app=self.app, deuxJoueurs=False, english = self.english, P1=self.Joueur1.pos, R1= self.Joueur1.rotation)
+            self.parent.add_widget(question)
+
+            self.parent.remove_widget(self)
+
 
 
 
@@ -454,7 +449,12 @@ class QuizzItem(Scatter):
         else:
             self.btnMauvaiseReponse.y = 47
 
-        self.center = (randint(200,1720), randint(200,880))
+        if self.pos == (-100,-100):
+            self.center = (randint(200,1720), randint(200,880))
+            self.rotation = randint(0,360)
+
+
+
 
         self.rebuild()
 
@@ -556,16 +556,75 @@ class QuizzItem(Scatter):
 
 
 
+
+
     def affichage_final(self):
         if self.victoire:
-            self.labelTitre.text = 'BRAVO\nVOUS HONOREZ L\'EMPEREUR'
-            self.photo.source = 'widget/win-laurier.png'
+            self.labelTitre.text = u'BRAVO\nVOUS HONOREZ L\'EMPEREUR'
+            self.photo.source = 'widgets/win-laurier.png'
+
+            if self.mere.deuxJoueurs:
+                score_win = Label(text=str(self.score), text_size=(35,20), size=(35,20), font_size=20, pos=(70,50), color=(0,0,0,1), halign='center')
+                score_lose = Label(text=str(self.mere.other_score(self)), text_size=(35,20), size=(35,20), font_size=20, pos=(125,50), color=(0,0,0,1), halign='center')
+                self.add_widget(score_win)
+                self.add_widget(score_lose)
 
         else:
-            self.labelTitre.text = 'L\'EMPEREUR A TRANCHÉ...\nVOUS AVEZ PERDU'
-            self.photo.source = 'widget/win-laurier.png' 
+            self.labelTitre.text = u'L\'EMPEREUR A TRANCHÉ...\nVOUS AVEZ PERDU'
+            self.photo.source = 'widgets/lose-casque.png' 
 
-        self.btnContinuez.text = 'RECOMMENCER'   
+            if self.mere.deuxJoueurs:
+                score_win = Label(text=str(self.mere.other_score(self)), text_size=(35,20), size=(35,20), font_size=20, pos=(70,50), color=(0,0,0,1), halign='center')
+                score_lose = Label(text=str(self.score), text_size=(35,20), size=(35,20), font_size=20, pos=(125,50), color=(0,0,0,1), halign='center')
+                self.add_widget(score_win)
+                self.add_widget(score_lose)
+
+
+        self.btnContinuez.text = 'RECOMMENCER' 
+
+        self.btnContinuez.disabled = False
+
+        self.btnContinuez.unbind(on_release = self.do_continue)
+        self.btnContinuez.bind(on_release = self.mere.restart)
+
+        if self.mere.deuxJoueurs:
+
+            img_win = Image(size=(20, 20), pos = (50,50), source='widgets/score-illust-laurrier.png')
+            img_lose = Image(size=(20, 20), pos = (160,50), source='widgets/score-illust-pouce.png')
+            ligne = Image(size=(20,20), pos=(105,50), source='widgets/hr-vertical.png')
+
+
+            self.add_widget(img_win)
+            self.add_widget(img_lose)
+            self.add_widget(ligne)
+
+
+
+        self.photo.y = 150
+
+        self.btnClose.opacity = 1
+        self.btnClose.disabled = False
+        self.btnClose.bind (on_release = self.mere.close)
+
+        self.labelReponse.text = ''
+        self.btnBonneReponse.opacity = 0
+        self.btnBonneReponse.disabled = True
+        self.btnMauvaiseReponse.opacity = 0
+        self.btnMauvaiseReponse.disabled = True
+
+        global_height = 10 + 210 + self.labelTitre.height + 60
+
+        anim = Animation(size=(230, global_height), d=0.2)
+        anim.start(self)
+
+
+        anim1 = Animation(y= global_height - 40, d=0.2)
+        anim1.start(self.labelTitre)
+
+        anim3 = Animation(size= (210,210), y=80, d=.2)
+        anim3.start(self.photo)
+
+
 
 
 
@@ -650,6 +709,8 @@ def build(app):
     # -------------------------------------------------------------------------
     # Our root widget
     root = FloatLayout()
+
+    app.limite = 0
 
     bgmap = Image(source = 'widgets/background.jpg', size=(1920,1080))
     root.add_widget(bgmap)
