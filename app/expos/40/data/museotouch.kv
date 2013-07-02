@@ -83,10 +83,11 @@
 			opacity: 1 if root.content == True else 0
 			x: 548
 			center_y: root.text_name.center_y
+			color: (1,1,1,1) if root.text_name.state == 'normal' else root.color
 
 		Label:
 			id: text_sub
-            text: root.item['calannee'].upper() + ' [font='+futura+']' + root.item['datation'].upper() + '[/font]' if  root.content == True else ''
+            text: root.item['calannee'].upper() + ' [font='+futura+']' + root.item['datation'].upper() + '[/font], ' + root.item['sub1'].upper() if  root.content == True else ''
 			markup: True
 			font_name: futuraBold
 			font_size: 20
@@ -103,7 +104,8 @@
 					rgba: root.color
 				Rectangle:
 					pos:self.x -10, self.y
-					size: 58*5 + 5*4, self.texture_size[1] 
+					size: (self.texture_size[0], self.texture_size[1]) if self.texture_size[0] > (58*5 + 5*4) else (58*5 + 5*4, self.texture_size[1])
+					# size: 58*5 + 5*4, self.texture_size[1] 
 
 		Scatter:
 			id: scatContent
@@ -156,10 +158,11 @@
 				opacity: 1 if root.content2 == True else 0
 				x: 290
 				center_y: root.text_name2.center_y
+				color: (1,1,1,1) if root.text_name2.state == 'normal' else root.color
 
 			Label:
 				id: text_sub2
-	            text: root.item2['calannee'].upper() + ' [font='+futura+']' + root.item2['datation'].upper() + '[/font]' if  root.content2 == True else ''
+	            text: root.item2['calannee'].upper() + ' [font='+futura+']' + root.item2['datation'].upper() + '[/font], ' + root.item2['sub1'].upper() if  root.content2 == True else ''
 				markup: True
 				font_name: futuraBold
 				font_size: 20
@@ -176,7 +179,8 @@
 						rgba: root.color
 					Rectangle:
 						pos:self.x -10, self.y
-						size: 58*5 + 5*4, self.texture_size[1] 
+						size: (self.texture_size[0], self.texture_size[1]) if self.texture_size[0] > (58*5 + 5*4) else (58*5 + 5*4, self.texture_size[1])
+						# size: 58*5 + 5*4, self.texture_size[1] 
 
 <ImageItem>:
 	text_content_label: text_content_label

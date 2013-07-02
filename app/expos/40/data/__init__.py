@@ -72,15 +72,28 @@ ImageItem.on_close = my_on_close
 class GlassButton(Button):
     color = ObjectProperty((1,1,1,1))
     item = ObjectProperty(None)
+    source = StringProperty(None)
+    img = ObjectProperty(None)
 
     def __init__(self, **kwargs):
         super(GlassButton, self).__init__(**kwargs)
+        if self.source != None:
+            self.img = img = Image(
+                source=self.source,
+                pos=self.pos,
+                size_hint=(None, None),
+                allow_stretch=True,
+                keep_ratio=False,
+                size=self.size)
+            self.add_widget(img)
 
     def on_state(self, button, state ):
         if state == 'down':
-            self.background_color = self.color
+            # self.background_color = self.color
+            self.img.color = self.color
         else:
-            self.background_color = (1,1,1,1)
+            self.img.color = (1,1,1,1)
+            # self.background_color = (1,1,1,1)
 
 class Glass(Scatter):
     background_img = StringProperty('')
@@ -126,7 +139,6 @@ class Glass(Scatter):
                 it = {}
                 it["item"] = item
                 its.append(it)
-
         if len(its) > 0:
             self.item = its[0]["item"]
             self.content = True
@@ -146,8 +158,10 @@ class Glass(Scatter):
 
     def create_glass_button(self, parent, fn, pos, item):
         but = GlassButton(
-            background_normal=fn, 
-            background_down=fn, 
+            # background_normal=fn, 
+            # background_down=fn, 
+            source= fn,
+            background_color=(1,1,1,0),
             color= self.color,
             size= (58,58),
             pos= pos,
@@ -168,7 +182,7 @@ class Glass(Scatter):
                         margin=0
                     else: 
                         margin = 5
-                    self.create_glass_button(fn=child.filename, parent=self, pos=(255 + margin + 58*i , 60), item=child)
+                    self.create_glass_button(fn=child.filename, parent=self, pos=(255 + margin + 58*i , 58), item=child)
                     i += 1
         if self.content2 == True:
             children_ids = self.item2.children
@@ -180,7 +194,7 @@ class Glass(Scatter):
                         margin=0
                     else: 
                         margin = 5
-                    self.create_glass_button(fn=child.filename, parent=self.scatContent, pos=(0 + margin + 58*i , 0), item=child)
+                    self.create_glass_button(fn=child.filename, parent=self.scatContent, pos=(0 + margin + 58*i , -2), item=child)
                     i += 1
             
 
@@ -546,7 +560,6 @@ def build(app):
     root.on_touch_down = on_touch_app
 
     ##### FIN VEILLE
-
     
     root.hide_items = True
     # -------------------------------------------------------------------------
