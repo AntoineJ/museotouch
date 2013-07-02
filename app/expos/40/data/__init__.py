@@ -114,6 +114,8 @@ class Glass(Scatter):
     children_items = ListProperty([])
     child_thumbs = ListProperty([])
 
+    fn_id = StringProperty(None)
+
     def __init__(self, **kwargs):
         super(Glass, self).__init__(**kwargs)
         self.color = (random.random(), random.random(), random.random(), 1)
@@ -122,6 +124,7 @@ class Glass(Scatter):
 
     def remove(self):
         if not self.disabled:
+            self.remove_content()
             self.disabled = True
             self.parent.remove_widget(self)
             self.app.glass_count -= 1
@@ -135,7 +138,7 @@ class Glass(Scatter):
         key_id = self.match_filename_keyword(filename_id)
         its = []
         for item in self.app.db.items:
-            if key_id in item.keywords and len(item.children) > 0:
+            if key_id in item.keywords and "361" in item.keywords:
                 it = {}
                 it["item"] = item
                 its.append(it)
@@ -201,6 +204,7 @@ class Glass(Scatter):
     def remove_content(self):
         self.content = False
         self.content2 = False
+        self.fn_id = ''
         for child in self.image_items[:]:
             if child != None:
                 child.on_close()
@@ -262,8 +266,9 @@ class Glass(Scatter):
         mmap = self.app.map
         fn_id = mmap.find_glass_item(self.center)
         if fn_id:
-            if self.content == False:
+            if self.content == False or self.fn_id != fn_id:
                 self.get_item_from_filename(fn_id)
+                self.fn_id = fn_id
         else:
             self.content = False
             self.remove_content()
