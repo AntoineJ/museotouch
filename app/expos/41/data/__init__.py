@@ -572,6 +572,12 @@ class QuizzItem(Scatter):
         else:
             self.labelTitre.text = u'L\'EMPEREUR A TRANCHÉ...\nVOUS AVEZ PERDU'
             self.photo.source = 'widgets/lose-casque.png' 
+            sang = Scatter(center = (115, 155), scale =0.1, size = (210,210), do_scale = False, do_rotation = False, do_translation = False)
+            sang.add_widget(Image( source = 'widgets/lose-blood.png', size = (210,210)))
+            self.add_widget(sang, 10)
+
+            anim4 = Animation(scale = 1, d=5, t='out_cubic')
+            anim4.start(sang)
 
             if self.mere.deuxJoueurs:
                 score_win = Label(text=str(self.mere.other_score(self)), text_size=(35,20), size=(35,20), font_size=20, pos=(70,50), color=(0,0,0,1), halign='center')
@@ -579,8 +585,10 @@ class QuizzItem(Scatter):
                 self.add_widget(score_win)
                 self.add_widget(score_lose)
 
-
-        self.btnContinuez.text = 'RECOMMENCER' 
+        if self.mere.english :
+            self.btnContinuez.text = 'RESTART' 
+        else:
+            self.btnContinuez.text = 'RECOMMENCER' 
 
         self.btnContinuez.disabled = False
 
@@ -621,8 +629,11 @@ class QuizzItem(Scatter):
         anim1 = Animation(y= global_height - 40, d=0.2)
         anim1.start(self.labelTitre)
 
-        anim3 = Animation(size= (210,210), y=80, d=.2)
+        anim3 = Animation(size= (210,210), center_y=165, d=.2)
         anim3.start(self.photo)
+
+        # if not self.victoire:
+        #     anim3.start(sang)
 
 
 
@@ -678,7 +689,7 @@ class QuizzItem(Scatter):
         if self.mere.english:
             self.btnContinuez.text = 'CONTINUE'
         else:
-            self.btnContinuez.text = 'CONTINUEZ'
+            self.btnContinuez.text = 'CONTINUER'
         self.btnContinuez.disabled = True
 
 
