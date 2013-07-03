@@ -1,0 +1,4 @@
+
+
+cd museotouch_private/app
+python main.py
