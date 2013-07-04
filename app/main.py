@@ -716,7 +716,7 @@ class MuseotouchApp(App):
         resource_add_path(self.expo_data_dir)
         self.expo_id = expo_id
         
-        force_sync = False
+        force_sync = True
         popup=None
         
         if force_sync:
