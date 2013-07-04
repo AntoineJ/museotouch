@@ -8,6 +8,7 @@ from os.path import join, isfile, basename, getsize
 from glob import glob
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.button import Button
+from kivy.uix.togglebutton import ToggleButton
 from kivy.uix.image import Image
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.scatter import Scatter
@@ -22,6 +23,11 @@ from kivy.animation import Animation
 from kivy.core.window import Window
 from kivy.graphics import Line, Color
 from kivy.uix.label import Label
+from kivy.clock import Clock
+from time import time
+
+
+TIMER = 5
 
 class QuizzSelector(Scatter):
 
@@ -57,6 +63,15 @@ class QuizzButton(Button):
     def on_touch_down(self, touch):
         if not self.disabled:
             ret = super(QuizzButton, self).on_touch_down(touch)
+            return ret
+        return
+
+class QuizzToggleButton(ToggleButton):
+    disabled = BooleanProperty(False)
+
+    def on_touch_down(self, touch):
+        if not self.disabled:
+            ret = super(QuizzToggleButton, self).on_touch_down(touch)
             return ret
         return
         
@@ -108,6 +123,11 @@ class QuizzMere(FloatLayout):
 
     # Images de bonne et mauvaise réponse
     medias = ListProperty(None)
+
+
+    # temps restant pour répondre
+    timer = NumericProperty(0)
+    timeStart = NumericProperty(0)
 
     def __init__(self, **kwargs):
         super(QuizzMere, self).__init__(**kwargs)
@@ -161,6 +181,12 @@ class QuizzMere(FloatLayout):
                 if isfile(filepath) and getsize(filepath) > 0:
                     self.medias.append(filepath)
 
+        self.timer = TIMER
+        self.timeStart = time()
+        Clock.schedule_interval(self.update_timer, 1 / 10.)
+        print 'pouet'
+
+
     def update_pos(self, fils, center_x, y):
         if fils == self.Joueur1:
             self.J1x = center_x
@@ -168,6 +194,60 @@ class QuizzMere(FloatLayout):
         else:
             self.J2x = center_x
             self.J2y = y + 200
+
+    def check_reponse(self):
+        self.correction = True
+
+        if self.Joueur1.btnBonneReponse.state == 'down':
+            self.Joueur1.bonneReponse = True
+            self.Joueur1.correction = True
+            self.Joueur1.transform_ui()
+            self.Joueur1.score += 1
+            self.Joueur1.btnBonneReponse.state = 'normal'
+        else:
+            self.Joueur1.bonneReponse = False
+            self.Joueur1.correction = True
+            self.Joueur1.transform_ui()
+            self.Joueur1.btnMauvaiseReponse.state = 'normal'
+
+        self.Joueur1.btnBonneReponse.disabled = True
+        self.Joueur1.btnMauvaiseReponse.disabled = True
+
+        if self.deuxJoueurs:
+            if self.Joueur2.btnBonneReponse.state =='down':
+                self.Joueur2.bonneReponse = True
+                self.Joueur2.correction = True
+                self.Joueur2.transform_ui()
+                self.Joueur2.score += 1
+                self.Joueur2.btnBonneReponse.state = 'normal'
+            else:
+                self.Joueur2.bonneReponse = False
+                self.Joueur2.correction = True
+                self.Joueur2.transform_ui()
+                self.Joueur2.btnMauvaiseReponse.state = 'normal'
+
+            self.Joueur2.btnBonneReponse.disabled = True
+            self.Joueur2.btnMauvaiseReponse.disabled = True
+
+            if self.Joueur1.score > self.Joueur2.score:
+                self.Joueur1.imageScoreWin.opacity = 1
+                self.Joueur1.imageScoreLose.opacity = 0
+                self.Joueur2.imageScoreWin.opacity = 0
+                self.Joueur2.imageScoreLose.opacity = 1
+            elif self.Joueur1.score == self.Joueur2.score:
+                self.Joueur1.imageScoreWin.opacity = 1
+                self.Joueur1.imageScoreLose.opacity = 0
+                self.Joueur2.imageScoreWin.opacity = 1
+                self.Joueur2.imageScoreLose.opacity = 0
+            else:
+                self.Joueur1.imageScoreWin.opacity = 0
+                self.Joueur1.imageScoreLose.opacity = 1
+                self.Joueur2.imageScoreWin.opacity = 1
+                self.Joueur2.imageScoreLose.opacity = 0
+
+
+
+
 
     def bonne_reponse(self, fils):
         if self.correction:
@@ -336,8 +416,13 @@ class QuizzMere(FloatLayout):
                     self.Joueur1.victoire = True
                     self.Joueur2.victoire = False
                 elif self.Joueur1.score == self.Joueur2.score:
-                    self.Joueur1.victoire = True
-                    self.Joueur2.victoire = True
+                    if self.Joueur1.score > 2:
+                        self.Joueur1.victoire = True
+                        self.Joueur2.victoire = True
+                    else:
+                        self.Joueur1.victoire = False
+                        self.Joueur2.victoire = False
+                
                 else:
                     self.Joueur1.victoire = False
                     self.Joueur2.victoire = True
@@ -391,6 +476,15 @@ class QuizzMere(FloatLayout):
 
             self.parent.remove_widget(self)
 
+    def update_timer(self, kwarg):
+        self.timer = TIMER - time() + self.timeStart
+
+        if self.timer<0:
+            Clock.unschedule(self.update_timer)
+            self.check_reponse()
+
+
+
 
 
 
@@ -428,6 +522,7 @@ class QuizzItem(Scatter):
     # Permet de savoir si on a gagné la partie
     victoire = BooleanProperty(False)
 
+
     # image = StringProperty('')
     # question = StringProperty('')
     # bonneReponse = StringProperty('')
@@ -459,8 +554,8 @@ class QuizzItem(Scatter):
         self.rebuild()
 
 
-        self.btnMauvaiseReponse.bind(on_release= self.do_mauvaise_reponse)
-        self.btnBonneReponse.bind(on_release= self.do_bonne_reponse)
+        # self.btnMauvaiseReponse.bind(on_release= self.do_mauvaise_reponse)
+        # self.btnBonneReponse.bind(on_release= self.do_bonne_reponse)
         self.btnContinuez.bind(on_release= self.do_continue)
 
     def on_touch_move(self, touch):
@@ -526,7 +621,7 @@ class QuizzItem(Scatter):
                 self.labelReponse.text = self.mere.item['english']['description2']
             else:
                 self.labelTitre.text = u'MAUVAISE RÉPONSE...'
-                self.labelReponse.text = str(self.mere.item['description2'])
+                self.labelReponse.text = self.mere.item['description2']
             if len(self.mere.medias) > 0:
                 self.photo.source = self.mere.medias[1]
 
