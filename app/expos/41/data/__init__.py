@@ -27,7 +27,7 @@ from kivy.clock import Clock
 from time import time
 
 
-TIMER = 10
+TIMER = 1
 
 class QuizzSelector(Scatter):
 
@@ -565,6 +565,18 @@ class QuizzItem(Scatter):
         # self.btnBonneReponse.bind(on_release= self.do_bonne_reponse)
         self.btnContinuez.bind(on_release= self.do_continue)
 
+    def on_center(self, instance, value):
+        parent = self.parent
+        if not parent:
+            return
+        # causing problems when the item scale was too important
+        x, y = value
+        x = max(parent.x, x)
+        y = max(parent.y, y)
+        x = min(parent.right, x)
+        y = min(parent.top, y)
+        self.center = x, y
+
     def on_touch_move(self, touch):
         ret = super(QuizzItem, self).on_touch_move(touch)
 
@@ -727,7 +739,9 @@ class QuizzItem(Scatter):
         
         global_height = 10 + 210 + self.labelTitre.height + 60
 
-        self.height_bar = global_height - 50
+        anim4 = Animation(height_bar = (global_height - 50), d=0.2)
+        anim4.start(self)
+        # self.height_bar = global_height - 50
         
         anim = Animation(size=(230, global_height), d=0.2)
         anim.start(self)
