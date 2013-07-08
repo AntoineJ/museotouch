@@ -100,7 +100,7 @@
         Color:
             rgba: 1,1,1,.5
         Line:
-            points: (-2,self.height-1 ,  -65-2,self.height-1   ,   -65-2,self.height-114-1   ,   -2,self.height-114-1)
+            points: (-2,self.height-1 ,  -65-2,self.height-1   ,   -65-2,self.height-114-1   ,   -2,self.height-114-1) if root.correction else (-2,self.height-1 ,  -65-2,self.height-1   ,   -65-2,self.height-60-1 -114   ,   -2,self.height-60-114-1)
             width: 1.5
             close: True
             cap: 'square'
@@ -111,7 +111,7 @@
             rgb: 117/255.,113/255.,81/255.
         Line:
             width: 1 
-            points: (10,85,220,85) if not root.correction else (10,self.height - 45,220,self.height - 45)
+            points: (10, self.height_bar,220, self.height_bar) #if not root.correction else (10,self.height - 30,220,self.height - 30)
 
     Image:
         id: imageScoreWin
@@ -153,6 +153,21 @@
         halign: 'center'
         valign: 'middle'
         font_name: futuraBold
+    
+    Label:
+        id: labelTimer
+        size_hint: (None, None)
+        pos_hint: (None, None)
+        color: 1,1,1, .9
+        pos: -64, root.height-110-50
+        text: str(int(root.mere.timer)) if not root.correction else ''
+        text_size: (60, 50)
+        # shorten: True
+        size: (60,50)
+        font_size: 40
+        halign: 'center'
+        valign: 'middle'
+        font_name: futuraBold
 
     Label:
         size_hint: None,None
@@ -164,6 +179,17 @@
         size: (60,25)   
         font_name: futuraBold
         pos: -65, root.height-116
+
+    Label:
+        size_hint: None,None
+        pos_hint: (None,None)
+        color: (1,1,1,.5) if not root.correction else (1,1,1,0)
+        text: 'TEMPS' if not root.mere.english else 'TIMER'
+        font_size: 17
+        text_size: (60,25) 
+        size: (60,25)   
+        font_name: futuraBold
+        pos: -65, root.height-110-50-15
 
     Image:
         id: photo
@@ -182,9 +208,9 @@
         color: 117/255.,113/255.,81/255.,1
         pos: 10, 90
         text: ''
-        text_size: (210, 32)
+        text_size: (210, None)
         # shorten: True
-        size: (210, 32)
+        size: (210, self.texture_size[1])
         font_size: 12
         halign: 'left'
         valign: 'middle'
@@ -281,22 +307,23 @@
         text: ''
         text_size: (210, None)
         size: (210, self.texture_size[1])
-        font_size: 10
+        font_size: 12
         halign: 'justify'
         valign: 'bottom'
         font_name: arial
 
-    Label:
-        id: labelTimer
-        size_hint: (None, None)
-        center: 115,20
-        size: 20,20
-        text_size: 20,20
-        text: str(int(root.mere.timer)) if not root.correction else ''
-        font_size: 12
-        halign: 'center'
-        valign: 'bottom'
-        font_name: arial
+    # Label:
+    #     id: labelTimer
+    #     size_hint: (None, None)
+    #     pos_hint: (None, None)
+    #     center: 115,20
+    #     size: 20,20
+    #     text_size: 20,20
+    #     text: str(int(root.mere.timer)) if not root.correction else ''
+    #     font_size: 12
+    #     halign: 'center'
+    #     valign: 'bottom'
+    #     font_name: arial
 
     # Label:
     #     id: labelReponse

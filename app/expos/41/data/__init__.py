@@ -27,7 +27,7 @@ from kivy.clock import Clock
 from time import time
 
 
-TIMER = 5
+TIMER = 10
 
 class QuizzSelector(Scatter):
 
@@ -85,6 +85,9 @@ class QuizzMere(FloatLayout):
     # Indique si le quizz est en anglais
     english = BooleanProperty(False)
 
+    #indique quel bouton a permis de creer le quizz
+    originEnglish = BooleanProperty(False)
+
     # Defini si on a un ou deux joueurs
     deuxJoueurs = BooleanProperty(False)
 
@@ -137,6 +140,8 @@ class QuizzMere(FloatLayout):
 
         self.item = self.app.db.items[self.ordreQuestion[self.numeroQuestion]]
 
+        self.originEnglish = self.english
+
         if self.item['english'] == []:
             self.english = False
 
@@ -184,7 +189,6 @@ class QuizzMere(FloatLayout):
         self.timer = TIMER
         self.timeStart = time()
         Clock.schedule_interval(self.update_timer, 1 / 10.)
-        print 'pouet'
 
 
     def update_pos(self, fils, center_x, y):
@@ -389,7 +393,7 @@ class QuizzMere(FloatLayout):
         if not self.deuxJoueurs:
             self.numeroQuestion += 1
 
-            if self.numeroQuestion >= len(self.app.db.items):
+            if self.numeroQuestion >= len(self.ordreQuestion):
                 if self.Joueur1.score > 2:
                     self.Joueur1.victoire = True
                 else:
@@ -411,7 +415,7 @@ class QuizzMere(FloatLayout):
 
             self.numeroQuestion += 1
 
-            if self.numeroQuestion >= len(self.app.db.items):
+            if self.numeroQuestion >= len(self.ordreQuestion):
                 if self.Joueur1.score > self.Joueur2.score:
                     self.Joueur1.victoire = True
                     self.Joueur2.victoire = False
@@ -522,6 +526,7 @@ class QuizzItem(Scatter):
     # Permet de savoir si on a gagné la partie
     victoire = BooleanProperty(False)
 
+    height_bar = NumericProperty(85)
 
     # image = StringProperty('')
     # question = StringProperty('')
@@ -545,10 +550,12 @@ class QuizzItem(Scatter):
             self.btnMauvaiseReponse.y = 47
 
         if self.pos == (-100,-100):
-            self.center = (randint(200,1720), randint(200,880))
-            self.rotation = randint(0,360)
-
-
+            if self.mere.originEnglish:
+                self.center = (randint(200,760), randint(200,880))
+                self.rotation = randint(135,225)
+            else:
+                self.center = (randint(1160,1720), randint(200,880))
+                self.rotation = randint(-45,45)
 
 
         self.rebuild()
@@ -634,10 +641,10 @@ class QuizzItem(Scatter):
         anim = Animation(size=(230, global_height), d=0.2)
         anim.start(self)
 
-        anim2 = Animation(y=global_height - 85, d=.2)
+        anim2 = Animation(y=global_height - 70, d=.2)
         anim2.start(self.btnBonneReponse)
 
-        anim1 = Animation(y= global_height - 40, d=0.2)
+        anim1 = Animation(y= global_height - 25, d=0.2)
         anim1.start(self.labelTitre)
 
         anim3 = Animation(size= (210,210), y=self.labelReponse.y + self.labelReponse.height + 10, x=10, d=.2)
@@ -646,6 +653,8 @@ class QuizzItem(Scatter):
         self.btnContinuez.opacity = 1
         self.btnContinuez.y = 10
         self.btnContinuez.disabled = False
+
+        self.height_bar = global_height - 30
 
         self.btnMauvaiseReponse.opacity = 0
 
@@ -715,8 +724,11 @@ class QuizzItem(Scatter):
         self.btnMauvaiseReponse.opacity = 0
         self.btnMauvaiseReponse.disabled = True
 
+        
         global_height = 10 + 210 + self.labelTitre.height + 60
 
+        self.height_bar = global_height - 50
+        
         anim = Animation(size=(230, global_height), d=0.2)
         anim.start(self)
 
@@ -767,10 +779,11 @@ class QuizzItem(Scatter):
         self.labelReponse.text = ''
         # self.labelMauvaiseReponse.opacity = 0
 
+
         self.position = choice([0,1])
         self.bonneReponse = False
         self.correction = False
-        self.size = 230,354
+        
         self.btnContinuez.opacity = 0
         self.btnContinuez.pos = 10,100
         self.btnMauvaiseReponse.opacity = 1
@@ -778,7 +791,6 @@ class QuizzItem(Scatter):
         self.btnBonneReponse.y = 10
         self.btnBonneReponse.disabled = False
         self.btnMauvaiseReponse.disabled = False
-
 
         # self.btnContinuez.bind(on_release = self.do_continue)
         if self.mere.english:
@@ -793,11 +805,16 @@ class QuizzItem(Scatter):
         else:
             self.btnMauvaiseReponse.y = 47
 
-        self.photo.size = 230,230
-        self.photo.pos = 0,124
-
+        self.labelTitre.texture_update() 
         self.labelTitre.y = 90
+        self.size = (230,354 + (self.labelTitre.height - 32))
+        
 
+        self.photo.size = 230,230
+        self.photo.pos = 0, self.labelTitre.y + self.labelTitre.height + 5
+        # self.photo.pos = 0,124
+
+        self.height_bar = 85
         # if self.mere.other_score(self) > self.score:
         #     self.imageScoreWin.opacity = 0
         #     self.imageScoreLose.opacity = 1
