@@ -20,7 +20,7 @@ from museolib.widgets.contentcontainer import ContentContainer
 from museolib.utils import no_url
 from glob import glob
 
-from museolib.widgets.imagebuttons import ImageButtons 
+from museolib.widgets.imagebuttons import ImageButtons, ImageButtonItem 
 from kivy.uix.button import Button
 from random import random, randint, choice, shuffle
 
@@ -635,6 +635,16 @@ def set_up_item_bodies(items, space):
 #    def onMessage(self, msg, binary):
 #       self.sendMessage(msg, binary)
 #       print 'message received'
+
+
+
+def set_active(self):
+    self.active = not self.active
+    self.source = self.source_active if self.active \
+    else self.source_original
+
+ImageButtonItem.set_active = set_active
+
 
 def build(app):
     # Here, you must return a root widget that will be used for app
