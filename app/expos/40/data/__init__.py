@@ -215,6 +215,18 @@ class Glass(Scatter):
                 child.parent.remove_widget(child)
             self.child_thumbs.remove(child)
 
+    def on_center(self, instance, value):
+        parent = self.parent
+        if not parent:
+            return
+        # causing problems when the item scale was too important
+        x, y = value
+        x = max(parent.x, x)
+        y = max(parent.y, y)
+        x = min(parent.right, x)
+        y = min(parent.top, y)
+        self.center = x, y
+
     def on_touch_down(self, touch):
         x, y = touch.x, touch.y
 
