@@ -145,11 +145,11 @@
         pos_hint: (None, None)
         color: 1,1,1, .9
         pos: -64, root.height-100
-        text: str(root.score)
+        text: str(root.score) + '/5'
         text_size: (60, 50)
         # shorten: True
         size: (60,50)
-        font_size: 40
+        font_size: 30
         halign: 'center'
         valign: 'middle'
         font_name: futuraBold
@@ -225,12 +225,13 @@
         color: 1,1,1,1
         pos: (10, 10)
         text: ''
-        text_size: (190, 32)
-        size: (210, 32)
+        text_size: (190, None)
+        size: (210, self.texture_size[1]) if self.texture_size[1] > 32 else (210,32)
         font_size: 10
         halign: 'left'
         valign: 'middle'
         font_name: futuraBold
+        on_release: root.do_reponse()
 
     QuizzToggleButton:
         id: btnBonneReponse
@@ -240,12 +241,14 @@
         color: 1,1,1,1
         pos: (10,10) 
         text: ''
-        text_size: (190, 32)
-        size: (210, 32)
+        text_size: (190, None)
+        # size: (210, 54)
+        size: (210, self.texture_size[1]) if self.texture_size[1] > 32 else (210,32)
         font_size: 10
         halign: 'left'
         valign: 'middle'
         font_name: futuraBold
+        on_release: root.do_reponse()
 
     QuizzButton:
         canvas.before:

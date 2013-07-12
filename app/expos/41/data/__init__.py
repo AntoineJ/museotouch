@@ -670,7 +670,17 @@ class QuizzItem(Scatter):
         self.mere.commencer(self)
 
     def affichage_debut(self):
-        self.labelTitre.text = "BRAVO !\nVOUS AVEZ LE COURAGE DE DESCENDRE DANS L'ARÈNE.\nTROIS BONNES RÉPONSES ET VOUS HONOREREZL'EMPEREUR, SINON C'EST LA DÉFAITE !"
+        if self.mere.deuxJoueurs:
+            if self.mere.english:
+                self.labelTitre.text = "Well done! You are brave enough to enter the arena!\nGet a better score than your opponent and at least three correct answers to honour the emperor !\nOtherwise it’s defeat !"
+            else:
+                self.labelTitre.text = "Bravo ! Vous avez le courage de descendre dans l'arÈne !\nObtenez un score supÉrieur À votre adversaire et au moins trois bonnes rÉponses pour honorer l'empereur !\nSinon c'est la dÉfaite !"
+        else:
+            if self.mere.english:
+                self.labelTitre.text = "Well done!\nYou are brave enough to enter the arena!\nThree correct answers and you honour the emperor, otherwise it’s defeat !"
+            else:
+                self.labelTitre.text = "BRAVO !\nVOUS AVEZ LE COURAGE DE DESCENDRE DANS L'ARÈNE!\nTROIS BONNES RÉPONSES ET VOUS HONOREREZ L'EMPEREUR, SINON C'EST LA DÉFAITE !"
+        self.labelTitre.text = self.labelTitre.text.upper()
         self.labelTitre.halign = 'center'
         self.labelTitre.y = 220
 
@@ -686,8 +696,16 @@ class QuizzItem(Scatter):
         self.photo.source = 'widgets/glaive.png'
         self.photo.size= 100,160
         self.photo.pos = 65,50
+        
+        #height label titre : 119 ou 153
+        self.labelTitre.texture_update()
+        if self.labelTitre.height == 153:
+            self.height = self.height + 153 - 119
 
-        self.btnContinuez.text = 'COMMENCER'
+        if self.mere.english:
+            self.btnContinuez.text = "START"
+        else:
+            self.btnContinuez.text = 'COMMENCER'
 
         self.correction = True
 
