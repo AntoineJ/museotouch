@@ -324,7 +324,7 @@ def build(app):
     # Our root widget
     root = FloatLayout()
 
-    bgmap = Image(source = 'widgets/map.jpg', size=(1920,1080))
+    bgmap = Image(source = 'widgets/background.png', size=(1920,1080))
     root.add_widget(bgmap)
     # -------------------------------------------------------------------------
     # Create an image map widget
@@ -397,9 +397,6 @@ def build(app):
     scat.center = (75, Window.height-75)
     but.english = True
 
-    def change_expo(but):
-        app.change_expo(str(41))
-
     scat2 = Scatter(size=(85,85), 
                     do_scale=False, 
                     do_rotation=False,
@@ -419,6 +416,23 @@ def build(app):
     root.add_widget(scat2)
     scat2.center = (Window.width - 75, 75)
     but2.english = False
+
+    ##### SWITCH MODE BUTTONS
+
+    def change_expo(but):
+        par = but.parent
+        if par.center_y < 100: # then its the button at the bottom left of the screen
+            anim = Animation(center=(-75,-75), d=.1)
+            anim2 = Animation(pos=(0,0), d=.1)
+            anim2.start(scat5)
+        else:
+            anim = Animation(center=(Window.width + 75, Window.height + 75), d=.1)
+            anim2 = Animation(pos=(Window.width - scat6.width, Window.height-scat6.height), d=.1)
+            anim2.start(scat6)
+        anim.start(par)
+
+    def load_expo(but):
+        app.change_expo(str(41))
 
     scat3 = Scatter(size=(130,130), 
                     do_scale=False, 
@@ -457,6 +471,123 @@ def build(app):
     root.add_widget(scat4)
     scat4.center = (Window.width -75, Window.height - 75)
 
+    ##### FRENCH POPUP
+
+    scat5 = Scatter(
+        size=(222,222),
+        do_scale=False, do_rotation=False, do_translation=False,
+        size_hint=(None,None),
+        center=(-300,-300)
+        )
+    img = Image(
+        source='widgets/popup/pop-up-exploFR.png',
+        size_hint=(None,None),
+        size=(222,222))
+    scat51 = Scatter(
+        size=(50,50),
+        do_scale=False, do_rotation=False, do_translation=False,
+        size_hint=(None,None)
+    )
+    but5 = Button(  size=(50,50),
+                    size_hint= (None,None),
+                    background_normal='widgets/popup/btn-oui.png',
+                    background_down='widgets/popup/btn-oui-active.png',
+                    on_release=load_expo
+                )
+    scat51.add_widget(but5)
+    scat61 = Scatter(
+        size=(50,50),
+        do_scale=False, do_rotation=False, do_translation=False,
+        size_hint=(None,None)
+    )
+
+    def show_switch_button_fr(dt):
+        anim = Animation(center=(75,75), d=.1)
+        anim.start(scat3)
+
+    def discard_popup_fr(but):
+        anim = Animation(center=(-300,-300), d=.1)
+        anim.start(scat5)
+        anim.on_complete = show_switch_button_fr
+
+    but6 = Button(  size=(50,50),
+                    size_hint= (None,None),
+                    background_normal='widgets/popup/btn-non.png',
+                    background_down='widgets/popup/btn-non-active.png',
+                    on_release=discard_popup_fr
+            )
+    scat61.add_widget(but6)
+    scat5.add_widget(img)
+    scat5.add_widget(scat51)
+    scat5.add_widget(scat61)
+    scat51.rotation = -45
+    scat61.rotation = -45
+    scat51.center = (65,112)
+    scat61.center = (108, 68)
+
+    root.add_widget(scat5)
+
+    ##### ENGLISH POPUP
+
+    scat6 = Scatter(
+        size=(222,222),
+        do_scale=False, do_rotation=False, do_translation=False,
+        size_hint=(None,None),
+        center=(Window.width+300,Window.height +300)
+        )
+    img = Image(
+        source='widgets/popup/pop-up-exploEN.png',
+        size_hint=(None,None),
+        size=(222,222))
+    scat52 = Scatter(
+        size=(50,50),
+        do_scale=False, do_rotation=False, do_translation=False,
+        size_hint=(None,None),
+        center=(65, 112)
+    )
+    but5 = Button(  size=(50,50),
+                    size_hint= (None,None),
+                    background_normal='widgets/popup/btn-yes.png',
+                    background_down='widgets/popup/btn-yes-active.png',
+                    on_release=load_expo
+                )
+    scat52.add_widget(but5)
+    scat62 = Scatter(
+        size=(50,50),
+        do_scale=False, do_rotation=False, do_translation=False,
+        size_hint=(None,None),
+        center=(108, 68)
+    )
+
+    def show_switch_button_en(dt):
+        anim = Animation(center=(Window.width-75,Window.height-75), d=.1)
+        anim.start(scat4)
+
+    def discard_popup_en(but):
+        anim = Animation(center=(Window.width+300,Window.height+300), d=.1)
+        anim.start(scat6)
+        anim.on_complete = show_switch_button_en
+
+    but6 = Button(  size=(50,50),
+                    size_hint= (None,None),
+                    background_normal='widgets/popup/btn-no.png',
+                    background_down='widgets/popup/btn-no-active.png',
+                    on_release=discard_popup_en
+            )
+    scat62.add_widget(but6)
+    scat6.add_widget(img)
+    scat6.add_widget(scat52)
+    scat6.add_widget(scat62)
+    scat52.rotation = -45
+    scat62.rotation = -45
+    scat52.center = (65,112)
+    scat62.center = (108, 68)
+    scat6.rotation = 180
+
+    root.add_widget(scat6)
+
+    #### ANIMATION SUR LES BOUTONS (INUTILE)
+
     def anim_buttons(dt):
         key = random.random()
         if key > .7:
@@ -478,7 +609,7 @@ def build(app):
                                 do_translation=False,
                                 scale=1,
                                 rotation=-45)
-    helpQuizz1 = Image( source='widgets/pop-up-help-quiz.png',
+    helpQuizz1 = Image( source='widgets/pop-up-help-quizFR.png',
                         size=(320,90))
     helpQuizz1Scat.add_widget(helpQuizz1)
     helpLayout.add_widget(helpQuizz1Scat)
@@ -490,7 +621,7 @@ def build(app):
                                 do_translation=False,
                                 scale=1,
                                 rotation=90+45)
-    helpQuizz2 = Image( source='widgets/pop-up-help-quiz.png',
+    helpQuizz2 = Image( source='widgets/pop-up-help-quizEN.png',
                         size=(320,90))
     helpQuizz2Scat.add_widget(helpQuizz2)
     helpLayout.add_widget(helpQuizz2Scat)
@@ -502,7 +633,7 @@ def build(app):
                                 do_translation=False,
                                 scale=1,
                                 rotation=-135)
-    helpExpo1 = Image( source='widgets/pop-up-help-loupe.png',
+    helpExpo1 = Image( source='widgets/pop-up-help-loupeEN.png',
                         size=(320,90))
     helpExpo1Scat.add_widget(helpExpo1)
     helpLayout.add_widget(helpExpo1Scat)
@@ -514,7 +645,7 @@ def build(app):
                                 do_translation=False,
                                 scale=1,
                                 rotation=45)
-    helpExpo2 = Image( source='widgets/pop-up-help-loupe.png',
+    helpExpo2 = Image( source='widgets/pop-up-help-loupeFR.png',
                         size=(320,90))
     helpExpo2Scat.add_widget(helpExpo2)
     helpLayout.add_widget(helpExpo2Scat)
