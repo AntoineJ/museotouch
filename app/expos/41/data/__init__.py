@@ -21,13 +21,13 @@ from kivy.utils import platform
 from random import choice, randint, sample, shuffle
 from kivy.animation import Animation
 from kivy.core.window import Window
-from kivy.graphics import Line, Color
+from kivy.graphics import Line, Color, Rectangle
 from kivy.uix.label import Label
 from kivy.clock import Clock
 from time import time
 
 
-TIMER = 1
+TIMER = 10
 
 class QuizzSelector(Scatter):
 
@@ -124,6 +124,9 @@ class QuizzMere(FloatLayout):
     # Permet de savoir si les 2 joueurs sont pret à continuer (peut etre mettre une variable par personne)
     sync_continuer = BooleanProperty(False)
 
+    # Permet de savoir si les 2 joueurs sont pret à commencer
+    sync_commencer = BooleanProperty(False)
+
     # Images de bonne et mauvaise réponse
     medias = ListProperty(None)
 
@@ -165,7 +168,7 @@ class QuizzMere(FloatLayout):
             self.J2x = self.Joueur2.center_x
             self.J2y = self.Joueur2.y + 200
 
-        self.rebuild()
+        # self.rebuild()
 
     def rebuild(self):
         if self.item['english'] == []:
@@ -386,6 +389,44 @@ class QuizzMere(FloatLayout):
 
 
 
+    def commencer(self, fils):
+        if not self.deuxJoueurs:
+                self.rebuild()
+                self.Joueur1.rebuild()
+                self.Joueur1.btnContinuez.unbind(on_release = self.Joueur1.do_commencer)
+                self.Joueur1.btnContinuez.bind(on_release = self.Joueur1.do_continue)
+
+
+        elif self.sync_commencer:
+            # fils.btnContinuez.unbind(on_release = fils.do_continue)
+            if not self.english:
+                fils.btnContinuez.text = 'EN ATTENTE DU DEUXIEME JOUEUR'
+            else:
+                fils.btnContinuez.text = 'WAITING FOR PLAYER TWO'
+
+            fils.btnContinuez.disabled = True
+
+            self.rebuild()
+            self.Joueur1.rebuild()
+            self.Joueur1.btnContinuez.unbind(on_release = self.Joueur1.do_commencer)
+            self.Joueur1.btnContinuez.bind(on_release = self.Joueur1.do_continue)
+            # self.Joueur1.btnContinuez.disabled = False
+            # self.Joueur1.btnContinuez.bind(on_release = self.Joueur1.do_continue)
+            self.Joueur2.rebuild()
+            self.Joueur2.btnContinuez.unbind(on_release = self.Joueur2.do_commencer)
+            self.Joueur2.btnContinuez.bind(on_release = self.Joueur2.do_continue)
+            # self.Joueur2.btnContinuez.disabled = False
+            # self.Joueur2.btnContinuez.bind(on_release = self.Joueur2.do_continue)
+        else:
+            # fils.btnContinuez.unbind(on_release = fils.do_continue)
+            fils.btnContinuez.disabled = True
+            if not self.english:
+                fils.btnContinuez.text = 'EN ATTENTE DU DEUXIEME JOUEUR'
+            else:
+                fils.btnContinuez.text = 'WAITING FOR PLAYER TWO'
+            self.sync_commencer = True
+
+
     def continuer(self, fils):
         if not self.correction:
             return
@@ -528,12 +569,13 @@ class QuizzItem(Scatter):
 
     height_bar = NumericProperty(85)
 
+
     # image = StringProperty('')
     # question = StringProperty('')
     # bonneReponse = StringProperty('')
     # mauvaiseReponse = StringProperty('')
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs): 
         
         super(QuizzItem, self).__init__(**kwargs)
 
@@ -543,7 +585,7 @@ class QuizzItem(Scatter):
         self.item = self.mere.item
 
         # Position aléatoire des réponses
-        self.position = choice([0,1])   
+        self.position = choice([0,1])
         if self.position:
             self.btnBonneReponse.y = 47
         else:
@@ -558,12 +600,13 @@ class QuizzItem(Scatter):
                 self.rotation = randint(-45,45)
 
 
-        self.rebuild()
+        # self.rebuild()
+        self.affichage_debut()
 
 
         # self.btnMauvaiseReponse.bind(on_release= self.do_mauvaise_reponse)
         # self.btnBonneReponse.bind(on_release= self.do_bonne_reponse)
-        self.btnContinuez.bind(on_release= self.do_continue)
+        self.btnContinuez.bind(on_release= self.do_commencer)
 
     def on_center(self, instance, value):
         parent = self.parent
@@ -619,6 +662,54 @@ class QuizzItem(Scatter):
         # else:
         #     self.mere.item = self.mere.app.db.items[self.mere.ordreQuestion[self.mere.numeroQuestion]]
         #     self.rebuild()
+
+    def do_commencer(self, kwargs):
+        self.mere.commencer(self)
+
+    def affichage_debut(self):
+        self.labelTitre.text = "BRAVO !\nVOUS AVEZ LE COURAGE DE DESCENDRE DANS L'ARÈNE.\nTROIS BONNES RÉPONSES ET VOUS HONOREREZL'EMPEREUR, SINON C'EST LA DÉFAITE !"
+        self.labelTitre.halign = 'center'
+        self.labelTitre.y = 220
+
+        self.btnBonneReponse.disabled = True
+        self.btnBonneReponse.opacity = 0
+        self.btnMauvaiseReponse.disabled = True
+        self.btnMauvaiseReponse.opacity = 0
+        self.btnContinuez.disabled = False
+        self.btnContinuez.opacity = 1
+        self.btnContinuez.y = 10
+
+        self.height_bar = 0
+        self.photo.source = 'widgets/glaive.png'
+        self.photo.size= 100,160
+        self.photo.pos = 65,50
+
+        self.btnContinuez.text = 'COMMENCER'
+
+        self.correction = True
+
+
+
+
+
+
+
+        # self.scat_debut = Scatter(pos = (0,0), size = self.size, do_translation= True)
+
+        # with self.scat_debut.canvas:
+        #     Color(1,1,1,1)
+        #     Rectangle(pos= (0,0), size= self.size)
+
+        # self.scat_debut.add_widget(Label(text= "BRAVO !\nVOUS AVEZ LE COURAGE DE DESCENDRE DANS L'ARÈNE.\nTROIS BONNES RÉPONSES ET VOUS HONOREREZL'EMPEREUR, SINON C'EST LA DÉFAITE !",
+        #                                 pos = (10,self.height - 25), size_hint = (None, None), pos_hint = (None, None),
+        #                                 color= (117/255.,113/255.,81/255.,1), text_size=(210, None), font_size= 12))
+
+        # # self.scat_debut.add_widget
+        # self.add_widget(self.scat_debut)
+
+        # self.scat_debut.bind(on_touch_move = self.suivi)
+
+
 
 
     # Affiche la bonne reponse
@@ -801,6 +892,7 @@ class QuizzItem(Scatter):
         self.btnContinuez.opacity = 0
         self.btnContinuez.pos = 10,100
         self.btnMauvaiseReponse.opacity = 1
+        self.btnBonneReponse.opacity = 1
         self.btnMauvaiseReponse.y = 10
         self.btnBonneReponse.y = 10
         self.btnBonneReponse.disabled = False
@@ -821,6 +913,7 @@ class QuizzItem(Scatter):
 
         self.labelTitre.texture_update() 
         self.labelTitre.y = 90
+        self.labelTitre.halign = 'left'
         self.size = (230,354 + (self.labelTitre.height - 32))
         
 
