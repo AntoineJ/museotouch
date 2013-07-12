@@ -27,7 +27,11 @@ from kivy.clock import Clock
 from time import time
 
 
+
 TIMER = 10
+
+# TIMER = 15
+
 
 class QuizzSelector(Scatter):
 
@@ -56,7 +60,6 @@ class QuizzSelector(Scatter):
                 self.parent.add_widget(question)
             self.img_active_2.opacity = 0
 
-
 class QuizzButton(Button):
     disabled = BooleanProperty(False)
 
@@ -75,9 +78,6 @@ class QuizzToggleButton(ToggleButton):
             return ret
         return
         
-
-
-
 class QuizzMere(FloatLayout):
     
     app = ObjectProperty()
@@ -130,7 +130,6 @@ class QuizzMere(FloatLayout):
     # Images de bonne et mauvaise réponse
     medias = ListProperty(None)
 
-
     # temps restant pour répondre
     timer = NumericProperty(0)
     timeStart = NumericProperty(0)
@@ -147,7 +146,6 @@ class QuizzMere(FloatLayout):
 
         if self.item['english'] == []:
             self.english = False
-
 
         self.Joueur1 = QuizzItem(app=self.app, mere=self)
         if self.P1 != (-100,-100):
@@ -204,23 +202,49 @@ class QuizzMere(FloatLayout):
 
     def check_reponse(self):
         self.correction = True
+        finishJ1 = False
+        finishJ2 = False
 
-        if self.Joueur1.btnBonneReponse.state == 'down':
-            self.Joueur1.bonneReponse = True
-            self.Joueur1.correction = True
-            self.Joueur1.transform_ui()
-            self.Joueur1.score += 1
-            self.Joueur1.btnBonneReponse.state = 'normal'
+        if not self.deuxJoueurs:
+            if self.Joueur1.btnBonneReponse.state == 'down':
+                self.Joueur1.bonneReponse = True
+                self.Joueur1.correction = True
+                self.Joueur1.transform_ui()
+                self.Joueur1.score += 1
+                self.Joueur1.btnBonneReponse.state = 'normal'
+            else:
+                self.Joueur1.bonneReponse = False
+                self.Joueur1.correction = True
+                self.Joueur1.transform_ui()
+                self.Joueur1.btnMauvaiseReponse.state = 'normal'
+
+            self.Joueur1.btnBonneReponse.disabled = True
+            self.Joueur1.btnMauvaiseReponse.disabled = True
+            Clock.unschedule(self.update_timer)
         else:
-            self.Joueur1.bonneReponse = False
-            self.Joueur1.correction = True
-            self.Joueur1.transform_ui()
-            self.Joueur1.btnMauvaiseReponse.state = 'normal'
+            if self.timer>0:
+                if self.Joueur1.btnBonneReponse.state == 'down' or self.Joueur1.btnMauvaiseReponse.state == "down":
+                    finishJ1 = True
+                if self.Joueur2.btnBonneReponse.state == 'down' or self.Joueur2.btnMauvaiseReponse.state == "down":
+                    finishJ2 = True
+                if finishJ1 and finishJ2:
+                    Clock.unschedule(self.update_timer)
+                else:
+                    return
+            if self.Joueur1.btnBonneReponse.state == 'down':
+                self.Joueur1.bonneReponse = True
+                self.Joueur1.correction = True
+                self.Joueur1.transform_ui()
+                self.Joueur1.score += 1
+                self.Joueur1.btnBonneReponse.state = 'normal'
+            else:
+                self.Joueur1.bonneReponse = False
+                self.Joueur1.correction = True
+                self.Joueur1.transform_ui()
+                self.Joueur1.btnMauvaiseReponse.state = 'normal'
 
-        self.Joueur1.btnBonneReponse.disabled = True
-        self.Joueur1.btnMauvaiseReponse.disabled = True
-
-        if self.deuxJoueurs:
+            self.Joueur1.btnBonneReponse.disabled = True
+            self.Joueur1.btnMauvaiseReponse.disabled = True
             if self.Joueur2.btnBonneReponse.state =='down':
                 self.Joueur2.bonneReponse = True
                 self.Joueur2.correction = True
@@ -251,11 +275,7 @@ class QuizzMere(FloatLayout):
                 self.Joueur1.imageScoreLose.opacity = 1
                 self.Joueur2.imageScoreWin.opacity = 1
                 self.Joueur2.imageScoreLose.opacity = 0
-
-
-
-
-
+        
     def bonne_reponse(self, fils):
         if self.correction:
             return
@@ -318,9 +338,6 @@ class QuizzMere(FloatLayout):
                 self.Joueur1.imageScoreLose.opacity = 1
                 self.Joueur2.imageScoreWin.opacity = 1
                 self.Joueur2.imageScoreLose.opacity = 0
-
-
-
 
     def mauvaise_reponse(self, fils):
         if self.correction:
@@ -389,6 +406,7 @@ class QuizzMere(FloatLayout):
 
 
 
+
     def commencer(self, fils):
         if not self.deuxJoueurs:
                 self.rebuild()
@@ -452,7 +470,6 @@ class QuizzMere(FloatLayout):
                 fils.btnContinuez.text = 'EN ATTENTE DU DEUXIEME JOUEUR'
             else:
                 fils.btnContinuez.text = 'WAITING FOR PLAYER TWO'
-
 
             self.numeroQuestion += 1
 
@@ -527,11 +544,6 @@ class QuizzMere(FloatLayout):
         if self.timer<0:
             Clock.unschedule(self.update_timer)
             self.check_reponse()
-
-
-
-
-
 
 class QuizzItem(Scatter):
 
@@ -633,22 +645,13 @@ class QuizzItem(Scatter):
 
         self.mere.bonne_reponse(self)
 
-        # self.bonneReponse = True
-        # self.correction = True
-        # self.transform_ui()
-
-        # self.score += 2
-
-
     def do_mauvaise_reponse(self, kwargs):
         if self.correction:
             return
-
         self.mere.mauvaise_reponse(self)
 
-        # self.bonneReponse = False
-        # self.correction = True
-        # self.transform_ui()
+    def do_reponse(self):
+        self.mere.check_reponse()
 
     def do_continue(self, kwargs):
         if not self.correction:
@@ -714,7 +717,6 @@ class QuizzItem(Scatter):
 
     # Affiche la bonne reponse
     def transform_ui(self):
-
         if self.bonneReponse:
             if self.mere.english:
                 self.labelTitre.text = 'GOOD ANSWER !'
@@ -739,12 +741,12 @@ class QuizzItem(Scatter):
         self.labelReponse.texture_update() # nécessaire pour actualiser la variable texture_size du label
         self.labelTitre.texture_update() # nécessaire pour actualiser la variable texture_size du label
 
-        global_height = self.labelReponse.y + self.labelReponse.height + 10 + 210 + self.labelTitre.height + 60
+        global_height = self.labelReponse.y + self.labelReponse.height + 10 + 210 + self.labelTitre.height + 28 + self.btnBonneReponse.height
 
         anim = Animation(size=(230, global_height), d=0.2)
         anim.start(self)
 
-        anim2 = Animation(y=global_height - 70, d=.2)
+        anim2 = Animation(y=global_height - 38 - self.btnBonneReponse.height, d=.2)
         anim2.start(self.btnBonneReponse)
 
         anim1 = Animation(y= global_height - 25, d=0.2)
@@ -760,10 +762,6 @@ class QuizzItem(Scatter):
         self.height_bar = global_height - 30
 
         self.btnMauvaiseReponse.opacity = 0
-
-
-
-
 
     def affichage_final(self):
         if self.victoire:
@@ -847,11 +845,6 @@ class QuizzItem(Scatter):
         # if not self.victoire:
         #     anim3.start(sang)
 
-
-
-
-
-
     def rebuild(self):
 
         Animation.stop_all(self)
@@ -905,32 +898,34 @@ class QuizzItem(Scatter):
             self.btnContinuez.text = 'CONTINUER'
         self.btnContinuez.disabled = True
 
+        self.btnBonneReponse.texture_update()
+        self.btnMauvaiseReponse.texture_update()
 
         if self.position:
-            self.btnBonneReponse.y = 47
+            self.btnBonneReponse.y = self.btnMauvaiseReponse.y + self.btnMauvaiseReponse.height +5
         else:
-            self.btnMauvaiseReponse.y = 47
+            self.btnMauvaiseReponse.y = self.btnBonneReponse.y + self.btnBonneReponse.height + 5
 
         self.labelTitre.texture_update() 
-        self.labelTitre.y = 90
+
         self.labelTitre.halign = 'left'
-        self.size = (230,354 + (self.labelTitre.height - 32))
+
+        self.labelTitre.y = 10 + self.btnBonneReponse.height + self.btnMauvaiseReponse.height + 10 + 10
+        self.size = (230,354 + (self.labelTitre.height - 32) + self.btnBonneReponse.height -32 + self.btnMauvaiseReponse.height -32+ 10) 
+
         
 
         self.photo.size = 230,230
-        self.photo.pos = 0, self.labelTitre.y + self.labelTitre.height + 5
+        self.photo.pos = 0, self.labelTitre.y + self.labelTitre.height + 10
         # self.photo.pos = 0,124
 
-        self.height_bar = 85
+        self.height_bar = self.btnMauvaiseReponse.height + self.btnBonneReponse.height + 10 + 10 + 5 #85
         # if self.mere.other_score(self) > self.score:
         #     self.imageScoreWin.opacity = 0
         #     self.imageScoreLose.opacity = 1
         # else:
         #     self.imageScoreWin.opacity = 1
         #     self.imageScoreLose.opacity = 0
-
-
-
 
 def build(app):
     # Here, you must return a root widget that will be used for app
@@ -942,7 +937,7 @@ def build(app):
 
     app.limite = 0
 
-    bgmap = Image(source = 'widgets/background.jpg', size=(1920,1080))
+    bgmap = Image(source = 'widgets/map.png', size=(1920,1080))
     root.add_widget(bgmap)
 
     # question = QuizzMere(app=app, deuxJoueurs=True)
@@ -973,7 +968,7 @@ def build(app):
                     do_translation=False,
                     scale=1,
                     size_hint=(None,None),
-                    rotation=180 ,
+                    rotation=-90 ,
                     center=(75, 75))    
 
     but = Button(   size=(85,85),
@@ -985,6 +980,7 @@ def build(app):
     scat.add_widget(but)
     root.add_widget(scat)
     scat.center = (75, 75)
+    # scat.rotation = -22.5
 
     scat2 = Scatter( size=(85,85), 
                     do_scale=False, 
@@ -992,10 +988,10 @@ def build(app):
                     do_translation=False,
                     scale=1,
                     size_hint=(None,None),
-                    rotation=180 ,
+                    rotation=90 ,
                     center=(75, 75))    
 
-    but2 = Button(   size=(85,85),
+    but2 = Button(  size=(85,85),
                     size_hint= (None,None),
                     background_normal='widgets/btn-loupe.png',
                     background_down='widgets/btn-loupe.png',
@@ -1004,6 +1000,7 @@ def build(app):
     scat2.add_widget(but2)
     root.add_widget(scat2)
     scat2.center = (Window.width- 75, Window.height -75)
+    # scat2.rotation = 22.5
 
 
     ###### BUTTONS TO SELECT A QUIZZ
@@ -1018,7 +1015,115 @@ def build(app):
     root.hide_items = True
 
     # -------------------------------------------------------------------------
-    # Add a date slider to our root widget.
+    ##### MODE VEILLE
+
+    helpLayout = FloatLayout()
+
+    helpQuizz1Scat = Scatter(size=(320,90),
+                                do_scale=False,
+                                do_rotation=False,
+                                do_translation=False,
+                                scale=1,
+                                rotation=-45)
+    helpQuizz1 = Image( source='widgets/help/pop-up-help-exploFR.png',
+                        size=(320,90))
+    helpQuizz1Scat.add_widget(helpQuizz1)
+    helpLayout.add_widget(helpQuizz1Scat)
+    helpQuizz1Scat.center=(150,150)
+    
+    helpQuizz2Scat = Scatter(size=(320,90),
+                                do_scale=False,
+                                do_rotation=False,
+                                do_translation=False,
+                                scale=1,
+                                rotation=90+45)
+    helpQuizz2 = Image( source='widgets/help/pop-up-help-exploEN.png',
+                        size=(320,90))
+    helpQuizz2Scat.add_widget(helpQuizz2)
+    helpLayout.add_widget(helpQuizz2Scat)
+    helpQuizz2Scat.center=(Window.width-150,Window.height-150)
+    
+    helpExpo1Scat = Scatter(size=(320,90),
+                                do_scale=False,
+                                do_rotation=False,
+                                do_translation=False,
+                                scale=1,
+                                rotation=-135)
+    helpExpo1 = Image( source='widgets/help/pop-up-help-quizEN.png',
+                        size=(320,90))
+    helpExpo1Scat.add_widget(helpExpo1)
+    helpLayout.add_widget(helpExpo1Scat)
+    helpExpo1Scat.center=(200,Window.height-200)
+    
+    helpExpo2Scat = Scatter(size=(320,90),
+                                do_scale=False,
+                                do_rotation=False,
+                                do_translation=False,
+                                scale=1,
+                                rotation=45)
+    helpExpo2 = Image( source='widgets/help/pop-up-help-quizFR.png',
+                        size=(320,90))
+    helpExpo2Scat.add_widget(helpExpo2)
+    helpLayout.add_widget(helpExpo2Scat)
+    helpExpo2Scat.center=(Window.width-200,200)
+
+    root.add_widget(helpLayout)
+
+
+    def anim_clues(dt):
+        Animation.stop_all(helpExpo1Scat)
+        Animation.stop_all(helpExpo2Scat)
+        Animation.stop_all(helpQuizz1Scat)
+        Animation.stop_all(helpQuizz2Scat)
+
+        delta = 5
+        dt = dt /10
+
+        anim = Animation(center_x=helpExpo1Scat.center_x + delta, center_y=helpExpo1Scat.center_y - delta, d=dt/2) + Animation(center=helpExpo1Scat.center, d=dt/2)
+        anim.start(helpExpo1Scat)
+        anim = Animation(center_x=helpExpo2Scat.center_x - delta, center_y=helpExpo2Scat.center_y + delta, d=dt/2) + Animation(center=helpExpo2Scat.center, d=dt/2)
+        anim.start(helpExpo2Scat)
+        anim = Animation(center_x=helpQuizz1Scat.center_x + delta, center_y=helpQuizz1Scat.center_y + delta, d=dt/2) + Animation(center_x=helpQuizz1Scat.center_x , center_y=helpQuizz1Scat.center_y , d=dt/2)
+        anim.start(helpQuizz1Scat)
+        anim = Animation(center_x=helpQuizz2Scat.center_x - delta, center_y=helpQuizz2Scat.center_y - delta, d=dt/2) + Animation(center_x=helpQuizz2Scat.center_x , center_y=helpQuizz2Scat.center_y , d=dt/2)
+        anim.start(helpQuizz2Scat)
+
+    # Clock.schedule_interval(anim_clues, 2)
+
+    def toggle_help_layout(show=True):
+        Animation.stop_all(helpLayout)
+        if show:
+            anim = Animation(opacity=1, d=1)
+            anim.start(helpLayout)
+        else:
+            anim = Animation(opacity=0, d=1)
+            anim.start(helpLayout)
+
+    def launch_screensaver(dt):
+        delay = time() - app.last_touch_time
+        if delay > 15:
+            Clock.schedule_interval(anim_clues, 2)
+            toggle_help_layout(show=True)
+            Clock.unschedule(launch_screensaver)
+
+    Clock.schedule_interval(launch_screensaver, 1)
+
+    def stop_screensaver():
+        Clock.unschedule(anim_clues)
+        Clock.schedule_interval(launch_screensaver, 1)
+        toggle_help_layout(show=False)
+
+    app.last_touch_time = 0
+    def on_touch_app(touch):
+        app.last_touch_time = touch.time_start
+        for child in root.children[:]:
+            if child.dispatch('on_touch_down', touch):
+                stop_screensaver()
+                return True
+
+    root.on_touch_down = on_touch_app
+
+    ##### FIN VEILLE
 
 
     # -------------------------------------------------------------------------
