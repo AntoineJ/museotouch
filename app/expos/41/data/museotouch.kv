@@ -127,15 +127,7 @@
         pos: -64, root.height-60
         opacity: 0
 
-    QuizzButton:
-        id: btnClose
-        size_hint: (None, None)
-        size: 100,100
-        background_normal: 'widgets/btn-close.png'
-        background_down: 'widgets/btn-close-active.png'
-        pos: root.width - 50, root.height -50
-        auto_bring_to_front: True
-        opacity: 0
+
 
 
 
@@ -314,6 +306,18 @@
         halign: 'justify'
         valign: 'bottom'
         font_name: arial
+
+
+
+    QuizzButton:
+        id: btnClose
+        size_hint: (None, None)
+        size: 100,100
+        background_normal: 'widgets/btn-close.png'
+        background_down: 'widgets/btn-close-active.png'
+        pos: root.width - 50, root.height -50
+        auto_bring_to_front: True
+        opacity: 1
 
     # Label:
     #     id: labelTimer

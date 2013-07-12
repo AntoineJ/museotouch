@@ -615,6 +615,8 @@ class QuizzItem(Scatter):
         # self.rebuild()
         self.affichage_debut()
 
+        self.btnClose.bind (on_release = self.mere.close)
+
 
         # self.btnMauvaiseReponse.bind(on_release= self.do_mauvaise_reponse)
         # self.btnBonneReponse.bind(on_release= self.do_bonne_reponse)
@@ -833,9 +835,9 @@ class QuizzItem(Scatter):
 
         self.photo.y = 150
 
-        self.btnClose.opacity = 1
-        self.btnClose.disabled = False
-        self.btnClose.bind (on_release = self.mere.close)
+        # self.btnClose.opacity = 1
+        # self.btnClose.disabled = False
+        
 
         self.labelReponse.text = ''
         self.btnBonneReponse.opacity = 0
