@@ -9,7 +9,7 @@ Config.set('kivy', 'log_level', 'debug')
 
 from random import random, randint
 from os.path import join, dirname, exists, basename, isfile
-from os import makedirs, remove
+from os import makedirs, remove, walk
 from zipfile import ZipFile
 from kivy.app import App
 from kivy.uix.floatlayout import FloatLayout
@@ -859,6 +859,10 @@ class MuseotouchApp(App):
         zipfilename = join(self.expo_dir, 'data.zip')
         with open(zipfilename, 'wb') as fd:
             fd.write(result)
+        pa = join(self.expo_dir, 'data/widgets/')
+        for root, dirs, files in walk(pa):
+            for name in files:
+                remove(join(root, name))
 
         # uncompress in current directory
         zp = ZipFile(zipfilename)
