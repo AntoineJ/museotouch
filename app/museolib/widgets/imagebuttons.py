@@ -117,3 +117,8 @@ class ImageButtons(FloatLayout):
 		self.active_ids = [get_id(x.source_original) for x \
 						   in self.children if x.active]
 		# print 'Image Buttons "key" changed to', self.active_ids
+
+	def clear_all(self):
+		for img in self.children:
+			if img.active == True:
+				img.set_active()
