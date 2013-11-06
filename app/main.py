@@ -42,7 +42,7 @@ from functools import partial
 from kivy.support import install_twisted_reactor
 install_twisted_reactor()
 
-# from pdb import set_trace as rrr
+from pdb import set_trace as rrr
 import time
 
 class MuseotouchApp(App):
@@ -324,8 +324,9 @@ class MuseotouchApp(App):
             item2 = items[-1]
 
             # set the text inside the slider
-            self.date_slider.text_min = format_date(item1.date)
-            self.date_slider.text_max = format_date(item2.date)
+            if item1.date and item2.date:
+                self.date_slider.text_min = format_date(item1.date)
+                self.date_slider.text_max = format_date(item2.date)
         
         # filter on size
         if self.size_slider:
@@ -800,17 +801,22 @@ class MuseotouchApp(App):
                 makedirs(directory)
             except OSError:
                 pass
-
         # get the initial json
         self.backend.set_expo(expo_id)
 
-        # get the initial zipfile
-        Logger.info('Museotouch: Synchronization starting')
-        self.backend.get_expos(
-                uid=expo_id,
-                on_success=self._sync_expo_1,
-                on_error=self._sync_error_but_continue,
-                on_progress=self._sync_progress)
+        fast = False
+        if fast:
+            print 'building fast'
+            self._sync_popup.dismiss()
+            self.build_app()
+        else:
+            # get the initial zipfile
+            Logger.info('Museotouch: Synchronization starting')
+            self.backend.get_expos(
+                    uid=expo_id,
+                    on_success=self._sync_expo_1,
+                    on_error=self._sync_error_but_continue,
+                    on_progress=self._sync_progress)
 
     def _sync_popup_text(self, text):
         self._sync_popup.content.children[-1].text = text
@@ -843,6 +849,7 @@ class MuseotouchApp(App):
             # avoid downloading the zip, already got it.
             self._sync_expo_3()
             return
+
 
         # download the zip
         print ' &&&& the zip is', zipfiles[0]
@@ -1096,7 +1103,7 @@ class MuseotouchApp(App):
         return filename, ext
 
     def _sync_download(self):
-        uid = self._sync_result[self._sync_index]['id']
+        uid = self._sync_result[self._sync_index]['id']   
         if '__item_filename__' in self._sync_result[self._sync_index]:
             filename, ext = self._sync_convert_filename(
                 self._sync_result[self._sync_index]['__item_filename__'])
@@ -1158,21 +1165,24 @@ class MuseotouchApp(App):
             total_str = None
         else:
             total_str = format_bytes_to_human(total)
-        #print '*progress*', req.url, current, total, req.chunk_size
+        # print '*progress*', req.url, current, total, req.chunk_size
         self._sync_popup.content.children[0].max = total
         self._sync_popup.content.children[0].value = current
         text = self._sync_popup.content.children[-2].text
-        filename = text.split(' ')[0]
-        text = ''
-        if filename:
-            text = '%s - ' % filename
-        text = '%s' % format_bytes_to_human(current)
-        if total_str is not None:
-            text += '/%s' % total_str
-        self._sync_popup.content.children[-2].text = text
+        # print 'text',  text, text.split(' ')[0]
+        if text is not None:
+            filename = text.split(' ')[0]
+            text = ''
+            if filename:
+                text = '%s - ' % filename
+            text = '%s' % format_bytes_to_human(current)
+            if total_str is not None:
+                text += '/%s' % total_str
+            self._sync_popup.content.children[-2].text = text
 
     def _sync_error(self, req, result):
-        self.error('Erreur lors de la synchro')
+        print result
+        self.error('Erreur lors de la synchro : '+ str(result))
 
     def _sync_error_but_continue(self, req, result):
         self._sync_popup.dismiss()

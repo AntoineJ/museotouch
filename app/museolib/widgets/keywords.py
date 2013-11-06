@@ -44,11 +44,12 @@ class KeywordsGroup(GridLayout):
     count_selected = NumericProperty(0)
 
     def on_count_selected(self, instance, value):
-        text = '%s' % self.title
-        if value > 0:
-            #text += ' (%d)' % value
-            text += ' *'
-        self.accitem.title = text
+        # text = '%s' % self.title
+        # if value > 0:
+        #     #text += ' (%d)' % value
+        #     text += ' *'
+        # self.accitem.title = text
+        pass
 
 
 class Keywords(Accordion):

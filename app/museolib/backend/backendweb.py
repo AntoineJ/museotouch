@@ -96,6 +96,6 @@ class BackendWeb(Backend):
         url = self.build_data_url('objets/%(uid)s/%(directory)s/%(uid)s.%(ext)s'
                 % {'uid': uid, 'directory': directory, 'ext': extension})
         Logger.debug('BackendWeb: GET %r' % url)
-        self.req = UrlRequest(url, on_success, on_error, on_progress,
+        self.req = UrlRequest(url, on_success, on_error, on_progress, debug=False,
                 chunk_size=32768)
 

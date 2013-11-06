@@ -134,18 +134,21 @@ class ImageItem(Scatter):
         super(ImageItem, self).__init__(**kwargs)
         self.on_start()
         if square:
-            # Rognage => maximum square :
-            my_ceil = lambda n: 0 if n < 0 else n
-            L,H = self.img_square.texture.size
-            x = my_ceil(L-H)/2
-            y = my_ceil(H-L)/2
-            w = min(L,H)
-            h = min(L,H)
-            self.img_square.texture = self.img_square.texture.get_region(x, y, w, h)
+            self.squarize_img()    
 
     def on_start(self):
         #Replace this function in init.py to personnalize dynamically an image item 
         pass
+
+    def squarize_img(self):
+        # Rognage => maximum square :
+        my_ceil = lambda n: 0 if n < 0 else n
+        L,H = self.img_square.texture.size
+        x = my_ceil(L-H)/2
+        y = my_ceil(H-L)/2
+        w = min(L,H)
+        h = min(L,H)
+        self.img_square.texture = self.img_square.texture.get_region(x, y, w, h)
 
     def on_touch_down(self, touch): 
         ret = super(ImageItem, self).on_touch_down(touch)
