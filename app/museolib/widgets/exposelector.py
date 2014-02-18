@@ -1,8 +1,10 @@
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.popup import Popup
+from kivy.uix.modalview import ModalView
 from kivy.uix.label import Label
 from kivy.uix.image import Image
-from kivy.properties import ObjectProperty
+from kivy.uix.widget import Widget
+from kivy.properties import ObjectProperty, ListProperty
 from kivy.uix.boxlayout import BoxLayout
 from kivy.lang import Builder
 from kivy.factory import Factory
@@ -12,12 +14,34 @@ from os import listdir
 from os.path import isdir, join, exists
 from json import load
 from kivy.uix.button import Button
+from kivy.uix.scrollview import ScrollView
+from kivy.core.window import Window
+from kivy.uix.behaviors import ButtonBehavior
+import random, os
 
-class ExpoPopupChoice(BoxLayout):
+
+class ExpoPopupChoice(ScrollView):
+
     def add_expo(self, widget):
         self.list_expos.add_widget(widget)
 
 Factory.register('ExpoPopupChoice', cls=ExpoPopupChoice)
+
+class ExpoItem(ButtonBehavior, Widget):
+    expo = ObjectProperty(None)
+    selector = ObjectProperty(None)
+
+    def __init__(self, **kwargs):
+        super(ExpoItem, self).__init__(**kwargs)
+
+    def launch_expo(self):
+        print 'voila'
+
+    def on_press(self):
+        print 'press'
+    def on_release(self):
+        self.selector.select_expo(self.expo)
+
 
 class ExpoSelector(FloatLayout):
 
@@ -28,7 +52,7 @@ class ExpoSelector(FloatLayout):
         super(ExpoSelector, self).__init__(**kwargs)
         self.req = self.app.backend.get_expos(on_success=self.on_success,
                 on_error=self.on_error)
-        self.load()
+        # self.load() 
 
     def load(self, *largs):
         content = Image(source='loader.gif', anim_delay=.1)
@@ -50,6 +74,7 @@ class ExpoSelector(FloatLayout):
             result = offline
         # show them.
         layout = ExpoPopupChoice()
+        layout.list_expos.bind(minimum_height=layout.list_expos.setter('height'))
         for expo in result:
             # convert to string key, python 2.6.
             expo = dict([(str(x), y) for x, y in expo.iteritems()])
@@ -57,12 +82,13 @@ class ExpoSelector(FloatLayout):
                     x['fichier'].rsplit('.', 1)[-1] == 'zip']
             data = [x['fichier'] for x in expo['data'] if
                     x['fichier'].rsplit('.', 1)[-1].lower() in ('jpg', 'png')]
+            print data
             expo['data'] = data
             expo['__zipfiles__'] = zipfiles
-            item = Builder.template('ExpoItem', selector=self, **expo)
+            # item = Builder.template('ExpoItem', selector=self, **expo)
+            item = ExpoItem(selector=self, expo=expo)
             layout.add_expo(item)
-        self.popup(content=layout, title='Liste des expositions',
-                size=(1000, 800))
+        self.popup(content=layout, title='Liste des expositions')
 
     def get_offline_expos(self):
         # minimal files to check
@@ -126,19 +152,21 @@ class ExpoSelector(FloatLayout):
 
     def popup(self, content, title, **kwargs):
         if not self._popup:
-            self._popup = popup = Popup(
+            self._popup = popup = ModalView(
                     auto_dismiss=False,
                     size_hint=(None, None),
                     size=(400, 400))
             popup.open()
+
         else:
             popup = self._popup
 
-        kwargs.setdefault('size', (400, 400))
+        kwargs.setdefault('size', (Window.width, Window.height))
         Animation(t='out_quad', d=.2, **kwargs).start(popup)
         popup.content = content
-        popup.title = title
+        popup.add_widget(content)
+        # popup.title = title
         return popup
 
     def select_expo(self, expo):
-        self.app.show_expo(expo['id'], self._popup)
+        self.app.show_expo(expo['id'])
