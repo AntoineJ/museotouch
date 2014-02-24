@@ -9,7 +9,7 @@ Config.set('kivy', 'log_level', 'debug')
 
 from random import random, randint
 from os.path import join, dirname, exists, basename, isfile
-from os import makedirs
+from os import makedirs, remove, walk
 from zipfile import ZipFile
 from kivy.app import App
 from kivy.uix.floatlayout import FloatLayout
@@ -26,6 +26,10 @@ from kivy.uix.popup import Popup
 from kivy.uix.image import Image
 from kivy.utils import format_bytes_to_human, platform
 from kivy.core.window import Window
+from kivy.properties import BooleanProperty, NumericProperty
+
+
+from kivy.loader import Loader
 
 import museolib
 from museolib.utils import format_date, no_url
@@ -34,16 +38,18 @@ from museolib.widgets.scrollviewitem import ScrollViewItem
 from museolib.widgets.exposelector import ExpoSelector
 from museolib.backend.backendjson import BackendJSON
 from museolib.backend.backendweb import BackendWeb
+from museolib.widgets.quitbutton import QuitButton
 from json import dump, dumps
 from imp import load_source
 from math import ceil
 from functools import partial
 
-from kivy.support import install_twisted_reactor
-install_twisted_reactor()
+# from kivy.support import install_twisted_reactor
+# install_twisted_reactor()
 
-# from pdb import set_trace as rrr
+from pdb import set_trace as rrr
 import time
+import unicodedata
 
 class MuseotouchApp(App):
 
@@ -308,6 +314,8 @@ class MuseotouchApp(App):
         '''
         # start from all items
         items = self.db.items
+        result = []
+
         # update date range from slider value
         if self.date_slider:
             ma, mb = self.date_slider.value_range
@@ -316,7 +324,7 @@ class MuseotouchApp(App):
             item_max = max(item_min + 1, int(mb * count))
 
             # adjust item selection
-            items = items[item_min:item_max]
+            items = result = items[item_min:item_max]
             if len(items) == 0:
                 self.show_objects(items)
                 return
@@ -324,8 +332,9 @@ class MuseotouchApp(App):
             item2 = items[-1]
 
             # set the text inside the slider
-            self.date_slider.text_min = format_date(item1.date)
-            self.date_slider.text_max = format_date(item2.date)
+            if item1.date and item2.date:
+                self.date_slider.text_min = format_date(item1.date)
+                self.date_slider.text_max = format_date(item2.date)
         
         # filter on size
         if self.size_slider:
@@ -337,7 +346,7 @@ class MuseotouchApp(App):
             item_max = max(item_min + 1, int(mb * count))
 
             # adjust item selection
-            items = items[item_min:item_max]
+            items = result = items[item_min:item_max]
             if len(items) == 0:
                 self.show_objects(items)
                 return
@@ -351,7 +360,7 @@ class MuseotouchApp(App):
             if self.keywords and self.keywords.selected_keywords and not origin_ids:
                 pass
             else:
-                items = [x for x in items if x.origin_key in origin_ids]
+                items = result = [x for x in items if x.origin_key in origin_ids]
 
         # filter from keywords but with image buttons, only if there is group of keyword with 'filtre' in the group's name
         if self.imageButtons:
@@ -362,13 +371,21 @@ class MuseotouchApp(App):
             keywords_all = []
 
             for group in groups:
-                if group['group'].find('filtre') != -1:
+                groupname = group['group'].lower()
+                if groupname.find('filtre') != -1:
                     keywords_all = group['children']
+
+            def remove_accents(input_str):
+                nkfd_form = unicodedata.normalize('NFKD', input_str)
+                return u"".join([c for c in nkfd_form if not unicodedata.combining(c)])
 
             if (keywords_all):
                 for name in keywords_names:
                     for keyword in keywords_all:
-                        if name == keyword['name']:
+                        # Preprocess keyname in order to avoid accents and convert from unicode to string for comparison
+                        keyname = remove_accents(keyword['name'])
+                        keyname = keyname.encode('utf8')
+                        if name == keyname:
                             keywords_ids.append(keyword['id'])
 
                 for item in items:
@@ -380,7 +397,7 @@ class MuseotouchApp(App):
                     if not keywords_names and not items_result: #si aucune image activee et aucun resultat
                       items_result = items # on affiche tout
 
-                items = items_result
+                items = result = items_result
 
             # for group in groups:
             #     if group.title.find('filtre'):
@@ -390,17 +407,17 @@ class MuseotouchApp(App):
             #             pass
             #         else:
             #             #items = [x for x in items if x.origin_ex in keywords_ids]
-            #     		items_result = []
-            #     		items = self.db.items		
-            #     		for item in items:
-            #     		    #print item.keywords
-            #     		    for key in keywords_ids:
-            #     			if key in item.keywords:
-            #     			    if not item in items_result:
-            #     				items_result.append(item)			                
-            #     		items = items_result		
-		#print "image buttons filter"		
-		# items
+            #           items_result = []
+            #           items = self.db.items       
+            #           for item in items:
+            #               #print item.keywords
+            #               for key in keywords_ids:
+            #               if key in item.keywords:
+            #                   if not item in items_result:
+            #                   items_result.append(item)                           
+            #           items = items_result        
+        #print "image buttons filter"       
+        # items
 
         # filter with keywords
         # AND between group
@@ -439,17 +456,20 @@ class MuseotouchApp(App):
                     items_result.remove(item)
 
             # now set the result as the new set of items
-            items = items_result
+            items = result = items_result
 
         if self.calendar:
             calfield = 'cal'
             if len(items) > 0:
                 if 'calannee' in items[0]:
                     calfield = 'calannee'
-                items = [x for x in items if self.calendar.accepts(x[calfield])]
+                items = result = [x for x in items if self.calendar.accepts(x[calfield])]
 
         # show only the first 10 objects
+        if not self.should_display_images_by_default:
+            items = result
         self.show_objects(items)
+
 
     def build_config(self, config):
         config.setdefaults('museotouch', {
@@ -541,11 +561,14 @@ class MuseotouchApp(App):
         self.imgtype = 'dds'
         self.imgdir = 'dds'
 
+        # display images when nothing is selected ?
+        self.should_display_images_by_default = BooleanProperty(True)
+
         # list of removed objects
         self.images_displayed = []
         self.images_pos = {}
 
-        self.items_to_add = 0  #Number of items waiting for display
+        self.items_to_add = NumericProperty(0)  #Number of items waiting for display
 
         # add data directory as a resource path
         self.data_dir = data_dir = join(dirname(museolib.__file__), 'data')
@@ -553,6 +576,10 @@ class MuseotouchApp(App):
 
         # add kv file
         Builder.load_file(join(data_dir, 'global.kv'))
+
+        loading_png_fn = join(data_dir, 'loading.gif')
+
+        Loader.loading_image = Image(source=loading_png_fn)
 
         # create trigger for updating objects
         self.trigger_objects_filtering = Clock.create_trigger(
@@ -624,8 +651,12 @@ class MuseotouchApp(App):
 
     def _build_app(self):
         # Import the module
-        modexpo = load_source('__expo__', join(
-            self.expo_data_dir, '__init__.py'))
+        if '__expo__'+self.expo_id not in sys.modules:
+            modexpo = load_source('__expo__'+self.expo_id, join(
+                self.expo_data_dir, '__init__.py'))
+        else:
+            modexpo = sys.modules['__expo__'+self.expo_id]
+
 
         # link with the db. later, we need to change it to real one.
         Builder.load_file(join(self.expo_data_dir, 'museotouch.kv'))
@@ -689,7 +720,8 @@ class MuseotouchApp(App):
         if self.calendar:
             self.calendar.bind(update=self.trigger_objects_filtering)
         
-        self.trigger_objects_filtering()
+        if not hasattr(root, 'hide_items'):
+            self.trigger_objects_filtering()
 
 
         parent = self.root.parent
@@ -700,7 +732,44 @@ class MuseotouchApp(App):
             parent = Window
         self.root = root
         parent.add_widget(self.root)
+
+        
+        demo = self.config.getboolean('museotouch', 'demo')
+        if demo: 
+            button_inst = QuitButton()
+            from kivy.uix.scatter import Scatter
+            scat = Scatter(size=(1200,1200), pos=(0,0), size_hint=(None, None), scale=.1 )
+            scat.add_widget(button_inst)
+            parent.add_widget(scat)
+            def restart():
+                self.reset(go_to_menu=True)
+            button_inst.do_action = restart
         return root
+
+    def change_expo(self, expo_id):
+        self.reset(go_to_menu=False)
+        # check if expo is available on the disk
+        self.expo_dir = self.get_expo_dir(expo_id)
+        self.expo_data_dir = join(self.expo_dir, 'data')
+        self.expo_img_dir = join(self.expo_dir, 'images')
+        resource_add_path(self.expo_data_dir)
+        self.expo_id = expo_id
+        
+        force_sync = True
+        popup=None
+        
+        if force_sync:
+            # create popup
+            if popup is None:
+                popup = Popup(title='Chargement...', size_hint=(None, None), opacity=0,
+                        size=(300, 300), auto_dismiss=False)
+                popup.open()
+
+            # synchronize it !
+            self.sync_expo(expo_id, popup)
+
+        else:
+            self.build_app()
 
     def show_expo(self, expo_id, popup=None):
         # check if expo is available on the disk
@@ -708,7 +777,7 @@ class MuseotouchApp(App):
         self.expo_data_dir = join(self.expo_dir, 'data')
         self.expo_img_dir = join(self.expo_dir, 'images')
         resource_add_path(self.expo_data_dir)
-
+        self.expo_id = expo_id
         # be able to run offline too.
         force_sync = True
         if force_sync:
@@ -721,7 +790,6 @@ class MuseotouchApp(App):
             self.sync_expo(expo_id, popup)
         else:
             self.build_app()
-
 
     #
     # Synchronisation of an exhibition
@@ -771,17 +839,22 @@ class MuseotouchApp(App):
                 makedirs(directory)
             except OSError:
                 pass
-
         # get the initial json
         self.backend.set_expo(expo_id)
 
-        # get the initial zipfile
-        Logger.info('Museotouch: Synchronization starting')
-        self.backend.get_expos(
-                uid=expo_id,
-                on_success=self._sync_expo_1,
-                on_error=self._sync_error_but_continue,
-                on_progress=self._sync_progress)
+        fast = False
+        if fast:
+            print 'building fast'
+            self._sync_popup.dismiss()
+            self.build_app()
+        else:
+            # get the initial zipfile
+            Logger.info('Museotouch: Synchronization starting')
+            self.backend.get_expos(
+                    uid=expo_id,
+                    on_success=self._sync_expo_1,
+                    on_error=self._sync_error_but_continue,
+                    on_progress=self._sync_progress)
 
     def _sync_popup_text(self, text):
         self._sync_popup.content.children[-1].text = text
@@ -815,6 +888,7 @@ class MuseotouchApp(App):
             self._sync_expo_3()
             return
 
+
         # download the zip
         print ' &&&& the zip is', zipfiles[0]
         self._sync_popup_text(u'Téléchargement des données')
@@ -830,6 +904,10 @@ class MuseotouchApp(App):
         zipfilename = join(self.expo_dir, 'data.zip')
         with open(zipfilename, 'wb') as fd:
             fd.write(result)
+        pa = join(self.expo_dir, 'data/widgets/')
+        for root, dirs, files in walk(pa):
+            for name in files:
+                remove(join(root, name))
 
         # uncompress in current directory
         zp = ZipFile(zipfilename)
@@ -903,9 +981,18 @@ class MuseotouchApp(App):
             makedirs(join(self.expo_dir, 'otherfiles'))
         # filepath = join(self.expo_dir, 'otherfiles', no_url(req.url))
         filepath = join(self.expo_dir, 'otherfiles', basename(req.url))
-        output = open(filepath, 'wb')
-        output.write(result) # fichier sauvegarde
-        output.close()
+        
+        try:
+            output = open(filepath, 'wb')
+            output.write(result) # fichier sauvegarde
+            output.close()
+        except TypeError, e:
+            print e
+            if isfile(filepath):
+                    remove(filepath)
+            else:    ## Show an error ##
+                    print("Error: %s file not found while removing" % filepath)
+
         self.url_requests.remove(req)
         if not self.url_requests: # si c'etait le dernier fichier
             if hasattr(self, 'root'):
@@ -1054,7 +1141,7 @@ class MuseotouchApp(App):
         return filename, ext
 
     def _sync_download(self):
-        uid = self._sync_result[self._sync_index]['id']
+        uid = self._sync_result[self._sync_index]['id']   
         if '__item_filename__' in self._sync_result[self._sync_index]:
             filename, ext = self._sync_convert_filename(
                 self._sync_result[self._sync_index]['__item_filename__'])
@@ -1075,6 +1162,7 @@ class MuseotouchApp(App):
                         -1 if self._sync_index % 10 < 8 else 0)
             else:
             '''
+
         self.backend.download_object(uid, self.imgdir, self.imgtype,
                 self._sync_download_ok, self._sync_error, self._sync_progress)
 
@@ -1116,21 +1204,24 @@ class MuseotouchApp(App):
             total_str = None
         else:
             total_str = format_bytes_to_human(total)
-        #print '*progress*', req.url, current, total, req.chunk_size
+
         self._sync_popup.content.children[0].max = total
         self._sync_popup.content.children[0].value = current
         text = self._sync_popup.content.children[-2].text
-        filename = text.split(' ')[0]
-        text = ''
-        if filename:
-            text = '%s - ' % filename
-        text = '%s' % format_bytes_to_human(current)
-        if total_str is not None:
-            text += '/%s' % total_str
-        self._sync_popup.content.children[-2].text = text
+
+        if text is not None:
+            filename = text.split(' ')[0]
+            text = ''
+            if filename:
+                text = '%s - ' % filename
+            text = '%s' % format_bytes_to_human(current)
+            if total_str is not None:
+                text += '/%s' % total_str
+            self._sync_popup.content.children[-2].text = text
 
     def _sync_error(self, req, result):
-        self.error('Erreur lors de la synchro')
+        print result
+        self.error('Erreur lors de la synchro : '+ str(result))
 
     def _sync_error_but_continue(self, req, result):
         self._sync_popup.dismiss()
@@ -1150,20 +1241,22 @@ class MuseotouchApp(App):
                 size_hint=(.5, .5))
         popup.open()
 
-    def reset(self, *l):
+    def reset(self, go_to_menu=True, *l ):
         # reset the whole app, restart from scratch.
         from kivy.core.window import Window
         for child in Window.children[:]:
             Window.remove_widget(child)
-
+        print 'reset 0'
         # remove everything from the current expo
         if hasattr(self, 'expo_data_dir'):
             resource_remove_path(self.expo_data_dir)
             Builder.unload_file(join(self.expo_data_dir, 'museotouch.kv'))
             self.expo_dir = self.expo_data_dir = self.expo_img_dir = None
 
-        # restart with selector.
-        Window.add_widget(self.build_selector())
+        if go_to_menu == True:
+            print 'reset'
+            # restart with selector.
+            Window.add_widget(self.build_selector())
         
 import sys, traceback
 if __name__ in ('__main__', '__android__'):
