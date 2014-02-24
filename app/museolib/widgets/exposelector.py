@@ -4,7 +4,7 @@ from kivy.uix.modalview import ModalView
 from kivy.uix.label import Label
 from kivy.uix.image import Image
 from kivy.uix.widget import Widget
-from kivy.properties import ObjectProperty, ListProperty
+from kivy.properties import ObjectProperty, ListProperty, StringProperty, NumericProperty
 from kivy.uix.boxlayout import BoxLayout
 from kivy.lang import Builder
 from kivy.factory import Factory
@@ -17,8 +17,10 @@ from kivy.uix.button import Button
 from kivy.uix.scrollview import ScrollView
 from kivy.core.window import Window
 from kivy.uix.behaviors import ButtonBehavior
-import random, os
+import random, os, time
+from os.path import dirname,abspath, join, isfile
 
+from kivy.clock import Clock
 
 class ExpoPopupChoice(ScrollView):
 
@@ -31,16 +33,28 @@ class ExpoItem(ButtonBehavior, Widget):
     expo = ObjectProperty(None)
     selector = ObjectProperty(None)
 
+    press_time = NumericProperty(0.0)
+    release_time = NumericProperty(0.0)
+
     def __init__(self, **kwargs):
         super(ExpoItem, self).__init__(**kwargs)
 
-    def launch_expo(self):
-        print 'voila'
+    def check_release(self, dt):
+        if self.state == 'down':
+            self.release_time = time.time() - self.press_time
 
-    def on_press(self):
-        print 'press'
+    def on_press(self):    
+        self.press_time = time.time()
+
+
+        Clock.schedule_interval(self.check_release, .1)
+
     def on_release(self):
-        self.selector.select_expo(self.expo)
+        # current = int(time.time())
+        # self.release_time = current - self.press_time
+        Clock.unschedule(self.check_release)
+        if self.release_time > .5:
+            self.selector.select_expo(self.expo)
 
 
 class ExpoSelector(FloatLayout):
@@ -52,7 +66,8 @@ class ExpoSelector(FloatLayout):
         super(ExpoSelector, self).__init__(**kwargs)
         self.req = self.app.backend.get_expos(on_success=self.on_success,
                 on_error=self.on_error)
-        # self.load() 
+        # self.load()
+        # self.load_offline(None)
 
     def load(self, *largs):
         content = Image(source='loader.gif', anim_delay=.1)
@@ -82,8 +97,20 @@ class ExpoSelector(FloatLayout):
                     x['fichier'].rsplit('.', 1)[-1] == 'zip']
             data = [x['fichier'] for x in expo['data'] if
                     x['fichier'].rsplit('.', 1)[-1].lower() in ('jpg', 'png')]
-            print data
-            expo['data'] = data
+            
+            expo_dir = self.app.get_expo_dir(expo['id'])
+            jpg = join(expo_dir, 'thumbnail.jpg')
+            png = join(expo_dir, 'thumbnail.png')
+            no_img = abspath(join(dirname(__file__), os.pardir, 'data/quit.png'))
+
+            expo['no_img'] = False
+            if isfile(jpg):
+                expo['data'] = jpg
+            elif isfile(png):
+                expo['data'] = png
+            else:
+                expo['data'] = no_img
+                expo['no_img'] = True
             expo['__zipfiles__'] = zipfiles
             # item = Builder.template('ExpoItem', selector=self, **expo)
             item = ExpoItem(selector=self, expo=expo)
@@ -140,15 +167,17 @@ class ExpoSelector(FloatLayout):
         return ExpoSelector(app=self)
 
     def on_error(self, req, result):
-        content = BoxLayout(orientation='vertical', padding=20, spacing=20)
-        content.add_widget(Label(text=
-            'Erreur lors du chargement des expositions\n'
-            'disponible en ligne.\n\n' +
-            str(result)))
-        btn = Button(text='Continuer', size_hint_y=.25)
-        btn.bind(on_release=self.load_offline)
-        content.add_widget(btn)
-        self.popup(content=content, title='Erreur')
+        # content = BoxLayout(orientation='vertical', padding=20, spacing=20)
+        # content.add_widget(Label(text=
+        #     'Erreur lors du chargement des expositions\n'
+        #     'disponible en ligne.\n\n' +
+        #     str(result)))
+        # btn = Button(text='Continuer', size_hint_y=.25)
+        # btn.bind(on_release=self.load_offline)
+        # content.add_widget(btn)
+        # self.popup(content=content, title='Erreur')
+        print 'error'
+        self.load_offline(None)
 
     def popup(self, content, title, **kwargs):
         if not self._popup:
@@ -169,4 +198,6 @@ class ExpoSelector(FloatLayout):
         return popup
 
     def select_expo(self, expo):
+        for child in Window.children[:]:
+            Window.remove_widget(child)
         self.app.show_expo(expo['id'])
