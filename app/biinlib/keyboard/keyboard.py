@@ -7,9 +7,9 @@ from kivy.uix.button import Button
 from json import load
 from os.path import dirname,abspath, join, isfile
 from kivy.graphics import Color, Rectangle
+from kivy.uix.scatter import Scatter
 
-
-class Keyboard(FloatLayout):
+class Keyboard(Scatter):
 	"""Custom keyboard with input text"""
 
 	# label to show the input string
@@ -33,12 +33,10 @@ class Keyboard(FloatLayout):
 	def __init__(self, **kwargs):
 		self.register_event_type('on_input')
 		super(Keyboard, self).__init__(**kwargs)
-
-		with self.canvas:
-			Color(0.9,0.9,0.9,1)
-			Rectangle(pos= self.pos, size= self.size)
+		self.size = (240,420)
 
 		curdir = dirname(__file__)
+		self.layout_filename = join(curdir, 'layout.json')
 
 		self.label_text = Label(text='',
 					font_size = 36, 
@@ -52,8 +50,6 @@ class Keyboard(FloatLayout):
 					valign = 'middle',
 					halign = 'center',
 					font_name = join(curdir, 'proximanovacond-light-webfont.ttf'))
-
-
 
 		self.btnClear = Button(text='x',
 								size = (20, 48), 

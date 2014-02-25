@@ -40,10 +40,19 @@
             on_release: root.toggle_panel(self)
 
         Keyboard:
-            size_hint: None, None
+            do_scale: False
+            do_rotation: False
+            do_translation: False
+            size_hint: None,None
             size: 240,420
             pos: root.pos
-            layout_filename: 'widgets/layout.json'
+            canvas.before:
+                Color:
+                    rgb: .9,.9,.9
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
+            # layout_filename: 'layout.json'
 
 <ImageItem>:
 	# border: 1 * self.scale
