@@ -23,6 +23,7 @@ from kivy.properties import StringProperty, ObjectProperty, NumericProperty, \
 from kivy.uix.vkeyboard import VKeyboard
 from kivy.core.window import Window
 from kivy.uix.widget import Widget 
+from kivy.uix.image import Image 
 from kivy.config import Config 
 from kivy.core.image import Image as CoreImage
 from kivy.animation import Animation
@@ -69,15 +70,9 @@ from os.path import dirname,abspath, join
 
 class WidgetsPanel(Widget):
     active = BooleanProperty(False)
-    
+
     def __init__(self, **kwargs):
         super(WidgetsPanel, self).__init__(**kwargs)
-
-        curdir = dirname(__file__)
-        json_filename = join(curdir, 'layout.json')
-        kb = (Keyboard(size=(240,420), size_hint=(None,None), pos =(0,0), layout_filename = json_filename))
-
-        self.container.add_widget(kb)
 
     def toggle_panel(self, but):
         Animation.stop_all(self, 'y')
