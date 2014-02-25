@@ -85,7 +85,26 @@ class WidgetsPanel(Widget):
             anim.start(self)
             self.active = True
 
+# En paramètre l'attribut db.items de app et un slug de champ à trouver
+# A l'init parcours tous ces champs et les stocke et les affichent dans la liste
+# Meme fonction que keywordScrollView pour l'input du clavier le filtre dans la scrollView (Faire une classe mère ?)
+# Lorsqu'un label est sélectionné on recherche tous les items qui possèdent ce label et on les rajoutent à la fonction
+# de filtre du main (A vérifier)
+class FieldScrollView(ScrollView):
+    pass
 
+# En paramètre un groupe de mot-clé précis.
+# Parcours la liste des mots-clés et les affiche dans la scrollview
+# A l'initialisation se connecte à l'input event du clavier
+# Lors d'un changement dans le clavier appelle une fonction de tri qui parcours les labels et suppriment 
+# ceux qui ne correspondent pas.
+# On garde en mémoire un tableau de tous les labels pour les ajouter ou supprimer sans les recréer à chaque fois
+
+# Chaque label est cliquable et appelle une fonction qui met à jour un tableau selected_keywords
+# Le widget est préalablement enregistré en tant qu'attribut keywords sur l'app ce qui lui permettra de filtrer
+# le contenu dès que selected_keywords variera
+class keywordScrollView(ScrollView):
+    pass
 
 class ContentPopup(Scatter):
     item = ObjectProperty(None)
