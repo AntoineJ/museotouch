@@ -70,6 +70,15 @@ from os.path import dirname,abspath, join
 class WidgetsPanel(Widget):
     active = BooleanProperty(False)
     
+    def __init__(self, **kwargs):
+        super(WidgetsPanel, self).__init__(**kwargs)
+
+        curdir = dirname(__file__)
+        json_filename = join(curdir, 'layout.json')
+        kb = (Keyboard(size=(240,420), size_hint=(None,None), pos =(0,0), layout_filename = json_filename))
+
+        self.container.add_widget(kb)
+
     def toggle_panel(self, but):
         Animation.stop_all(self, 'y')
         if self.active:
@@ -156,14 +165,6 @@ def build(app):
     # Our root widget
     root = FloatLayout()
     root.hide_items = False # Désactive l'affichage des items au démarrage
-
-    curdir = dirname(__file__)
-    json_filename = join(curdir, 'layout.json')
-    kb = (Keyboard(size=(240,420), size_hint=(None,None), pos =(200,100), layout_filename = json_filename))
-
-    root.add_widget(kb)
-
-
 
     root.scroller = scroller = ScrollView( 
         size_hint=(None, None), 
