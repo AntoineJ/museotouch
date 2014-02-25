@@ -23,9 +23,33 @@ from kivy.uix.vkeyboard import VKeyboard
 from kivy.core.window import Window
 from kivy.uix.widget import Widget 
 from kivy.config import Config 
+from kivy.core.image import Image as CoreImage
 
-from museolib.widgets.keyboard import Keyboard
+from main import MuseotouchApp
+
+# from museolib.widgets.keyboard import Keyboard
 from os.path import dirname,abspath, join
+
+from PIL import Image
+
+class PixelCounter(object):
+  ''' loop through each pixel and average rgb '''
+  def __init__(self, imageName):
+      self.pic = Image.open(imageName)
+      # load image data
+      self.imgData = self.pic.load()
+  def averagePixels(self):
+      r, g, b = 0, 0, 0
+      count = 0
+      for x in xrange(self.pic.size[0]):
+          for y in xrange(self.pic.size[1]):
+              tempr,tempg,tempb = self.imgData[x,y]
+              r += tempr
+              g += tempg
+              b += tempb
+              count += 1
+      # calculate averages
+      return (r/count), (g/count), (b/count), count
 
 # class MyKeyboardListener(Widget):
 
@@ -63,11 +87,45 @@ from os.path import dirname,abspath, join
 #         # the system.
 #         return True
 
-# Popup qui contient tout le contenu de l'item (en surimpression)
-# Même comportement que pour MGR donc la classe devrait peut-être hériter de Popup plutôt.
+
 class ContentPopup(Scatter):
     item = ObjectProperty(None)
     imgitem = ObjectProperty(None)
+    color = ListProperty([0,0,0,1])
+
+    def __init__(self, **kwargs):
+        super(ContentPopup, self).__init__(**kwargs)
+        colors = []
+
+        # Find main color in the image
+        if self.img is not None:
+            cimg = CoreImage(self.img.source, keep_data=True)
+            r, g, b = 0, 0, 0
+            count = 0
+            for i in range(0, cimg.width, 5):
+                for j in range(0, cimg.height, 5):
+                    try:
+                        color = cimg.read_pixel(i,j)
+                        if len(color) > 2:
+                            r += color[0]
+                            g += color[1]
+                            b += color[2]
+                            count += 1
+                            
+                    except IndexError as e:
+                        print "Can't find color : ", e
+                        r , g , b = 0
+                        count = 1
+
+            r = r/ count
+            g = g/ count
+            b = b/ count
+            self.color = r,g,b,1
+
+
+    def close(self, but):
+        self.parent.remove_widget(self)
+
 
 ImageItem.popup = ObjectProperty(None)
         
@@ -75,7 +133,7 @@ def on_btn_moreinfo(self, *largs):
     # Instanciation de la classe ContentPopup 
     # On passe en paramètre self.item qui contient toutes les infos à afficher
     self.popup = ContentPopup(item=self.item, imgitem=self, size_hint=(None,None), size=(800,800))
-    self.parent.add_widget(self.popup)
+    self.app.root_images.add_widget(self.popup)
 
 ImageItem.on_btn_moreinfo = on_btn_moreinfo
 
@@ -87,6 +145,14 @@ def on_start(self):
 ImageItem.on_start = on_start
 
 
+
+def feed_scroll(defs):
+    item = ImageItem(**defs)
+    app = defs.pop('app')
+    app.root.scroller.layout.add_widget(item)
+
+
+
 def build(app):
     # Here, you must return a root widget that will be used for app
     # You also have app instance in parameter.
@@ -95,6 +161,65 @@ def build(app):
     # Our root widget
     root = FloatLayout()
     root.hide_items = False # Désactive l'affichage des items au démarrage
+
+    root.scroller = scroller = ScrollView( 
+        size_hint=(None, None), 
+        size=(1920, 1080),
+        pos_hint={'center_x': .5, 'center_y': .5}, 
+        do_scroll_x=False)
+
+    root.add_widget(scroller)
+
+    scroller.layout = layout = GridLayout(
+        cols=8, 
+        col_force_default = True,
+        row_force_default = True,
+        col_default_width = 223,
+        row_default_height = 252,
+        padding=15, 
+        spacing=15,
+        size_hint=(None, None), 
+        width=1920)
+
+    scroller.add_widget(layout)
+
+    def my_show_objects(objects):
+        self = app
+        root = self.root
+        if isinstance(self.root_images.x, (int, long)):
+            if root.type_expo == 'normal':
+                images = [x.source for x in self.root.scroller.layout.children]
+
+                images_to_add = []
+                images_displayed = []
+                for item in objects:
+                    # is the current filename is already showed ?
+                    filename = item.filename
+                    if filename in images:
+                        images.remove(filename)
+                        continue
+
+                    # x = randint(self.scroller.layout.x + 200, self.scroller.layout.right - 200)
+                    # y = randint(root.y + 300, root.top - 100)
+                    # angle = randint(0, 360)
+
+                    image = dict(source=filename, size_hint=(1,1), item=item, app=self)
+                    images_to_add.append(image)
+                    images_displayed.append(filename)
+
+                self.images_displayed = images_displayed
+                self.delayed_work(feed_scroll, images_to_add)
+
+                # remove all the previous images
+                for child in self.root.scroller.layout.children[:]:
+                    for filename in images:
+                        if filename == child.source:
+                            self.images_pos[filename] = {
+                                'center': child.center,
+                                'rotation': child.rotation }
+                            self.root.scroller.layout.remove_widget(child)
+
+    app.show_objects = my_show_objects
 
     # keyboard_layout = FloatLayout(size=(300,300), size_hint=(None, None))
 
@@ -105,14 +230,14 @@ def build(app):
     # keyboard_layout.add_widget(kbListener)
 
     # root.add_widget(kbListener)
-    curdir = dirname(__file__)
-    json_filename = join(curdir, 'layout.json')
+    # curdir = dirname(__file__)
+    # json_filename = join(curdir, 'layout.json')
 
-    kb = (Keyboard(size=(240,500), size_hint=(None,None), pos =(100,100), layout_filename = json_filename))
+    # kb = (Keyboard(size=(240,500), size_hint=(None,None), pos =(100,100), layout_filename = json_filename))
 
-    root.add_widget(kb)
+    # root.add_widget(kb)
 
-    # app.trigger_objects_filtering()
+    app.trigger_objects_filtering()
 
     # layout = GridLayout(cols=7, padding=10, spacing=10,
     #     size_hint=(None, None), width=1920)
@@ -123,7 +248,7 @@ def build(app):
     #                  size_hint=(None, None))
     #     layout.add_widget(btn)
 
-    # scroll = ScrollView(size_hint=(None, None), size=(1920, 1080),
+    # root = ScrollView(size_hint=(None, None), size=(1920, 1080),
     #             pos_hint={'center_x': .5, 'center_y': .5}
     #             , do_scroll_x=False)
 
@@ -137,15 +262,15 @@ def build(app):
     #         pos=widgetlayout.pos, 
     #         size=widgetlayout.size)
         
-    # import random
-    # def change_grid(but):
-    #     rd = random.randint(1, 100)
+    import random
+    def change_grid(but):
+        rd = random.randint(1, 100)
 
-    #     layout.clear_widgets()
-    #     for i in range(rd):
-    #         btn = Button(text=str(i), size=(250, 250),
-    #              size_hint=(None, None))
-    #         layout.add_widget(btn)
+        layout.clear_widgets()
+        for i in range(rd):
+            btn = Button(text=str(i), size=(250, 250),
+                 size_hint=(None, None))
+            layout.add_widget(btn)
 
     # but = Button(
     #     text='relayout', 

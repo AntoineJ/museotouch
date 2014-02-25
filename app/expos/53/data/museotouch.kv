@@ -5,9 +5,9 @@
 #:set white (1,1,1,1)
 
 <ImageItem>:
-	border: 1 * self.scale
-	size_hint: None, None
-	size: 512, 512
+	# border: 1 * self.scale
+	# size_hint: None, None
+	# size: 512, 512
 
 	# do_scale: False
 	# do_rotation: False
@@ -18,11 +18,11 @@
 	container: container
 
 	canvas:
-		Color:
-			rgb: 1, 1, 1
-		Rectangle:
-			pos: -self.border, -self.border
-			size: self.width + self.border * 2, self.height + self.border * 2
+		# Color:
+		# 	rgb: 1, 1, 1
+		# Rectangle:
+		# 	pos: -self.border, -self.border
+		# 	size: self.width + self.border * 2, self.height + self.border * 2
 		Color:
 			rgb: 0, 0, 0
 		Rectangle:
@@ -43,21 +43,23 @@
 
 <ContentPopup>:
     container: container
+    img: img
 
     canvas: 
         Color: 
-            rgba: 0,0,0,1
+            rgba: self.color
         Rectangle:
             size: self.size
-            pos: self.pos
-        Color:
-            rgba: grey
-        Line:
-            width: .1
-            points: self.x, self.y, self.x, self.y + self.height, self.x + self.width, self.y + self.height, self.x + self.width, self.y, self.x, self.y
+            pos: 0,0
+    #     Color:
+    #         rgba: grey
+    #     Line:
+    #         width: .1
+    #         points: self.x, self.y, self.x, self.y + self.height, self.x + self.width, self.y + self.height, self.x + self.width, self.y, self.x, self.y
 
     FloatLayout:
         id: container
+        size: root.size
 
         GridLayout:
             cols: 1
@@ -133,36 +135,6 @@
                     Line:
                         width: 1
                         points: self.x, self.y, self.x + 400 - 30, self.y                        
-            # Label:
-            #     text: "Collections :                     [color=#FFF][size=18]" + root.imgitem.collection + "[/size][/color] "
-            #     color: grey
-            #     markup: True
-            #     size_hint_y: None
-            #     height: self.texture_size[1] + 10
-            #     font_size: 16
-            #     text_size: (root.width/2 - 30, None)
-
-            #     canvas:
-            #         Color:
-            #             rgba: grey
-            #         Line:
-            #             width: 1
-            #             points: self.x, self.y, self.x + 400 - 30, self.y
-            # Label:
-            #     text: "Periode :                           [color=#FFF][size=18]" + root.imgitem.periode + "[/size][/color] "
-            #     color: grey
-            #     markup: True
-            #     size_hint_y: None
-            #     height: self.texture_size[1] + 10
-            #     font_size: 16
-            #     text_size: (root.width/2 - 30, None)
-
-            #     canvas:
-            #         Color:
-            #             rgba: grey
-            #         Line:
-            #             width: 1
-            #             points: self.x, self.y, self.x + 400 - 30, self.y
 
         GridLayout:
             cols: 1
@@ -203,18 +175,23 @@
                 height: self.texture_size[1] + 10
                 font_size: 18
                 
+
+
         Image:
+            id: img
             source: root.item.filename
             size_hint: None, None
-            size: root.width/2,root.height/2
-            pos: root.x, root.y + root.height/2
+            size: root.width/2, root.height/2
+            y: root.height/2
+            x: - self.width * (1 - self.image_ratio ) /2
 
-        # Button:
-        #   text: 'X Fermer'
-        #   size_hint: None, None
-        #   size: 100,50
-        #   pos: root.x, root.y + root.height
 
+        Button:
+            text: 'X Fermer'
+            size_hint: None, None
+            size: 100,50
+            pos: root.width - self.width, root.height - self.height
+            on_release: root.close(self)
 
 <ImageItemContent>:
 	GridLayout:
