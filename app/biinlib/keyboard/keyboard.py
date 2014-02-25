@@ -38,7 +38,8 @@ class Keyboard(FloatLayout):
 			Color(0.9,0.9,0.9,1)
 			Rectangle(pos= self.pos, size= self.size)
 
-		
+		curdir = dirname(__file__)
+
 		self.label_text = Label(text='',
 					font_size = 36, 
 					color = (0,0,0,1),
@@ -50,9 +51,8 @@ class Keyboard(FloatLayout):
 					pos_hint = {},
 					valign = 'middle',
 					halign = 'center',
-					font_name = 'widgets/proximanovacond-light-webfont.ttf')
+					font_name = join(curdir, 'proximanovacond-light-webfont.ttf'))
 
-		curdir = dirname(__file__)
 
 
 		self.btnClear = Button(text='x',
@@ -127,15 +127,16 @@ class Keyboard(FloatLayout):
 
 	def switch(self):
 		"""switch keys to the alternative layout"""
+		curdir = dirname(__file__)
 		self.alternative = not self.alternative
 		for key in self.keys:
 			if not self.alternative:
 				key.canvas.after.clear()
-				if (isfile('widgets/' + key.prop[3] + '.png')):
+				if (isfile(join(curdir, key.prop[3] + '.png'))):
 					key.text = ' '
 					with key.canvas.after:
 						Color(1,1,1,1)
-						Rectangle(size = key.size, pos = key.pos, source = 'widgets/' + key.prop[3] + '.png')
+						Rectangle(size = key.size, pos = key.pos, source = join(curdir, key.prop[3] + '.png'))
 					print key.size
 				else:
 					key.text = key.prop[3]
@@ -146,11 +147,11 @@ class Keyboard(FloatLayout):
 					key.disabled = False
 			else:
 				key.canvas.after.clear()
-				if (isfile('widgets/' + key.prop[5] + '.png')):
+				if (isfile(join(curdir,  key.prop[5] + '.png'))):
 					key.text = ' '
 					with key.canvas.after:
 						Color(1,1,1,1)
-						Rectangle(size = key.size, pos = key.pos, source = 'widgets/' + key.prop[5] + '.png')
+						Rectangle(size = key.size, pos = key.pos, source = join(curdir, key.prop[5] + '.png'))
 					print key.size
 				else:
 					key.text = key.prop[5]
@@ -192,18 +193,18 @@ class Keyboard(FloatLayout):
 								background_color = self.layout['bgr_color'][key_prop[1]],
 								color = [0,0,0,1],
 								font_size = h / 2,
-								font_name = 'widgets/proximanovacond-light-webfont.ttf' )
+								font_name = join(curdir, 'proximanovacond-light-webfont.ttf' ))
 
 
 
 				# key.center = (self.pos[0] + 30 + j*45 + 45/2, self.pos[1] + 30 + i*45 + 45/2)
 				key.center = (self.pos[0] + 30 + w_tmp + key.size[0]/2, self.pos[1] + 30 + h_tmp - key.size[1]/2)
 
-				if (isfile('widgets/' + key_prop[3] + '.png')):
+				if (isfile(join(curdir, key_prop[3] + '.png'))):
 					key.text = ' '
 					with key.canvas.after:
 						Color(1,1,1,1)
-						Rectangle(size = key.size, pos = key.pos, source = 'widgets/' + key_prop[3] + '.png')
+						Rectangle(size = key.size, pos = key.pos, source = join(curdir, key_prop[3] + '.png'))
 
 
 
