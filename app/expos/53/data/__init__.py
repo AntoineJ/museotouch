@@ -14,6 +14,7 @@ from kivy.graphics import Color, Rectangle
 from museolib.widgets.keywords import Keywords
 from museolib.widgets.imageitem import ImageItem
 from museolib.widgets.basket import Basket
+from biinlib.keyboard.keyboard import Keyboard
 
 from kivy.utils import platform
 from kivy.properties import StringProperty, ObjectProperty, NumericProperty, \
@@ -161,6 +162,14 @@ def build(app):
     # Our root widget
     root = FloatLayout()
     root.hide_items = False # Désactive l'affichage des items au démarrage
+
+    curdir = dirname(__file__)
+    json_filename = join(curdir, 'layout.json')
+    kb = (Keyboard(size=(240,420), size_hint=(None,None), pos =(200,100), layout_filename = json_filename))
+
+    root.add_widget(kb)
+
+
 
     root.scroller = scroller = ScrollView( 
         size_hint=(None, None), 
