@@ -24,32 +24,11 @@ from kivy.core.window import Window
 from kivy.uix.widget import Widget 
 from kivy.config import Config 
 from kivy.core.image import Image as CoreImage
+from kivy.animation import Animation
 
-from main import MuseotouchApp
 
 # from museolib.widgets.keyboard import Keyboard
 from os.path import dirname,abspath, join
-
-from PIL import Image
-
-class PixelCounter(object):
-  ''' loop through each pixel and average rgb '''
-  def __init__(self, imageName):
-      self.pic = Image.open(imageName)
-      # load image data
-      self.imgData = self.pic.load()
-  def averagePixels(self):
-      r, g, b = 0, 0, 0
-      count = 0
-      for x in xrange(self.pic.size[0]):
-          for y in xrange(self.pic.size[1]):
-              tempr,tempg,tempb = self.imgData[x,y]
-              r += tempr
-              g += tempg
-              b += tempb
-              count += 1
-      # calculate averages
-      return (r/count), (g/count), (b/count), count
 
 # class MyKeyboardListener(Widget):
 
@@ -86,6 +65,21 @@ class PixelCounter(object):
 #         # Return True to accept the key. Otherwise, it will be used by
 #         # the system.
 #         return True
+
+class WidgetsPanel(Widget):
+    active = BooleanProperty(False)
+    
+    def toggle_panel(self, but):
+        Animation.stop_all(self, 'y')
+        if self.active:
+            anim = Animation(y=-self.height, t='in_quad', d=.1)
+            anim.start(self)
+            self.active = False
+        else:
+            anim = Animation(y=0, t='in_quad', d=.1)
+            anim.start(self)
+            self.active = True
+
 
 
 class ContentPopup(Scatter):
@@ -183,6 +177,10 @@ def build(app):
 
     scroller.add_widget(layout)
 
+
+    panel = WidgetsPanel()
+    root.add_widget(panel)
+
     def my_show_objects(objects):
         self = app
         root = self.root
@@ -238,51 +236,6 @@ def build(app):
     # root.add_widget(kb)
 
     app.trigger_objects_filtering()
-
-    # layout = GridLayout(cols=7, padding=10, spacing=10,
-    #     size_hint=(None, None), width=1920)
-    # layout.bind(minimum_height=layout.setter('height'))
-    # # add button into that grid
-    # for i in range(300):
-    #     btn = Button(text=str(i), size=(250, 250),
-    #                  size_hint=(None, None))
-    #     layout.add_widget(btn)
-
-    # root = ScrollView(size_hint=(None, None), size=(1920, 1080),
-    #             pos_hint={'center_x': .5, 'center_y': .5}
-    #             , do_scroll_x=False)
-
-    # scroll.add_widget(layout)
-    # root.add_widget(scroll)
-
-    # widgetlayout = FloatLayout(size=(1920,540), size_hint=(None,None), pos=(0,0))
-    # with widgetlayout.canvas:
-    #     Color(1,0,1,.2)
-    #     Rectangle(
-    #         pos=widgetlayout.pos, 
-    #         size=widgetlayout.size)
-        
-    import random
-    def change_grid(but):
-        rd = random.randint(1, 100)
-
-        layout.clear_widgets()
-        for i in range(rd):
-            btn = Button(text=str(i), size=(250, 250),
-                 size_hint=(None, None))
-            layout.add_widget(btn)
-
-    # but = Button(
-    #     text='relayout', 
-    #     size=(150,150), 
-    #     size_hint=(None, None),
-    #     pos= (150,150),
-    #     on_release=change_grid
-    #     )
-    # widgetlayout.add_widget(but)
-    # root.add_widget(widgetlayout)
-
-
 
 
     #### LAISSER CETTE PARTIE SINON CRASH -> variable app.basket appellée dans imageitem

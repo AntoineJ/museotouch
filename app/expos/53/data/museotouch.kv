@@ -1,8 +1,28 @@
 #:kivy 1.0
 #:import math math
-
+#:import Window kivy.core.window.Window
 #:set grey (.6,.6,.6,1)
 #:set white (1,1,1,1)
+
+<WidgetsPanel>:
+    # orientation: 'horizontal'
+    size_hint: None, None
+    size: Window.width, Window.height/2
+    pos: 0, - self.height   
+    canvas:
+        Color:
+            rgb: .1,.1,.1,1
+        Rectangle:
+            size: self.size
+            pos: self.pos
+
+    Button:
+        text: "toggle"
+        size_hint: None, None
+        size: 100,50
+        y: root.y + root.height
+        center_x: root.center_x
+        on_release: root.toggle_panel(self)
 
 <ImageItem>:
 	# border: 1 * self.scale
@@ -51,11 +71,6 @@
         Rectangle:
             size: self.size
             pos: 0,0
-    #     Color:
-    #         rgba: grey
-    #     Line:
-    #         width: .1
-    #         points: self.x, self.y, self.x, self.y + self.height, self.x + self.width, self.y + self.height, self.x + self.width, self.y, self.x, self.y
 
     FloatLayout:
         id: container
