@@ -28,8 +28,7 @@ from kivy.config import Config
 from kivy.core.image import Image as CoreImage
 from kivy.animation import Animation
 
-
-# from museolib.widgets.keyboard import Keyboard
+from biinlib.keywordscrollview import KeywordScrollView
 from os.path import dirname,abspath, join
 
 # class MyKeyboardListener(Widget):
@@ -68,11 +67,31 @@ from os.path import dirname,abspath, join
 #         # the system.
 #         return True
 
-class WidgetsPanel(Widget):
+class WidgetsPanel(FloatLayout):
     active = BooleanProperty(False)
+
+    app = ObjectProperty(None)
+
+    keys = ListProperty([])
+
+    title = StringProperty('')
 
     def __init__(self, **kwargs):
         super(WidgetsPanel, self).__init__(**kwargs)
+
+
+
+        self.app.keywords = keywords = KeywordScrollView(
+            pos=(self.x + 240, self.y),
+            title=u'Thématique',
+            app=self.app)
+        self.container.add_widget(keywords)
+        
+        def on_pos(widget, value):
+            keywords.pos = value[0] + 240 + 15, value[1]
+        self.bind(pos=on_pos)
+        
+        self.keyboard.bind(on_input = keywords.on_key)
 
     def toggle_panel(self, but):
         Animation.stop_all(self, 'y')
@@ -91,19 +110,6 @@ class WidgetsPanel(Widget):
 # Lorsqu'un label est sélectionné on recherche tous les items qui possèdent ce label et on les rajoutent à la fonction
 # de filtre du main (A vérifier)
 class FieldScrollView(ScrollView):
-    pass
-
-# En paramètre un groupe de mot-clé précis.
-# Parcours la liste des mots-clés et les affiche dans la scrollview
-# A l'initialisation se connecte à l'input event du clavier
-# Lors d'un changement dans le clavier appelle une fonction de tri qui parcours les labels et suppriment 
-# ceux qui ne correspondent pas.
-# On garde en mémoire un tableau de tous les labels pour les ajouter ou supprimer sans les recréer à chaque fois
-
-# Chaque label est cliquable et appelle une fonction qui met à jour un tableau selected_keywords
-# Le widget est préalablement enregistré en tant qu'attribut keywords sur l'app ce qui lui permettra de filtrer
-# le contenu dès que selected_keywords variera
-class keywordScrollView(ScrollView):
     pass
 
 class ContentPopup(Scatter):
@@ -178,7 +184,9 @@ def build(app):
     # -------------------------------------------------------------------------
     # Our root widget
     root = FloatLayout()
-    root.hide_items = False # Désactive l'affichage des items au démarrage
+    # root.hide_items = False # Désactive l'affichage des items au démarrage
+    
+    app.should_display_images_by_default = True
 
     root.scroller = scroller = ScrollView( 
         size_hint=(None, None), 
@@ -202,7 +210,7 @@ def build(app):
     scroller.add_widget(layout)
 
 
-    panel = WidgetsPanel()
+    panel = WidgetsPanel(app=app)
     root.add_widget(panel)
 
     def my_show_objects(objects):

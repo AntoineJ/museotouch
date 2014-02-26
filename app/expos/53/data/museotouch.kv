@@ -4,6 +4,58 @@
 #:set grey (.6,.6,.6,1)
 #:set white (1,1,1,1)
 
+<KeyScrollItem>:
+    # size_hint: None, None
+    color: (0,0,0,1) 
+    halign: 'left'
+    size_hint_x: .5
+    size_hint_y: None
+    height: 60 #self.texture_size[1] + 10
+    text_size: (230, None)
+    # width: 
+                # height: self.texture_size[1] + 10
+                # font_size: 16
+    # text_size: (root.width/2 - 30, None)
+
+
+    canvas.before:
+        Color:
+            rgb: (.2,.2,.2 )if self.state == 'normal' else (0,1,0,1)
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
+
+
+<KeywordScrollView>:
+    size_hint: None, None
+    size: 240, 420
+    # pos: 240,0
+    do_scroll_x: False
+
+    container: container
+    canvas:
+        Color:
+            rgb: .9,.9,.9
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
+    GridLayout:
+        id: container
+        size_hint: None, None
+        size: root.size
+        cols: 1
+        spacing: 10
+        padding: 10
+        # padding_vertical: 10
+        canvas:
+            Color:
+                rgb: 1,1,0
+            Rectangle:
+                pos: self.pos
+                size: self.size
+
 <WidgetsPanel>:
     # orientation: 'horizontal'
     size_hint: None, None
@@ -11,6 +63,8 @@
     pos: 0, - self.height   
 
     container: container 
+    keyboard: keyboard
+
     canvas:
         Color:
             rgb: .1,.1,.1,1
@@ -18,8 +72,8 @@
             size: self.size
             pos: self.pos
 
-    Button:
-        text: "toggle"
+    ToggleButton:
+        text: "open" if self.state == "normal" else "close"
         size_hint: None, None
         size: 100,50
         y: root.y + root.height
@@ -28,31 +82,42 @@
 
     FloatLayout:
         id: container
-        size_hint: None, None
+        size_hint: 0,0
         size: root.size
-
-        Button:
-            text: "close"
-            size_hint: None, None
-            size: 100,50
-            center_y: root.center_y
-            center_x: root.center_x
-            on_release: root.toggle_panel(self)
-
+        # orientation: 'horizontal'
+        
         Keyboard:
+            id: keyboard
             do_scale: False
             do_rotation: False
             do_translation: False
             size_hint: None,None
             size: 240,420
             pos: root.pos
+           
             canvas.before:
                 Color:
                     rgb: .9,.9,.9
                 Rectangle:
                     pos: self.pos
                     size: self.size
-            # layout_filename: 'layout.json'
+
+        # KeywordScrollView:
+        #     size_hint: None, None
+        #     pos: 240,0
+
+<Keyword>:
+    size_hint: None,None
+    size: 240,40
+    color: (1, 1, 1, 1) if self.selected else (.5, .5, .5, 1) 
+    canvas.before:
+        Color:
+            rgb: 1, 1, 1
+        Rectangle:
+            pos: int(self.center_x - self.texture_size[0] / 2. - 32), int(self.center_y - 10)
+            size: 20, 20
+            # source: 'widgets/circle%s.png' % ('_selected' if self.selected else '')
+
 
 <ImageItem>:
 	# border: 1 * self.scale
@@ -312,13 +377,3 @@
 			height: self.texture_size[1]
 			color: (1, 1, 1, 1 - root.flip_alpha)
 
-
-<Keyword>:
-	color: (1, 1, 1, 1) if self.selected else (.5, .5, .5, 1) 
-	canvas.before:
-		Color:
-			rgb: 1, 1, 1
-		Rectangle:
-            pos: int(self.center_x - self.texture_size[0] / 2. - 32), int(self.center_y - 10)
-			size: 20, 20
-			source: 'widgets/circle%s.png' % ('_selected' if self.selected else '')
