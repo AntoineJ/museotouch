@@ -1,42 +1,51 @@
 #:kivy 1.0
+
+# FONTS
+#:set proxima 'fonts/proximanova-regular-webfont.ttf'
+#:set proximaSemiBold 'fonts/proximanova-semibold-webfont.ttf'
+#:set proximaBold 'fonts/proximanova-bold-webfont.ttf'
+#:set futura 'fonts/FuturaLT.ttf'
+
+# IMPORTS
 #:import math math
 #:import Window kivy.core.window.Window
-#:set grey (.6,.6,.6,1)
-#:set white (1,1,1,1)
+
+# COLORS
+#:set blue (0,.647,.635,1)
+#:set greybg (0.933,0.933,0.933,1)
+#:set greytext (0.235,0.235,0.235,1)
+#:set greytitle (0.2,0.2,0.2,1)
 
 <KeyScrollItem>:
     # size_hint: None, None
-    color: (0,0,0,1) 
+    color: greytitle if self.state == 'normal' else (1,1,1,1)
     halign: 'left'
-    size_hint_x: .5
+    size_hint_x: None
     size_hint_y: None
-    height: 60 #self.texture_size[1] + 10
-    text_size: (230, None)
-    # width: 
-                # height: self.texture_size[1] + 10
-                # font_size: 16
-    # text_size: (root.width/2 - 30, None)
 
+    width: 240 if not self.parent else self.parent.width -60
+    height: self.texture_size[1] + 20
+    text_size: (self.width, None)
 
+    font_name: proxima if self.state == 'normal' else proximaSemiBold
+    font_size: 14
+    
     canvas.before:
         Color:
-            rgb: (.2,.2,.2 )if self.state == 'normal' else (0,1,0,1)
+            rgba: (0,0,0,0) if self.state == 'normal' else blue
         Rectangle:
-            pos: self.pos
-            size: self.size
-
+            pos: self.x - 15, self.y
+            size: self.width +30, self.height
 
 
 <KeywordScrollView>:
     size_hint: None, None
-    size: 240, 420
-    # pos: 240,0
     do_scroll_x: False
 
     container: container
     canvas:
         Color:
-            rgb: .9,.9,.9
+            rgba: .9,.9,.9,0
         Rectangle:
             pos: self.pos
             size: self.size
@@ -46,39 +55,52 @@
         size_hint: None, None
         size: root.size
         cols: 1
-        spacing: 10
-        padding: 10
-        # padding_vertical: 10
-        canvas:
-            Color:
-                rgb: 1,1,0
-            Rectangle:
-                pos: self.pos
-                size: self.size
+        spacing: 0
+        padding: 30 ,0 ,0 ,0
 
 <WidgetsPanel>:
     # orientation: 'horizontal'
     size_hint: None, None
-    size: Window.width, Window.height/2
-    pos: 0, - self.height   
+    size: Window.width, 510
+    pos: 0, - self.height + 60 
 
     container: container 
     keyboard: keyboard
 
     canvas:
         Color:
-            rgb: .1,.1,.1,1
+            rgb: greybg
         Rectangle:
             size: self.size
             pos: self.pos
+        Color:
+            rgba: 0,0,0,.3
+        Line:
+            width: 1
+            points: self.x, self.y + self.height - 61, self.x + self.width, self.y + self.height -61
+        Line:
+            points: self.x + 240 +1, self.y, self.x + 240 + 1, self.y + self.height - 62
+        Line:
+            points: self.x + 240*3 + 3, self.y, self.x + 240*3 + 3, self.y + self.height - 62
+        Line:
+            points: self.x + 240*4 + 5, self.y, self.x + 240*4 + 5, self.y + self.height - 62
+        Line:
+            points: self.x + 240*5 + 7, self.y, self.x + 240*5 + 7, self.y + self.height - 62
 
     ToggleButton:
-        text: "open" if self.state == "normal" else "close"
+        # text: "open" if self.state == "normal" else "close"
         size_hint: None, None
-        size: 100,50
-        y: root.y + root.height
+        size: Window.width,60
+        y: root.y + root.height - self.height
         center_x: root.center_x
         on_release: root.toggle_panel(self)
+
+        canvas:
+            Color:
+                rgb: 1,1,1
+            Rectangle: 
+                pos: self.pos
+                size: self.size
 
     FloatLayout:
         id: container
@@ -95,16 +117,75 @@
             size: 240,420
             pos: root.pos
            
-            canvas.before:
-                Color:
-                    rgb: .9,.9,.9
-                Rectangle:
-                    pos: self.pos
-                    size: self.size
+            # canvas.before:
+            #     Color:
+            #         rgb: .9,.9,.9
+            #     Rectangle:
+            #         pos: self.pos
+            #         size: self.size
 
         # KeywordScrollView:
         #     size_hint: None, None
         #     pos: 240,0
+
+
+<SizeSlider>:
+    canvas:
+        Color:
+            rgb: 1, 1, 1
+        Rectangle:
+            pos: self.x, self.y
+            size: self.size
+            # source: 'widgets/taille.png'
+        Color:
+            rgb: .3,.3,.3
+        Rectangle:
+            pos: self.x + self.value_min * self.width, 0
+            size: self.width * (self.value_max - self.value_min), self.height
+
+
+    Scatter:
+        do_translation: False
+        do_scale: False
+        do_rotation: False
+        rotation: 90
+        size_hint: None,None
+        pos: root.x + root.value_min * root.width - 40, 0
+
+
+        Label: 
+            size_hint: None, None
+            text: root.text_min
+            width: 240
+            height: 60
+            
+            canvas.before:
+                Color:
+                    rgb: .6,.6,.6
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
+        
+    Scatter:
+        do_translation: False
+        do_scale: False
+        do_rotation: False
+        rotation: 90
+        size_hint: None,None
+        pos: root.x + root.value_max * root.width - self.width, 0
+
+        Label:
+            size_hint: None, None
+            width: 240
+            height: 60
+            text: root.text_max
+            
+            canvas.before:
+                Color:
+                    rgb: .6,.6,.6
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
 
 <Keyword>:
     size_hint: None,None
@@ -155,6 +236,14 @@
 			size_hint: (1 * (0.3 + 0.7 * root.flip_alpha), 1 * (0.3 + 0.7 * root.flip_alpha))
 			pos_hint: {'top': 1}
 			on_release: root.on_btn_moreinfo()
+
+<ScrollItem>:
+    background_normal: root.source
+    background_down: root.source
+    # size_hint: (1 * (0.3 + 0.7 * root.flip_alpha), 1 * (0.3 + 0.7 * root.flip_alpha))
+    size_hint: None, None
+    pos_hint: {'top': 1}
+    on_press: root.open()
 
 <ContentPopup>:
     container: container

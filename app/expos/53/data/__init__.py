@@ -1,7 +1,5 @@
 #:kivy 1.8.0
 # -*- coding: utf-8 -*-
-from os.path import join
-from glob import glob
 
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.button import Button
@@ -9,63 +7,24 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.scatter import Scatter
 from kivy.uix.scrollview import ScrollView
 from kivy.uix.gridlayout import GridLayout
-from kivy.graphics import Color, Rectangle
-
-from museolib.widgets.keywords import Keywords
-from museolib.widgets.imageitem import ImageItem
-from museolib.widgets.basket import Basket
-from biinlib.keyboard.keyboard import Keyboard
 
 from kivy.utils import platform
 from kivy.properties import StringProperty, ObjectProperty, NumericProperty, \
         BooleanProperty, ListProperty
 
-from kivy.uix.vkeyboard import VKeyboard
 from kivy.core.window import Window
-from kivy.uix.widget import Widget 
-from kivy.uix.image import Image 
-from kivy.config import Config 
 from kivy.core.image import Image as CoreImage
 from kivy.animation import Animation
 
-from biinlib.keywordscrollview import KeywordScrollView
+from museolib.widgets.imageitem import ImageItem
+from museolib.widgets.basket import Basket
+from museolib.widgets.slider import SizeSlider
+
+from biinlib.keyboard.keyboard import Keyboard
+from biinlib.keywordscrollview import KeywordScrollView, AttributeScrollView
+
 from os.path import dirname,abspath, join
 
-# class MyKeyboardListener(Widget):
-
-#     def __init__(self, **kwargs):
-#         print('Init keyboard listener')
-#         super(MyKeyboardListener, self).__init__(**kwargs)
-#         self._keyboard = Window.request_keyboard(
-#             self._keyboard_closed, self, 'text')
-#         if self._keyboard.widget:
-#             print 'in'
-#             vkeyboard = self._keyboard.widget
-#             vkeyboard.layout = 'layout.json'
-#             vkeyboard.size = self.size
-#             vkeyboard.key_margin = [0,0,0,0]
-#             vkeyboard.margin_hint = [0,0,0,0]
-#         self._keyboard.bind(on_key_down=self._on_keyboard_down)
-
-
-#     def _keyboard_closed(self):
-#         print('My keyboard have been closed!')
-#         self._keyboard.unbind(on_key_down=self._on_keyboard_down)
-#         self._keyboard = None
-
-#     def _on_keyboard_down(self, keyboard, keycode, text, modifiers):
-#         print('The key', keycode, 'have been pressed')
-#         print(' - text is %r' % text)
-#         print(' - modifiers are %r' % modifiers)
-
-#         # Keycode is composed of an integer + a string
-#         # If we hit escape, release the keyboard
-#         if keycode[1] == 'escape':
-#             keyboard.release()
-
-#         # Return True to accept the key. Otherwise, it will be used by
-#         # the system.
-#         return True
 
 class WidgetsPanel(FloatLayout):
     active = BooleanProperty(False)
@@ -79,24 +38,71 @@ class WidgetsPanel(FloatLayout):
     def __init__(self, **kwargs):
         super(WidgetsPanel, self).__init__(**kwargs)
 
-
-
+        # -------------------------------------------------------------------------
+        # Widget Scroll View on one group of Keywords
         self.app.keywords = keywords = KeywordScrollView(
-            pos=(self.x + 240, self.y),
+            pos=(self.x + 240 * 4, self.y),
             title=u'Thématique',
+            size=(240,420),
             app=self.app)
         self.container.add_widget(keywords)
-        
-        def on_pos(widget, value):
-            keywords.pos = value[0] + 240 + 15, value[1]
-        self.bind(pos=on_pos)
-        
+        # Binding widget with keyboard
         self.keyboard.bind(on_input = keywords.on_key)
+
+        # -------------------------------------------------------------------------
+        # Date Slider
+        self.app.date_slider = slider = SizeSlider(
+            size=(420, 240), size_hint=(None, None))
+        scatter = Scatter(size=slider.size,
+                auto_bring_to_front=False,
+                pos=(self.x, self.y - 240),
+                size_hint=(None, None), rotation=-90,
+                do_translate=False, do_rotate=False, do_scale=False)
+        scatter.add_widget(slider)
+        self.container.add_widget(scatter)
+
+        # Find all the titles and authors from item database
+        item_names = []
+        item_authors = []
+        for item in self.app.db.items:
+            if item.nom not in item_names:
+                item_names.append(item.nom)
+            if item.freefield not in item_authors:
+                item_authors.append(item.freefield)
+
+        # -------------------------------------------------------------------------
+        # Title Scroll View
+        title_scroll = AttributeScrollView(
+            pos=(self.x + 240, self.y),
+            size=(480, 420),
+            app = self.app)
+        self.container.add_widget(title_scroll)
+        title_scroll.keywords = item_names
+        # Binding widget with keyboard
+        self.keyboard.bind(on_input = title_scroll.on_key)
+        # -------------------------------------------------------------------------
+        # Author Scroll View
+        author_scroll = AttributeScrollView(
+            pos=(self.x + 240 * 3, self.y),
+            size=(240,420),
+            app= self.app)
+        self.container.add_widget(author_scroll)
+        author_scroll.keywords = item_authors
+        # Binding widget with keyboard
+        self.keyboard.bind(on_input = author_scroll.on_key)
+        # -------------------------------------------------------------------------
+        # Moving children widgets with panel
+        def on_pos(widget, value):
+            title_scroll.pos = self.x + 240 + 2, value[1]
+            author_scroll.pos = self.x + 240 * 3 + 4, value[1]
+            keywords.pos = value[0] + 240 *4 + 6, value[1]
+            scatter.pos = self.x + 240 * 5 + 8, value[1]
+        self.bind(pos=on_pos)
 
     def toggle_panel(self, but):
         Animation.stop_all(self, 'y')
         if self.active:
-            anim = Animation(y=-self.height, t='in_quad', d=.1)
+            anim = Animation(y=-self.height + 60, t='in_quad', d=.1)
             anim.start(self)
             self.active = False
         else:
@@ -114,12 +120,12 @@ class FieldScrollView(ScrollView):
 
 class ContentPopup(Scatter):
     item = ObjectProperty(None)
-    imgitem = ObjectProperty(None)
+    controler = ObjectProperty(None)
     color = ListProperty([0,0,0,1])
+    controler = ObjectProperty(None)
 
     def __init__(self, **kwargs):
         super(ContentPopup, self).__init__(**kwargs)
-        colors = []
 
         # Find main color in the image
         if self.img is not None:
@@ -149,31 +155,37 @@ class ContentPopup(Scatter):
 
     def close(self, but):
         self.parent.remove_widget(self)
-
-
-ImageItem.popup = ObjectProperty(None)
-        
-def on_btn_moreinfo(self, *largs):
-    # Instanciation de la classe ContentPopup 
-    # On passe en paramètre self.item qui contient toutes les infos à afficher
-    self.popup = ContentPopup(item=self.item, imgitem=self, size_hint=(None,None), size=(800,800))
-    self.app.root_images.add_widget(self.popup)
-
-ImageItem.on_btn_moreinfo = on_btn_moreinfo
-
-
+        self.controler.popup = None
 
 def on_start(self):
     pass
 
 ImageItem.on_start = on_start
 
+class ScrollItem(Button):
+    item = ObjectProperty(None)
+    source = StringProperty('')
+    app = ObjectProperty(None)
+    popup = ObjectProperty(None)
 
-
+    def open(self, *largs):
+        print self.popup
+        self.popup = ContentPopup(
+            item=self.item, 
+            controler=self, 
+            size_hint=(None,None), 
+            size=(800,800))
+        self.app.root_images.add_widget(self.popup)
+   
 def feed_scroll(defs):
-    item = ImageItem(**defs)
+    item = ScrollItem(**defs)
     app = defs.pop('app')
     app.root.scroller.layout.add_widget(item)
+
+    # for i in range(30):
+    #     btn = Button(text=str(i), 
+    #                  size_hint=(None, None))
+    #     app.root.scroller.layout.add_widget(btn)
 
 
 
@@ -206,6 +218,7 @@ def build(app):
         spacing=15,
         size_hint=(None, None), 
         width=1920)
+    layout.bind(minimum_height=layout.setter('height'))
 
     scroller.add_widget(layout)
 
@@ -244,28 +257,12 @@ def build(app):
                 for child in self.root.scroller.layout.children[:]:
                     for filename in images:
                         if filename == child.source:
-                            self.images_pos[filename] = {
-                                'center': child.center,
-                                'rotation': child.rotation }
+                            # self.images_pos[filename] = {
+                            #     'center': child.center,
+                            #     'rotation': child.rotation }
                             self.root.scroller.layout.remove_widget(child)
 
     app.show_objects = my_show_objects
-
-    # keyboard_layout = FloatLayout(size=(300,300), size_hint=(None, None))
-
-    # kbListener = MyKeyboardListener(size=(100,150), size_hint=(None, None))
-    # print kbListener._keyboard.widget.font_size
-    # print kbListener.size_hint
-
-    # keyboard_layout.add_widget(kbListener)
-
-    # root.add_widget(kbListener)
-    # curdir = dirname(__file__)
-    # json_filename = join(curdir, 'layout.json')
-
-    # kb = (Keyboard(size=(240,500), size_hint=(None,None), pos =(100,100), layout_filename = json_filename))
-
-    # root.add_widget(kb)
 
     app.trigger_objects_filtering()
 

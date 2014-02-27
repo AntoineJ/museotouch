@@ -49,7 +49,7 @@ class Keyboard(Scatter):
 					pos_hint = {},
 					valign = 'middle',
 					halign = 'center',
-					font_name = join(curdir, 'proximanovacond-light-webfont.ttf'))
+					font_name = join(curdir, 'ProximaNova-Thin-webfont.ttf'))
 
 		self.btnClear = Button(text='x',
 								size = (20, 48), 
@@ -75,7 +75,6 @@ class Keyboard(Scatter):
 		self.add_widget(self.label_text)
 	def on_input(self, *args):
 		return True
-
 
 	def load_layout(self):
 		"""load the JSON file"""
@@ -189,7 +188,7 @@ class Keyboard(Scatter):
 								background_color = self.layout['bgr_color'][key_prop[1]],
 								color = [0,0,0,1],
 								font_size = h / 2,
-								font_name = join(curdir, 'proximanovacond-light-webfont.ttf' ))
+								font_name = join(curdir, 'ProximaNova-Thin-webfont.ttf' ))
 
 
 
