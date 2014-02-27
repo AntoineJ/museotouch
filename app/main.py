@@ -424,10 +424,10 @@ class MuseotouchApp(App):
         # OR inside group
         if self.keywords and self.keywords.selected_keywords:
             selected_keywords = self.keywords.selected_keywords
+            print selected_keywords
             groups = list(set([x[0] for x in selected_keywords]))
             groups_result = {}
             items_result = []
-
             # check every group
             for group in groups:
                 # check keywords for current group
@@ -468,6 +468,8 @@ class MuseotouchApp(App):
         # show only the first 10 objects
         if not self.should_display_images_by_default:
             items = result
+
+
         self.show_objects(items)
 
 
@@ -558,8 +560,9 @@ class MuseotouchApp(App):
         self.calendar = None
 
         # set the image type from mode
-        self.imgtype = 'dds'
-        self.imgdir = 'dds'
+        # TODO : get values from museotouch.ini
+        self.imgtype = 'jpg'
+        self.imgdir = 'raw'
 
         # display images when nothing is selected ?
         self.should_display_images_by_default = BooleanProperty(True)
