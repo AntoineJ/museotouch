@@ -98,7 +98,7 @@ class Keyboard(Scatter):
 		"""manage the inputs. Here you can define an action for a specific key"""
 
 		if key.prop[0] == 'input':
-			if len(self.label_text.text) < 7:				
+			if len(self.label_text.text) < 6:				
 				if not self.alternative:
 					self.label_text.text += key.prop[4]
 				else:
