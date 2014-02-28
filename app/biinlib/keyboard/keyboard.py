@@ -95,8 +95,45 @@ class Keyboard(Scatter):
 			self.layout = load(fd)
 
 	def keyInput(self, key):
-		"""manage the inputs. Here you can define an action for a specific key"""
+		
 
+		# if key.prop[0] == 'input':
+		# 	if len(self.label_text.text) < 6:				
+		# 		if not self.alternative:
+		# 			self.label_text.text += key.prop[4]
+		# 		else:
+		# 			self.label_text.text += key.prop[6]
+		# 		self.resetNextInput()
+		# 		self.dispatch('on_input', self.label_text.text)
+		# elif key.prop[0] == 'back':
+		# 	if len(self.label_text.text) > 0:
+		# 		self.label_text.text = self.label_text.text[0:len(self.label_text.text) - 1] #moche mais fait le taf
+		# 		self.resetNextInput()
+		# 		self.dispatch('on_input', self.label_text.text)
+		# 		self.enable_key()
+		# elif key.prop[0] == 'clear':
+		# 	self.clear_text()
+		# elif key.prop[0] == 'change':
+		# 	self.switch()
+
+		# center_tmp = (key.center[0], key.center[1])
+		# key.size = (key.size[0] + 15, key.size[1] + 15)
+		# key.wd = key.wd + 15
+		# key.hgt = key.hgt + 15
+		Animation.stop_all(key)
+		anim = Animation(wd = key.wd_fix + 15, hgt = key.hgt_fix + 15, duration = 0.1, t='out_circ')
+		anim.start(key)
+		# key.center = center_tmp
+
+		parent = key.parent
+		parent.remove_widget(key)
+		parent.add_widget(key)
+
+		key.background_color = [1,1,1,1]
+
+
+	def keyRelease(self, key):
+		"""manage the inputs. Here you can define an action for a specific key"""
 		if key.prop[0] == 'input':
 			if len(self.label_text.text) < 6:				
 				if not self.alternative:
@@ -116,23 +153,14 @@ class Keyboard(Scatter):
 		elif key.prop[0] == 'change':
 			self.switch()
 
-		# center_tmp = (key.center[0], key.center[1])
-		# key.size = (key.size[0] + 15, key.size[1] + 15)
-		# key.wd = key.wd + 15
-		# key.hgt = key.hgt + 15
-		Animation.stop_all(key)
-		anim = Animation(wd = key.wd_fix + 15, hgt = key.hgt_fix + 15, duration = 0.1, t='out_circ')
-		anim.start(key)
-		# key.center = center_tmp
-
-		parent = key.parent
-		parent.remove_widget(key)
-		parent.add_widget(key)
-
-		key.background_color = [1,1,1,1]
 
 
-	def keyRelease(self, key):
+
+
+
+
+
+
 		# center_tmp = (key.center[0], key.center[1])
 		# key.size = (key.size[0] - 15, key.size[1] - 15)
 		# print key.pic.size
