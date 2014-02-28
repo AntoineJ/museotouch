@@ -2,12 +2,22 @@
 
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.label import Label
-from kivy.properties import ObjectProperty, StringProperty, BooleanProperty, ListProperty
+from kivy.properties import ObjectProperty, StringProperty, BooleanProperty, ListProperty, NumericProperty
 from kivy.uix.button import Button
 from json import load
 from os.path import dirname,abspath, join, isfile
 from kivy.graphics import Color, Rectangle
 from kivy.uix.scatter import Scatter
+from kivy.animation import Animation
+
+class Key(Button):
+	wd = NumericProperty(1)
+	hgt = NumericProperty(1)
+	wd_fix = NumericProperty(1)
+	hgt_fix = NumericProperty(1)
+	centre = ObjectProperty([1,2])
+	img = StringProperty('')
+
 
 class Keyboard(Scatter):
 	"""Custom keyboard with input text"""
@@ -38,18 +48,18 @@ class Keyboard(Scatter):
 		curdir = dirname(__file__)
 		self.layout_filename = join(curdir, 'layout.json')
 
-		self.label_text = Label(text='',
-					font_size = 36, 
-					color = (0,0,0,1),
-					# shorten = True,
-					text_size = (self.size[0] - 60 - 22, 50),
-					size = (self.size[0] - 60 - 22, 50),
-					size_hint = (None, None),
-					pos = (self.pos[0] + 30, self.pos[1] + self.size[1] - 50),
-					pos_hint = {},
-					valign = 'middle',
-					halign = 'center',
-					font_name = join(curdir, 'ProximaNova-Thin-webfont.ttf'))
+		# self.label_text = Label(text='',
+		# 			font_size = 36, 
+		# 			color = (0,0,0,1),
+		# 			# shorten = True,
+		# 			text_size = (self.size[0] - 60 - 22, 50),
+		# 			size = (self.size[0] - 60 - 22, 50),
+		# 			size_hint = (None, None),
+		# 			pos = (self.pos[0] + 30, self.pos[1] + self.size[1] - 50),
+		# 			pos_hint = {},
+		# 			valign = 'middle',
+		# 			halign = 'center',
+		# 			font_name = join(curdir, 'ProximaNova-Thin-webfont.ttf'))
 
 		self.btnClear = Button(text='x',
 								size = (20, 48), 
@@ -72,7 +82,7 @@ class Keyboard(Scatter):
 		self.add_widget(self.btnClear)
 
 
-		self.add_widget(self.label_text)
+		# self.add_widget(self.label_text)
 	def on_input(self, *args):
 		return True
 
@@ -83,7 +93,6 @@ class Keyboard(Scatter):
 
 	def keyInput(self, key):
 		"""manage the inputs. Here you can define an action for a specific key"""
-
 
 
 		if key.prop[0] == 'input':
@@ -103,9 +112,14 @@ class Keyboard(Scatter):
 		elif key.prop[0] == 'change':
 			self.switch()
 
-		center_tmp = (key.center[0], key.center[1])
-		key.size = (key.size[0] + 15, key.size[1] + 15)
-		key.center = center_tmp
+		# center_tmp = (key.center[0], key.center[1])
+		# key.size = (key.size[0] + 15, key.size[1] + 15)
+		# key.wd = key.wd + 15
+		# key.hgt = key.hgt + 15
+		Animation.stop_all(key)
+		anim = Animation(wd = key.wd_fix + 15, hgt = key.hgt_fix + 15, duration = 0.1, t='out_circ')
+		anim.start(key)
+		# key.center = center_tmp
 
 		parent = key.parent
 		parent.remove_widget(key)
@@ -115,9 +129,15 @@ class Keyboard(Scatter):
 
 
 	def keyRelease(self, key):
-		center_tmp = (key.center[0], key.center[1])
-		key.size = (key.size[0] - 15, key.size[1] - 15)
-		key.center = center_tmp
+		# center_tmp = (key.center[0], key.center[1])
+		# key.size = (key.size[0] - 15, key.size[1] - 15)
+		# print key.pic.size
+		# key.wd = key.wd - 15
+		# key.hgt = key.hgt - 15
+		Animation.stop_all(key)
+		anim = Animation(wd = key.wd_fix, hgt = key.hgt_fix, duration = 0.1, t='out_circ')
+		anim.start(key)
+		# key.center = center_tmp
 		key.background_color = self.layout['bgr_color'][key.prop[1]]
 
 	def switch(self):
@@ -126,30 +146,39 @@ class Keyboard(Scatter):
 		self.alternative = not self.alternative
 		for key in self.keys:
 			if not self.alternative:
-				key.canvas.after.clear()
+				# key.canvas.after.clear()
 				if (isfile(join(curdir, key.prop[3] + '.png'))):
 					key.text = ' '
-					with key.canvas.after:
-						Color(1,1,1,1)
-						Rectangle(size = key.size, pos = key.pos, source = join(curdir, key.prop[3] + '.png'))
-					print key.size
+					key.img = join(curdir, key.prop[3] + '.png')
+					# key.pic.color = [1,1,1,1]
+
+					# with key.canvas.after:
+					# 	Color(1,1,1,1)
+					# 	Rectangle(size = key.size, pos = key.pos, source = join(curdir, key.prop[3] + '.png'))
+
 				else:
 					key.text = key.prop[3]
+					# key.pic.color = [0,0,0,0]
+					key.img = ''
 
 				if key.text == '':
 					key.disabled = True
 				else:
 					key.disabled = False
 			else:
-				key.canvas.after.clear()
+				# key.canvas.after.clear()
 				if (isfile(join(curdir,  key.prop[5] + '.png'))):
 					key.text = ' '
-					with key.canvas.after:
-						Color(1,1,1,1)
-						Rectangle(size = key.size, pos = key.pos, source = join(curdir, key.prop[5] + '.png'))
-					print key.size
+					key.img = join(curdir, key.prop[5] + '.png')
+					# key.pic.color = [1,1,1,1]
+					# with key.canvas.after:
+					# 	Color(1,1,1,1)
+					# 	Rectangle(size = key.size, pos = key.pos, source = join(curdir, key.prop[5] + '.png'))
+
 				else:
 					key.text = key.prop[5]
+					key.img = ''
+					# key.pic.color = [0,0,0,0]
 				if key.text == '':
 					key.disabled = True
 				else:
@@ -174,32 +203,42 @@ class Keyboard(Scatter):
 			for key_prop in self.layout['button'][i]:
 				if isinstance(key_prop, (int, float, long, complex)): #the first item is the height of the row
 					continue
-				key = Button(text = key_prop[3], 
-								size = (w * key_prop[2] - 2, h - 2),
-								size_hint = (None, None),
+				key = Key(text = key_prop[3], 
+								wd = w * key_prop[2],
+								hgt = h,
+								wd_fix = w * key_prop[2],
+								hgt_fix = h,
+
+								centre = (self.pos[0] + 30 + w_tmp + w * key_prop[2]/2, self.pos[1] + 30 + h_tmp - h/2),
+								# size = (w * key_prop[2] - 2, h - 2),
+								# size_hint = (None, None),
 								# pos = (self.pos[0] + j*w, self.pos[1] + i * h),
-								border = [0,0,0,0],
+								# border = [0,0,0,0],
 								# background_normal = join(curdir,'special-carac-icon.png'),
-								background_normal = join(curdir,'btn.png'),
-								background_disabled_normal = join(curdir,'btn.png'),
-								background_disabled_down = join(curdir,'btn.png'),
-								background_down = join(curdir,'btn.png'),
+								# background_normal = join(curdir,'btn.png'),
+								# background_disabled_normal = join(curdir,'btn.png'),
+								# background_disabled_down = join(curdir,'btn.png'),
+								# background_down = join(curdir,'btn.png'),
 								# background_color = [0,0,0,0],
 								background_color = self.layout['bgr_color'][key_prop[1]],
-								color = [0,0,0,1],
-								font_size = h / 2,
-								font_name = join(curdir, 'ProximaNova-Thin-webfont.ttf' ))
+								color = [0,0,0,1])
+								# font_size = h / 2)
+								# font_name = join(curdir, 'ProximaNova-Thin-webfont.ttf' ))
 
 
 
 				# key.center = (self.pos[0] + 30 + j*45 + 45/2, self.pos[1] + 30 + i*45 + 45/2)
-				key.center = (self.pos[0] + 30 + w_tmp + key.size[0]/2, self.pos[1] + 30 + h_tmp - key.size[1]/2)
+				# key.centre = (self.pos[0] + 30 + w_tmp + w * key_prop[2]/2, self.pos[1] + 30 + h_tmp - h/2)
+
+				
 
 				if (isfile(join(curdir, key_prop[3] + '.png'))):
 					key.text = ' '
-					with key.canvas.after:
-						Color(1,1,1,1)
-						Rectangle(size = key.size, pos = key.pos, source = join(curdir, key_prop[3] + '.png'))
+					key.img = join(curdir, key_prop[3] + '.png')
+					# key.pic.color = [1,1,1,1]
+					# with key.canvas.after:
+					# 	Color(1,1,1,1)
+					# 	Rectangle(size = key.size, pos = key.pos, source = join(curdir, key_prop[3] + '.png'))
 
 
 

@@ -2,6 +2,7 @@
 
 # FONTS
 #:set proxima 'fonts/proximanova-regular-webfont.ttf'
+#:set proximaThin 'fonts/ProximaNova-Thin-webfont.ttf'
 #:set proximaSemiBold 'fonts/proximanova-semibold-webfont.ttf'
 #:set proximaBold 'fonts/proximanova-bold-webfont.ttf'
 #:set futura 'fonts/FuturaLT.ttf'
@@ -162,12 +163,39 @@
         
         Keyboard:
             id: keyboard
+            label_text: label_text
+            # btnClear: btnClear
             do_scale: False
             do_rotation: False
             do_translation: False
             size_hint: None,None
             size: 240,420
             pos: root.pos
+
+            Label:
+                id: label_text
+                text: ''
+                font_size: 36
+                color: 0,0,0,1
+                text_size: 158, 50
+                size: 158, 50
+                size_hint: None, None
+                pos: 30, 370
+                valign: 'middle'
+                halign: 'center'
+                font_name: proximaThin
+
+            # Button:
+            #     id: btnClear
+            #     text: 'x'
+            #     size: 20, 48
+            #     pos: 189, 370
+            #     size_hint: None, None
+            #     border: [0,0,0,0]
+            #     background_normal: 'btn.png'
+            #     # background_down: 'btn_close_down.png'
+            #     background_color: [0.8,0.8,0.8,1]
+            #     color: [0,0,0,1]
            
             # canvas.before:
             #     Color:
@@ -179,6 +207,36 @@
         # KeywordScrollView:
         #     size_hint: None, None
         #     pos: 240,0
+
+<Key>:
+    pic: pic
+    size_hint: None, None
+    border: [0,0,0,0]
+    font_name: proximaThin
+    background_normal: 'widgets/btn.png'
+    background_disabled_normal: 'widgets/btn.png'
+    background_disabled_down: 'widgets/btn.png'
+    background_down: 'widgets/btn.png'
+    size: self.wd - 2, self.hgt - 2
+    font_size: (self.hgt+2) / 2.
+    pos: self.centre[0] - self.size[0]/2., self.centre[1] - self.size[1]/2.
+
+    Scatter:
+        id: pic
+        do_scale: False
+        do_rotation: False
+        do_translation: False
+        size_hint: None, None
+        size: root.size
+        pos: root.pos
+        canvas:
+            Color:
+                rgba: (0,0,0,0) if root.img =='' else (1,1,1,1)
+            Rectangle:
+                pos: 0,0
+                size: root.size
+                source: root.img
+
 
 
 <SizeSlider>:
