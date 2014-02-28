@@ -80,8 +80,6 @@ class KeywordScrollView(ScrollView):
             uname = uname.upper()
 
             if value in uname:
-
-                print uname, value
                 if value != '':
                     splittxt = uname.split(value, 1)
                     # print splittxt
@@ -104,7 +102,8 @@ class KeywordScrollView(ScrollView):
                     # for key in self.selected_keywords: 
                     #     if key[1] == child.key['id']:
                     #         self.selected_keywords.remove(key)
-        print 'NEXT : ', next_letters
+        # print 'NEXT : ', next_letters
+        self.keyboard.next_input(next_letters)
 
 
 class AttributeScrollView(KeywordScrollView):
