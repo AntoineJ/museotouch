@@ -12,6 +12,8 @@
 
 # COLORS
 #:set blue (0,.647,.635,1)
+#:set grey (0,0,0,1)
+#:set white (1,1,1,1)
 #:set greybg (0.933,0.933,0.933,1)
 #:set greytext (0.235,0.235,0.235,1)
 #:set greytitle (0.2,0.2,0.2,1)
@@ -37,7 +39,6 @@
             pos: self.x - 15, self.y
             size: self.width +30, self.height
 
-
 <KeywordScrollView>:
     size_hint: None, None
     do_scroll_x: False
@@ -56,7 +57,7 @@
         size: root.size
         cols: 1
         spacing: 0
-        padding: 30 ,0 ,0 ,0
+        padding: 30 ,30 ,0 ,0
 
 <WidgetsPanel>:
     # orientation: 'horizontal'
@@ -66,6 +67,7 @@
 
     container: container 
     keyboard: keyboard
+    dynamic_sentence: dynamic_sentence
 
     canvas:
         Color:
@@ -76,7 +78,6 @@
         Color:
             rgba: 0,0,0,.3
         Line:
-            width: 1
             points: self.x, self.y + self.height - 61, self.x + self.width, self.y + self.height -61
         Line:
             points: self.x + 240 +1, self.y, self.x + 240 + 1, self.y + self.height - 62
@@ -101,6 +102,57 @@
             Rectangle: 
                 pos: self.pos
                 size: self.size
+
+    Label: 
+        text: 'TITRES'
+        font_name: proximaBold
+        size_hint: None, None
+        color: greytitle
+        font_size: 16
+        halign: 'left'
+        pos: root.x + 240 + 30, root.y + root.height- 90 
+        height: 30
+        width: self.texture_size[0]
+        text_size: None, 30
+
+    Label:
+        text: ' AUTEURS'
+        font_name: proximaBold
+        size_hint: None, None
+        color: greytitle
+        font_size: 16
+        halign: 'left'
+        pos: root.x + 240 * 3+ 30, root.y + root.height- 90 
+        height: 30
+        width: self.texture_size[0]
+        text_size: None, 30
+
+    Label:
+        text: ' THÈMES'
+        font_name: proximaBold
+        size_hint: None, None
+        color: greytitle
+        font_size: 16
+        halign: 'left'
+        pos: root.x + 240 * 4 + 30, root.y + root.height- 90 
+        height: 30
+        width: self.texture_size[0]
+        text_size: None, 30
+
+    Label: 
+        id: dynamic_sentence
+        text: "Trouve moi un livre de n'import qui"
+        font_name: proxima
+        size_hint: None, None
+        color: greytitle
+        font_size: 24
+        halign: 'left'
+        valign: 'middle'
+        pos: root.x + 30, root.y + root.height- 60 
+        height: 60
+        width: self.texture_size[0]
+        text_size: None, 60
+
 
     FloatLayout:
         id: container
@@ -199,7 +251,6 @@
             size: 20, 20
             # source: 'widgets/circle%s.png' % ('_selected' if self.selected else '')
 
-
 <ImageItem>:
 	# border: 1 * self.scale
 	# size_hint: None, None
@@ -248,6 +299,8 @@
 <ContentPopup>:
     container: container
     img: img
+    scale_min: .5
+    scale_max: 1.5
 
     canvas: 
         Color: 

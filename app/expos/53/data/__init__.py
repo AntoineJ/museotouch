@@ -44,11 +44,12 @@ class WidgetsPanel(FloatLayout):
             pos=(self.x + 240 * 4, self.y),
             title=u'Thématique',
             size=(240,420),
-            app=self.app)
+            app=self.app,
+            keyboard=self.keyboard)
         self.container.add_widget(keywords)
         # Binding widget with keyboard
         self.keyboard.bind(on_input = keywords.on_key)
-
+        keywords.bind(selected_keywords=self.build_sentence)
         # -------------------------------------------------------------------------
         # Date Slider
         self.app.date_slider = slider = SizeSlider(
@@ -60,6 +61,7 @@ class WidgetsPanel(FloatLayout):
                 do_translate=False, do_rotate=False, do_scale=False)
         scatter.add_widget(slider)
         self.container.add_widget(scatter)
+        slider.bind(value_range=self.build_sentence)
 
         # Find all the titles and authors from item database
         item_names = []
@@ -75,21 +77,31 @@ class WidgetsPanel(FloatLayout):
         title_scroll = AttributeScrollView(
             pos=(self.x + 240, self.y),
             size=(480, 420),
-            app = self.app)
+            app = self.app,
+            keyboard=self.keyboard)
         self.container.add_widget(title_scroll)
         title_scroll.keywords = item_names
+        self.app.title_widget = title_scroll
         # Binding widget with keyboard
         self.keyboard.bind(on_input = title_scroll.on_key)
+        # Binding widget with main filtering
+        title_scroll.bind(selected_keywords=self.app.trigger_objects_filtering)
+        title_scroll.bind(selected_keywords=self.build_sentence)
         # -------------------------------------------------------------------------
         # Author Scroll View
         author_scroll = AttributeScrollView(
             pos=(self.x + 240 * 3, self.y),
             size=(240,420),
-            app= self.app)
+            app= self.app,
+            keyboard=self.keyboard)
         self.container.add_widget(author_scroll)
         author_scroll.keywords = item_authors
+        self.app.author_widget = author_scroll
         # Binding widget with keyboard
         self.keyboard.bind(on_input = author_scroll.on_key)
+        # Binding widget with main filtering
+        author_scroll.bind(selected_keywords=self.app.trigger_objects_filtering)
+        author_scroll.bind(selected_keywords=self.build_sentence)
         # -------------------------------------------------------------------------
         # Moving children widgets with panel
         def on_pos(widget, value):
@@ -98,6 +110,65 @@ class WidgetsPanel(FloatLayout):
             keywords.pos = value[0] + 240 *4 + 6, value[1]
             scatter.pos = self.x + 240 * 5 + 8, value[1]
         self.bind(pos=on_pos)
+
+    def build_sentence(self, instance, value):
+
+        prefix_text = "Trouve moi les livres "
+        # TITLE TEXT
+        titles = self.app.title_widget.selected_keywords
+        if len(titles) > 0:
+            if len(titles) == 1:
+                self.dynamic_sentence.text = 'Trouve moi le livre ' + str(titles[0])
+            elif len(titles) > 1:
+                title_text = ''
+                for title in titles:
+                    if titles.index(title) == len(titles) - 1:
+                        title_text = title_text + ' et ' + str(title)
+                    elif title_text != '':
+                        title_text = title_text + ', ' + str(title)
+                    else:
+                        title_text = str(title)
+                self.dynamic_sentence.text = prefix_text + title_text
+            return
+
+        # DATE TEXT
+        date_min = str(self.app.date_slider.text_min)
+        date_max = str(self.app.date_slider.text_max)
+        date_text = "parus de " + date_min + " à " + date_max
+        # date_text = date_text.decode('utf8')
+
+
+        #AUTHORS TEXT
+        authors = self.app.author_widget.selected_keywords
+        authors_text = ''
+        if len(authors) > 0:
+            if len(authors) == 1:
+                authors_text = "de l'auteur " + str(authors[0])
+            elif len(authors) > 1:
+                authors_text = "des auteurs " 
+                for author in authors:
+                    if authors.index(author) == len(authors) - 1:
+                        authors_text = authors_text + ' et ' + str(author)
+                    elif authors_text != "des auteurs ":
+                        authors_text = authors_text + ', ' + str(author)
+                    else:
+                        authors_text = authors_text + str(author)
+            authors_text = authors_text + ' '
+
+        # THEMES TEXT
+        themes = self.app.keywords.selected_keywords
+        themes_text = ''
+        print themes
+        if len(themes) > 0:
+            if len(themes) == 1:
+                # print str(themes[0][0])
+                themes_text = 'du thème ' + themes[0][0]
+                print isinstance(themes_text, unicode)
+            themes_text += ' '
+            themes_text = themes_text.decode('utf8')
+
+        self.dynamic_sentence.text = prefix_text + authors_text + themes_text + date_text
+
 
     def toggle_panel(self, but):
         Animation.stop_all(self, 'y')
@@ -155,12 +226,6 @@ class ContentPopup(Scatter):
 
     def close(self, but):
         self.parent.remove_widget(self)
-        self.controler.popup = None
-
-def on_start(self):
-    pass
-
-ImageItem.on_start = on_start
 
 class ScrollItem(Button):
     item = ObjectProperty(None)
@@ -169,13 +234,15 @@ class ScrollItem(Button):
     popup = ObjectProperty(None)
 
     def open(self, *largs):
-        print self.popup
-        self.popup = ContentPopup(
-            item=self.item, 
-            controler=self, 
-            size_hint=(None,None), 
-            size=(800,800))
-        self.app.root_images.add_widget(self.popup)
+        if self.popup == None:
+            self.popup = ContentPopup(
+                item=self.item, 
+                controler=self, 
+                size_hint=(None,None), 
+                size=(800,800))
+            self.app.root_images.add_widget(self.popup)
+        elif self.popup.parent is None:
+            self.app.root_images.add_widget(self.popup)
    
 def feed_scroll(defs):
     item = ScrollItem(**defs)
@@ -229,6 +296,19 @@ def build(app):
     def my_show_objects(objects):
         self = app
         root = self.root
+        selected_authors = self.author_widget.selected_keywords
+        selected_titles = self.title_widget.selected_keywords
+
+        for item in objects[:]:
+            # Filtering authors and titles
+            if item.nom not in selected_titles and len(selected_titles) > 0:
+                objects.remove(item)
+                continue
+
+            if item.freefield not in selected_authors and len(selected_authors) > 0:
+                objects.remove(item)
+                continue
+
         if isinstance(self.root_images.x, (int, long)):
             if root.type_expo == 'normal':
                 images = [x.source for x in self.root.scroller.layout.children]
@@ -236,6 +316,7 @@ def build(app):
                 images_to_add = []
                 images_displayed = []
                 for item in objects:
+
                     # is the current filename is already showed ?
                     filename = item.filename
                     if filename in images:

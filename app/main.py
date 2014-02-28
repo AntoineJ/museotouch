@@ -424,7 +424,7 @@ class MuseotouchApp(App):
         # OR inside group
         if self.keywords and self.keywords.selected_keywords:
             selected_keywords = self.keywords.selected_keywords
-            print selected_keywords
+            
             groups = list(set([x[0] for x in selected_keywords]))
             groups_result = {}
             items_result = []
