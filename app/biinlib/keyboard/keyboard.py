@@ -40,6 +40,9 @@ class Keyboard(Scatter):
 	# List of all the keys
 	keys = ListProperty(None)
 
+	# List of the possible next input
+	nextInput = StringProperty('')
+
 	def __init__(self, **kwargs):
 		self.register_event_type('on_input')
 		super(Keyboard, self).__init__(**kwargs)
@@ -107,6 +110,7 @@ class Keyboard(Scatter):
 			if len(self.label_text.text) > 0:
 				self.label_text.text = self.label_text.text[0:len(self.label_text.text) - 1] #moche mais fait le taf
 				self.dispatch('on_input', self.label_text.text)
+				self.enable_key()
 		elif key.prop[0] == 'clear':
 			self.clear_text()
 		elif key.prop[0] == 'change':
@@ -183,6 +187,8 @@ class Keyboard(Scatter):
 					key.disabled = True
 				else:
 					key.disabled = False
+
+			self.enable_key()
 
 	def generate(self):
 		"""Generate buttons"""
@@ -262,16 +268,32 @@ class Keyboard(Scatter):
 
 
 
-
 	def clear_text(self, *args):
 		"""Clear the input text"""
 
 		self.label_text.text = ''
+		self.enable_key()
 		self.dispatch('on_input', self.label_text.text)
 
 	def get_text(self):
 		"""Return the input text"""
 		return self.label_text.text
+
+	def enable_key(self):
+		if (self.label_text.text == ''):
+			for key in self.keys:
+				key.disabled = False
+		else:
+			for key in self.keys:
+				if (key.prop[0] == 'input'):
+					if (key.text in self.nextInput):
+						key.disabled = False
+					else:
+						key.disabled = True
+
+	def next_input(self, stri):
+		self.nextInput = stri.upper()
+		self.enable_key()
 
 
 
