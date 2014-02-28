@@ -98,16 +98,17 @@ class Keyboard(Scatter):
 		"""manage the inputs. Here you can define an action for a specific key"""
 
 		if key.prop[0] == 'input':
-			if len(self.label_text.text) < 7:
-				
+			if len(self.label_text.text) < 7:				
 				if not self.alternative:
 					self.label_text.text += key.prop[4]
 				else:
 					self.label_text.text += key.prop[6]
+				self.resetNextInput()
 				self.dispatch('on_input', self.label_text.text)
 		elif key.prop[0] == 'back':
 			if len(self.label_text.text) > 0:
 				self.label_text.text = self.label_text.text[0:len(self.label_text.text) - 1] #moche mais fait le taf
+				self.resetNextInput()
 				self.dispatch('on_input', self.label_text.text)
 				self.enable_key()
 		elif key.prop[0] == 'clear':
@@ -272,6 +273,7 @@ class Keyboard(Scatter):
 
 		self.label_text.text = ''
 		self.enable_key()
+		self.resetNextInput()
 		self.dispatch('on_input', self.label_text.text)
 
 	def get_text(self):
@@ -290,8 +292,11 @@ class Keyboard(Scatter):
 					else:
 						key.disabled = True
 
+	def resetNextInput(self):
+		self.nextInput = ''
+
 	def next_input(self, stri):
-		self.nextInput = stri.upper()
+		self.nextInput += stri.upper()
 		self.enable_key()
 
 
