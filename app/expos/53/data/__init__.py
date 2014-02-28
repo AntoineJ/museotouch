@@ -274,25 +274,6 @@ class ScrollItem(Button):
         elif self.popup.parent is None:
             self.app.root_images.add_widget(self.popup)
 
-def feed_scroll(defs):
-    # items = []
-    # for i in range(30):
-    #     item = ScrollItem(**defs)
-    #     items.append(item)
-
-    app = defs.pop('app')
-    # for item in items:
-    #     app.root.scroller.layout.add_widget(item)
-
-    item = ScrollItem(**defs)
-    app.root.scroller.layout.add_widget(item)
-
-    # for i in range(30):
-    #     btn = Button(text=str(i), 
-    #                  size_hint=(None, None))
-    #     app.root.scroller.layout.add_widget(btn)
-
-
 
 def build(app):
     # Here, you must return a root widget that will be used for app
@@ -330,6 +311,25 @@ def build(app):
 
     panel = WidgetsPanel(app=app)
     root.add_widget(panel)
+
+    def feed_scroll(defs):
+        # items = []
+        # for i in range(30):
+        #     item = ScrollItem(**defs)
+        #     items.append(item)
+
+        # app = defs.pop('app')
+        # for item in items:
+        #     app.root.scroller.layout.add_widget(item)
+
+        item = ScrollItem(**defs)
+        app.root.scroller.layout.add_widget(item)
+
+        # for i in range(30):
+        #     btn = Button(text=str(i), 
+        #                  size_hint=(None, None))
+        #     app.root.scroller.layout.add_widget(btn)
+
 
     def my_show_objects(objects):
         self = app
