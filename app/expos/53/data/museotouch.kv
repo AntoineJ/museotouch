@@ -267,6 +267,7 @@
     background_disabled_normal: 'widgets/btn.png'
     background_disabled_down: 'widgets/btn.png'
     background_down: 'widgets/btn.png'
+    opacity: 1 if not root.disabled else .3
     size: self.wd - 2, self.hgt - 2
     font_size: (self.hgt+2) / 2.
     pos: self.centre[0] - self.size[0]/2., self.centre[1] - self.size[1]/2.
@@ -281,7 +282,7 @@
         pos: root.pos
         canvas:
             Color:
-                rgba: (0,0,0,0) if root.img =='' else ((1,1,1,0.4) if root.disabled else (1,1,1,1))
+                rgba: (0,0,0,0) if root.img == '' else ((1,1,1,0.3) if root.disabled else (1,1,1,1))
             Rectangle:
                 pos: 0,0
                 size: root.size
