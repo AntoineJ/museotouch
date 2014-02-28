@@ -37,21 +37,19 @@ class KeywordScrollView(ScrollView):
 
     app = ObjectProperty(None)
 
+    keyboard = ObjectProperty(None)
+
     def __init__(self, **kwargs):
         super(KeywordScrollView, self).__init__(**kwargs)
         self.container.bind(minimum_height=self.container.setter('height'))
     
 
     def on_selected_keywords(self, instance, value):
-        pass
-        # if len(value) == 0:
-        #     self.selected_keywords = []
-
+        self.keyboard.clear_text()
 
     def on_keywords(self, instance, value):
         self.container.clear_widgets()
-        
-        
+       
         for item in value:
             group = item['group']
             children = item['children']
@@ -64,7 +62,7 @@ class KeywordScrollView(ScrollView):
             but = KeyScrollItem(
                 text= key['name'],
                 key= key,
-                # width= 230,
+                # width=self.width - 60,
                 active=True,
                 controler=self)
             self.buttons.append(but) 
@@ -86,9 +84,28 @@ class KeywordScrollView(ScrollView):
             else:
                 if child in self.container.children:
                     self.container.remove_widget(child)
-                    child.state = 'normal'
+                    # child.state = 'normal'
                     child.active = False
+                    # When a keyword disappear it deactivate itself
+                    # for key in self.selected_keywords: 
+                    #     if key[1] == child.key['id']:
+                    #         self.selected_keywords.remove(key)
 
+
+class AttributeScrollView(KeywordScrollView):
+
+    def on_keywords(self, instance, value):
+        self.container.clear_widgets()
+        self.local_keywords = self.keywords
+
+        for param in self.local_keywords:
+            but = AttributeScrollItem(
+                text= param,
+                active=True,
+                # width=self.width ,
+                controler=self)
+            self.buttons.append(but) 
+            self.container.add_widget(but)
 
 class KeyScrollItem(ToggleButtonBehavior, Label):
     active = BooleanProperty(True)   
@@ -99,10 +116,29 @@ class KeyScrollItem(ToggleButtonBehavior, Label):
 
     def on_release(self):
         if self.state == 'down':
-            for child in self.controler.container.children:
-                if child is not self and child.state == 'down':
-                    child.state = 'normal'
-            del self.controler.selected_keywords[:]
-            self.controler.selected_keywords.append((None, self.key['id']))
+            # for child in self.controler.buttons:
+            #     if child is not self and child.state == 'down':
+            #         child.state = 'normal'
+            # del self.controler.selected_keywords[:]
+            self.controler.selected_keywords.append((self.text, self.key['id']))
+        else:
+            # del self.controler.selected_keywords[:]
+            self.controler.selected_keywords.remove((self.text, self.key['id']))
+        
+
+class AttributeScrollItem(KeyScrollItem):
+
+    def on_release(self):
+        if self.state == 'down':
+            # for child in self.controler.buttons:
+            #     if child is not self and child.state == 'down':
+            #         child.state = 'normal'
+            # del self.controler.selected_keywords[:]
+            self.controler.selected_keywords.append(self.text)
+        else:
+            self.controler.selected_keywords.remove(self.text)
+
+
+
 
 
