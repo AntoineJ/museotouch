@@ -26,6 +26,8 @@ from biinlib.keywordscrollview import KeywordScrollView, AttributeScrollView
 from os.path import dirname,abspath, join
 
 
+blue = '00a5a2'
+
 class WidgetsPanel(FloatLayout):
     active = BooleanProperty(False)
 
@@ -53,7 +55,7 @@ class WidgetsPanel(FloatLayout):
         # -------------------------------------------------------------------------
         # Date Slider
         self.app.date_slider = slider = SizeSlider(
-            size=(420, 240), size_hint=(None, None))
+            size=(450, 240), size_hint=(None, None))
         scatter = Scatter(size=slider.size,
                 auto_bring_to_front=False,
                 pos=(self.x, self.y - 240),
@@ -118,56 +120,84 @@ class WidgetsPanel(FloatLayout):
         titles = self.app.title_widget.selected_keywords
         if len(titles) > 0:
             if len(titles) == 1:
-                self.dynamic_sentence.text = 'Trouve moi le livre ' + str(titles[0])
+                self.dynamic_sentence.text = 'Trouve moi le livre [color='+blue+']' + titles[0].encode('utf-8') + '[/color]'
             elif len(titles) > 1:
                 title_text = ''
                 for title in titles:
+                    ttl = title.encode('utf-8')
                     if titles.index(title) == len(titles) - 1:
-                        title_text = title_text + ' et ' + str(title)
+                        title_text = title_text + ' et [color='+blue+']' + ttl + '[/color]'
                     elif title_text != '':
-                        title_text = title_text + ', ' + str(title)
+                        title_text = title_text + ', [color='+blue+']' + ttl + '[/color]'
                     else:
-                        title_text = str(title)
+                        title_text = '[color='+blue+']' + ttl + '[/color]'
                 self.dynamic_sentence.text = prefix_text + title_text
             return
 
         # DATE TEXT
         date_min = str(self.app.date_slider.text_min)
         date_max = str(self.app.date_slider.text_max)
-        date_text = "parus de " + date_min + " à " + date_max
-        # date_text = date_text.decode('utf8')
-
+        date_text = "parus de [color="+blue+"]" + date_min + "[/color] à [color="+blue+"]" + date_max + "[/color]"
 
         #AUTHORS TEXT
         authors = self.app.author_widget.selected_keywords
         authors_text = ''
         if len(authors) > 0:
             if len(authors) == 1:
-                authors_text = "de l'auteur " + str(authors[0])
+                authors_text += "de l'auteur [color="+blue+"]" + authors[0].encode('utf-8') + "[/color]"
             elif len(authors) > 1:
                 authors_text = "des auteurs " 
                 for author in authors:
+                    auth = author.encode('utf-8')
                     if authors.index(author) == len(authors) - 1:
-                        authors_text = authors_text + ' et ' + str(author)
+                        authors_text = authors_text + ' et [color='+blue+']' + auth + '[/color]'
                     elif authors_text != "des auteurs ":
-                        authors_text = authors_text + ', ' + str(author)
+                        authors_text = authors_text + ', [color='+blue+']' + auth + '[/color]'
                     else:
-                        authors_text = authors_text + str(author)
+                        authors_text = authors_text + '[color='+blue+']' + auth + '[/color]'
             authors_text = authors_text + ' '
 
         # THEMES TEXT
         themes = self.app.keywords.selected_keywords
         themes_text = ''
-        print themes
         if len(themes) > 0:
             if len(themes) == 1:
-                # print str(themes[0][0])
-                themes_text = 'du thème ' + themes[0][0]
-                print isinstance(themes_text, unicode)
+                themes_text = 'du thème [color='+blue+']' + themes[0][0].encode('utf-8') + '[/color]'
+            elif len(themes) > 1:
+                themes_text = 'des thèmes ' 
+                for theme in themes:
+                    th = theme[0]
+                    th = th.encode('utf-8')
+
+                    if themes.index(theme) == len(themes) -1:
+                        themes_text += ' et [color='+blue+']' + th + '[/color]'
+                    elif themes_text !=  'des thèmes ':
+                        themes_text += ', [color='+blue+']' + th + '[/color]'
+                    else:
+                        themes_text += '[color='+blue+']' + th + '[/color]'
             themes_text += ' '
-            themes_text = themes_text.decode('utf8')
 
         self.dynamic_sentence.text = prefix_text + authors_text + themes_text + date_text
+        
+
+        self.dynamic_sentence.x = 30
+
+        print self.dynamic_sentence.width
+        if self.dynamic_sentence.width > 1200:
+            Animation.stop_all(self.dynamic_sentence)
+            anim = Animation(x=-self.dynamic_sentence.width - 30, d=5) + Animation(opacity=0, d=.1) + Animation(x=1300, d=0.1) + Animation(opacity=1, d=.1) + Animation(x=30, d=5)
+            anim.repeat = True
+            anim.start(self.dynamic_sentence)
+            
+            def anim_restart(dt):
+                print 'restart'
+                if self.dynamic_sentence.x < -1500:
+                    self.dynamic_sentence.x = 1920
+                Animation.stop_all(self.dynamic_sentence)
+                anim = Animation(x=-self.dynamic_sentence.width, d=15)
+                anim.on_complete=anim_restart
+                anim.start(self.dynamic_sentence) 
+            # anim_restart(None)
 
 
     def toggle_panel(self, but):
@@ -243,10 +273,18 @@ class ScrollItem(Button):
             self.app.root_images.add_widget(self.popup)
         elif self.popup.parent is None:
             self.app.root_images.add_widget(self.popup)
-   
+
 def feed_scroll(defs):
-    item = ScrollItem(**defs)
+    # items = []
+    # for i in range(30):
+    #     item = ScrollItem(**defs)
+    #     items.append(item)
+
     app = defs.pop('app')
+    # for item in items:
+    #     app.root.scroller.layout.add_widget(item)
+
+    item = ScrollItem(**defs)
     app.root.scroller.layout.add_widget(item)
 
     # for i in range(30):
@@ -309,6 +347,12 @@ def build(app):
                 objects.remove(item)
                 continue
 
+        # for item in objects[:]:
+        #     for i in range(30):
+        #         objects.append(item)
+
+        panel.result_sentence.text = "J'ai trouvé [font=fonts/proximanova-bold-webfont.ttf][size=28]" + str(len(objects)) + " [/size][/font]livres!"
+
         if isinstance(self.root_images.x, (int, long)):
             if root.type_expo == 'normal':
                 images = [x.source for x in self.root.scroller.layout.children]
@@ -330,7 +374,6 @@ def build(app):
                     image = dict(source=filename, size_hint=(1,1), item=item, app=self)
                     images_to_add.append(image)
                     images_displayed.append(filename)
-
                 self.images_displayed = images_displayed
                 self.delayed_work(feed_scroll, images_to_add)
 
