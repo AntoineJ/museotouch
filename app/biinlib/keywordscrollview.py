@@ -72,12 +72,26 @@ class KeywordScrollView(ScrollView):
         nkfd_form = unicodedata.normalize('NFKD', input_str)
         return u"".join([c for c in nkfd_form if not unicodedata.combining(c)])
     
-    def on_key(self, widget, value):        
+    def on_key(self, widget, value):  
+
+        next_letters = ''      
         for child in self.buttons:
             uname = self.remove_accents(child.text)
             uname = uname.upper()
 
             if value in uname:
+
+                print uname, value
+                if value != '':
+                    splittxt = uname.split(value, 1)
+                    # print splittxt
+                    if len(splittxt) > 1:
+                        if len(splittxt[1]) > 0:
+                            letter = splittxt[1][0]
+                            letter = letter.encode('utf-8')
+                            if letter not in next_letters:
+                                next_letters += letter
+
                 if not child in self.container.children:
                     self.container.add_widget(child)
                     child.active = True
@@ -90,6 +104,7 @@ class KeywordScrollView(ScrollView):
                     # for key in self.selected_keywords: 
                     #     if key[1] == child.key['id']:
                     #         self.selected_keywords.remove(key)
+        print 'NEXT : ', next_letters
 
 
 class AttributeScrollView(KeywordScrollView):
