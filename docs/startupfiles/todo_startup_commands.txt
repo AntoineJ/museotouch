@@ -1,0 +1,69 @@
+
+###################################################################
+###################	  EXTINCTION PROGRAMMÉE	    ###################
+###################################################################
+Extinction ordi -# /etc/crontab
+
+L'exemple ci-dessous exécutera /usr/bin/apt-get update, chaque jour, de chaque mois à 03:05 (le cron fonctionne sur 24 h) avec les droits de l'utilisateur nomdutilisateur.
+
+# 5 3  * *  * nomdutilisateur /usr/bin/apt-get update
+5 3  * *  * root /usr/bin/poweroff
+
+
+###################################################################
+###################	  TEAMVIEWER DAEMON  	    ###################
+###################################################################
+
+sudo subl /etc/rc.local
+
+# Ajouter cette ligne : 
+/usr/bin/teamviewer --daemon start
+
+
+
+###################################################################
+###################	  MISE EN VEILLE PROLONGÉE  ###################
+###################################################################
+
+# Bug du réveil automatique : 
+Voir dmesg pour debug
+
+# Modifier /etc/rc.local :
+
+#Echo PWRB to the ACPI wakeup file to disable waking up with the power button
+echo PWRB > /proc/acpi/wakeup
+echo "rc.local has completed sucessfully." >> /tmp/resume.log
+
+
+
+###################################################################
+###################	  REVEIL AUTOMATIQUE        ###################
+###################################################################
+
+# http://askubuntu.com/questions/61708/automatically-sleep-and-wake-up-at-specific-times
+# edit /etc/crontab
+
+30 23 * * * /home/myhomefolder/suspend_until 07:30
+
+
+
+###################################################################
+###################	  STARTUP PROGRAM   	    ###################
+###################################################################
+
+(A) Execute command at system startup
+Let us assume you would like to run command called
+
+i) Create a script called mystartup.sh in /etc/init.d/ directory(login as root)
+# vi /etc/init.d/mystartup.sh
+
+ii) Add commands to this script one by one:
+#!/bin/bash
+echo "Setting up customized environment..."
+fortune
+
+iii) Setup executable permission on script:
+# chmod +x /etc/init.d/mystartup.sh
+
+iv)Make sure this script get executed every time Debian Linux system boot up/comes up:
+# update-rc.d mystartup.sh defaults 100
