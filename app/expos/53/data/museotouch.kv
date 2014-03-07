@@ -25,11 +25,10 @@
     halign: 'left'
     size_hint_x: None
     size_hint_y: None
-
+    markup: True
     width: 240 if not self.parent else self.parent.width -60
     height: self.texture_size[1] + 20
     text_size: (self.width, None)
-
     font_name: proxima if self.state == 'normal' else proximaSemiBold
     font_size: 14
     
@@ -69,6 +68,7 @@
     container: container 
     keyboard: keyboard
     dynamic_sentence: dynamic_sentence
+    dynamic_sentence2: dynamic_sentence2
     result_sentence: result_sentence
 
     canvas:
@@ -89,6 +89,14 @@
             points: self.x + 240*4 + 5, self.y, self.x + 240*4 + 5, self.y + self.height - 62
         Line:
             points: self.x + 240*5 + 7, self.y, self.x + 240*5 + 7, self.y + self.height - 62
+        Line:
+            points: self.x + 240*6 + 9, self.y, self.x + 240*6 + 9, self.y + self.height - 62
+
+    # Useless but catch touch events to prevent 
+    Button:
+        size_hint: 1, 1
+        background_color: (0,0,0,0)        
+        pos: root.pos
 
     ToggleButton:
         # text: "open" if self.state == "normal" else "close"
@@ -151,7 +159,23 @@
         font_size: 24
         halign: 'left'
         valign: 'middle'
-        pos: root.x + 30, root.y + root.height- 60 
+        pos: 30, root.y + root.height- 60 
+        height: 60
+        width: self.texture_size[0]
+        text_size: None, 60
+
+    Label: 
+        id: dynamic_sentence2
+        text: "Dessine moi un livre !"
+        font_name: proxima
+        size_hint: None, None
+        color: greytitle
+        markup: True
+        font_size: 24
+        halign: 'left'
+        valign: 'middle'
+        opacity: 1 if root.dynamic_sentence.width > 1400 else 0
+        pos: root.dynamic_sentence.x + root.dynamic_sentence.width + 60, root.y + root.height- 60 
         height: 60
         width: self.texture_size[0]
         text_size: None, 60
@@ -203,7 +227,21 @@
             Rectangle:
                 pos: root.x + root.width - 150, root.y + root.height- 60 
                 size: 90,60
+    # 
+    # HELP IMAGE
+    # IMAGE DANS Dossier personnel / seafile / Museotouch / git / museotouch_private / app / expos / 53 / data / widgets
+    # source: 'widgets/nomdefichier.png'
+    # Modifier l'attribut color 
+    # Modifier l'attribut size si l'image déborde sur le liseret gris
+    # 
 
+    Image:
+        id: helpimage
+        size_hint: None, None
+        source: ''
+        color: .2,.2,.2,1
+        size: 480,450
+        pos: root.width - self.width, root.y
 
     FloatLayout:
         id: container
@@ -228,31 +266,42 @@
                 font_size: 36
                 color: 0,0,0,1
                 text_size: 158, 50
-                size: 158, 50
+                size: 158, 45
                 size_hint: None, None
-                pos: 30, 370
+                pos: 30, 375
                 valign: 'middle'
                 halign: 'left'
+                padding: -10,0
                 font_name: proximaThin
+                canvas.before:
+                    Color:
+                        rgb: 1,1,1
+                    Rectangle:
+                        pos: self.pos
+                        size: self.width + 20, self.height
 
-            # Button:
-            #     id: btnClear
-            #     text: 'x'
-            #     size: 20, 48
-            #     pos: 189, 370
-            #     size_hint: None, None
-            #     border: [0,0,0,0]
-            #     background_normal: 'btn.png'
-            #     # background_down: 'btn_close_down.png'
-            #     background_color: [0.8,0.8,0.8,1]
-            #     color: [0,0,0,1]
-           
-            # canvas.before:
-            #     Color:
-            #         rgb: .9,.9,.9
-            #     Rectangle:
-            #         pos: self.pos
-            #         size: self.size
+            Button:
+                id: btnClear
+                
+                pos: 155, 375
+                size: 55,45
+                
+                # center: 188, 387
+                size_hint: None, None
+                border: [0,0,0,0]
+                background_normal: 'widgets/clear-btn-bg.png'
+                background_down: 'widgets/clear-btn-bg.png'
+                background_color: 1,1,1,1
+                color: [1,1,1,1]
+                on_release: root.keyboard.clear_text()
+                canvas.after:
+                    Color:
+                        rgb: blue
+                    Rectangle:
+                        size: (20,20) #if self.state == 'normal' else (40,40)
+                        pos: 178, 387
+                        source: 'widgets/clear-btn.png'
+
 
         # KeywordScrollView:
         #     size_hint: None, None
@@ -288,114 +337,112 @@
                 size: root.size
                 source: root.img
 
-
-
 <SizeSlider>:
+    padding: 17
+    bound_min: 0.04
     canvas:
         Color:
-            rgb: 1, 1, 1
+            rgba: 1, 0, 1,0
         Rectangle:
             pos: self.x, self.y
             size: self.size
             # source: 'widgets/taille.png'
         Color:
-            rgba: .3,.3,.3, 1
+            rgba: 1,1,1,1
         Rectangle:
-            pos: self.x + self.value_min * self.width, 0
-            size: self.width * (self.value_max - self.value_min), self.height
-
+            pos: self.x + self.value_min * self.width, 240 - 40
+            size: self.width * (self.value_max - self.value_min), 5
+        Color:
+            rgba: blue
+        Rectangle: 
+            pos: 2, 35
+            size: 449, 5
+            source: 'widgets/point-ligne.png'
+        # Line:
+        #     width: 3
+        #     points: 2, 35, 2 + 450, 35
+        #     dash_offset: 50
+        #     dash_length: 5
 
     Scatter:
+        id: item_min
         do_translation: False
         do_scale: False
         do_rotation: False
         rotation: 90
+        size: 210, 34
         size_hint: None,None
-        pos: root.x + root.value_min * root.width - 40, 0
-
-
+        # pos: root.x + root.value_min * root.width, 15
+        y: 15
+        center_x: root.x + root.value_min * root.width 
+        
         Label: 
             size_hint: None, None
             text: root.text_min
-            width: 240
-            height: 60
+            width: 210
+            height: 34
+            font_name: proximaThin
+            font_size: 24
+            color: 0,0,0,1
             
             canvas.before:
                 Color:
-                    rgb: .6,.6,.6
+                    rgb: 1,1,1
                 Rectangle:
-                    pos: self.pos
-                    size: self.size
+                    pos: self.x + 17, self.y  
+                    size: self.width - 34, self.height
+                Ellipse:
+                    pos: self.x , self.y
+                    size: 34, 34
+                Ellipse:
+                    pos: self.x + self.width - 34, self.y
+                    size: 34, 34
+                Color:
+                    rgba: blue
+                Rectangle:
+                    pos: self.width - 30, 12
+                    size: 15, 9
+                    source: 'widgets/stripes.png'                    
         
     Scatter:
+        id: item_max
         do_translation: False
         do_scale: False
         do_rotation: False
         rotation: 90
+        size: 210, 34
         size_hint: None,None
-        pos: root.x + root.value_max * root.width - self.width, 0
+        # pos: root.x + root.value_max * root.width - self.height + 17, 15
+        center_x: root.x + root.value_max * root.width - 17
+        y: 15
 
         Label:
             size_hint: None, None
-            width: 240
-            height: 60
+            width: 210
+            height: 34
             text: root.text_max
+            font_name: proximaThin
+            font_size: 24
+            color: 0,0,0,1
             
             canvas.before:
                 Color:
-                    rgb: .6,.6,.6
+                    rgb: 1,1,1
                 Rectangle:
-                    pos: self.pos
-                    size: self.size
-
-<Keyword>:
-    size_hint: None,None
-    size: 240,40
-    color: (1, 1, 1, 1) if self.selected else (.5, .5, .5, 1) 
-    canvas.before:
-        Color:
-            rgb: 1, 1, 1
-        Rectangle:
-            pos: int(self.center_x - self.texture_size[0] / 2. - 32), int(self.center_y - 10)
-            size: 20, 20
-            # source: 'widgets/circle%s.png' % ('_selected' if self.selected else '')
-
-<ImageItem>:
-	# border: 1 * self.scale
-	# size_hint: None, None
-	# size: 512, 512
-
-	# do_scale: False
-	# do_rotation: False
-	# do_translation: False
-	scale: 1
-	rotation: 0
-
-	container: container
-
-	canvas:
-		# Color:
-		# 	rgb: 1, 1, 1
-		# Rectangle:
-		# 	pos: -self.border, -self.border
-		# 	size: self.width + self.border * 2, self.height + self.border * 2
-		Color:
-			rgb: 0, 0, 0
-		Rectangle:
-			size: self.size
-
-	FloatLayout:
-		id: container
-		size: root.size
-
-		# Image:
-		# 	source: root.source
-		Button:
-			background_normal: root.source
-			background_down: root.source
-			size_hint: (1 * (0.3 + 0.7 * root.flip_alpha), 1 * (0.3 + 0.7 * root.flip_alpha))
-			pos_hint: {'top': 1}
-			on_release: root.on_btn_moreinfo()
+                    pos: self.x + 17, self.y
+                    size: self.width - 34, self.height
+                Ellipse:
+                    pos: self.x , self.y
+                    size: 34, 34
+                Ellipse:
+                    pos: self.x + self.width - 34, self.y
+                    size: 34, 34
+                Color:
+                    rgba: blue
+                Rectangle:
+                    pos: self.width - 30, 12
+                    size: 15, 9
+                    source: 'widgets/stripes.png'
 
 <ScrollItem>:
     background_normal: root.source
@@ -403,228 +450,354 @@
     # size_hint: (1 * (0.3 + 0.7 * root.flip_alpha), 1 * (0.3 + 0.7 * root.flip_alpha))
     size_hint: None, None
     pos_hint: {'top': 1}
-    on_press: root.open()
+    on_release: root.open()
+    background_color: (1,1,1,1) if self.state == 'normal' else blue
 
 <ContentPopup>:
     container: container
-    img: img
+
+    # img: img
+    # scale: 1
+    scale: .8
+    do_scale: False
+    do_rotation: True
     scale_min: .5
     scale_max: 1.5
+    size: 720,900
 
+
+    canvas.before:
+        Color:
+            rgba: 1,1,1,1
+        BorderImage:
+            source: 'widgets/shadow32.png'
+            border: (18,18,18,18)
+            size:(self.width+36, self.height+36)
+            pos: (-18,-18)
     canvas: 
         Color: 
             rgba: self.color
         Rectangle:
             size: self.size
             pos: 0,0
-
+        Color:
+            rgb: 1,1,1
+        Rectangle:
+            size: self.width/2, 490
+            pos: 0, 410
+            source: self.item.filename
+                # add shadow background
+        
     FloatLayout:
         id: container
         size: root.size
 
-        GridLayout:
-            cols: 1
-            # size_hint_x: 0.5
-            size: root.width/2, root.height/2
-            pos_hint: {'x':0, 'y':0}
+        canvas.before:
+            Color:
+                rgb: 1,1,1
+            Rectangle:
+                pos: self.pos
+                size: self.width, 410
+            Color:
+                rgba: root.color
+            Rectangle:
+                size: 270, 5
+                pos: 420, 106
+            Rectangle: 
+                size: 720,180
+                pos: 0, 410
+                source: 'widgets/degrade-h180.png'
+
+        Label:
+            id: auteurs
+            text: root.item.freefield.upper() + ' ' + root.item.freefield2.upper() #if root.item.freefield2 is not None else root.item.freefield.upper()
+            color: greytitle
+            text_size: (self.width, None)
             size_hint: None, None
-            padding: 15
-            spacing: 15
-            canvas: 
-                Color: 
-                    rgba: 0,1,0,0
+            width: 360 - 30
+            # height: self.texture_size[1]
+            font_size: 16
+            font_name: proximaThin
+            x: 360 +15
+            y: 425 
+            valign: 'top'
+            halign: 'left'
+          
+        Label:
+            id: title
+            text: root.item.title.upper() 
+            text_size: (self.width, None)
+            size_hint: None, None
+            width: 360 -30
+            height: self.texture_size[1] 
+            valign: 'top'
+            halign: 'left'
+            font_size: 20
+            font_name: proxima
+            x: 360  + 15
+            y: 425 + root.ids['auteurs'].height 
+
+        ScrollView:
+            size_hint: None, None
+            size: 360, 338
+            do_scroll_x: False
+            pos: 30, 30
+            bar_color: root.color
+            scroll_type: ['bars', 'content']
+
+            canvas:
+                Color:
+                    rgba: .2,.2,.2,.05
                 Rectangle:
                     size: self.size
                     pos: self.pos
-            Label:
-                text: "Fiche d'identité"
-                color: grey
-                text_size: (self.width, None)
+            GridLayout:
+                id: scroll_layout
+                rows: 1
+                cols: 1
                 size_hint_y: None
-                height: self.texture_size[1] + 10
-                font_size: 16
-                canvas:
-                    Color:
-                        rgba: grey
-                    Line:
-                        points: self.x, self.y, self.x + 400 - 30, self.y
-
-            Label:
-                text: "Date :                               [color=#FFF][size=18]" + root.item.datation + "[/size][/color] "#if root.item.datation.strip() != '' else root.item.date_crea
-                text_size: (self.width, None)
-                color: grey
-                markup: True
-                size_hint_y: None
-                height: self.texture_size[1] + 10
-                font_size: 16
-                width: root.width/2 - 30
-
-                canvas:
-                    Color:
-                        rgba: grey
-                    Line:
-                        points: self.x, self.y, self.x + 400 - 30, self.y
-
-            Label:
-                text: "Origine :                           [color=#FFF][size=18]" + root.item.origin_ex + "[/size][/color] "
-                color: grey
-                markup: True
-                size_hint_y: None
-                height: self.texture_size[1] + 10
-                font_size: 16
-                text_size: (root.width/2 - 30, None)
-
-                canvas:
-                    Color:
-                        rgba: grey
-                    Line:
-                        width: 1
-                        points: self.x, self.y, self.x + 400 - 30, self.y
-                        
-            Label:
-                text: "Date d'acquisition :        [color=#FFF][size=18]" + root.item.date_acqui + "[/size][/color] "
-                color: grey
-                markup: True
-                size_hint_y: None
-                height: self.texture_size[1] + 10
-                font_size: 16
-                text_size: (root.width/2 - 30, None)
-
-                canvas:
-                    Color:
-                        rgba: grey
-                    Line:
-                        width: 1
-                        points: self.x, self.y, self.x + 400 - 30, self.y                        
-
-        GridLayout:
-            cols: 1
-            width: 500
-            # size_hint_x: 0.5
+                height: self.minimum_height
+                padding: 15,15
+                Label:
+                    id: maintext
+                    text: root.item.description
+                    color: greytitle
+                    text_size: (self.width, None)
+                    size_hint: None, None
+                    valign: 'top'
+                    halign: 'left'
+                    line_height: 1.1
+                    width: 330
+                    height: self.texture_size[1]
+                    font_size: 16
+                    font_name: proxima
+                   
+        Label:
+            text: 'ISSN     [font=' + proximaSemiBold + ']' + root.item.datation + '[/font]'
+            # text: 'ISSN : Nul'
+            markup: True
+            color: greytitle
+            text_size: (self.width, self.height)
             size_hint: None, None
-            size: root.width/2, root.height
-            pos_hint: {'x':.5, 'y':0}
-            padding: 15
-            spacing: 60
-            canvas: 
-                Color: 
-                    rgba: 1,0,0,0
+            width: 270
+            height: 12
+            font_size: 12
+            font_name: proximaThin
+            pos: 420, 30
+
+        Label:
+            text: 'ISBN     [font=' + proximaSemiBold + ']' + root.item.date_acqui + '[/font]'
+            markup: True
+            color: greytitle
+            text_size: (self.width, self.height)
+            size_hint: None, None
+            width: 270
+            height: 12
+            font_size: 12
+            font_name: proximaThin
+            pos: 420, 49
+
+        Label:
+            text: 'COTE   [font=' + proximaSemiBold + ']' + root.item.orig_geo_prec + '[/font]'
+            markup: True
+            color: greytitle
+            text_size: (self.width, self.height)
+            size_hint: None, None
+
+            width: 270
+            height: 12
+            font_size: 12
+            font_name: proximaThin
+            pos: 420, 68
+
+        Label:
+            text: 'DATE  '
+            markup: True
+            color: greytitle
+            text_size: (self.width, self.height)
+            size_hint: None, None
+            width: 270
+            height: 12
+            font_size: 12
+            font_name: proximaThin
+            pos: 420, 136
+            
+        Label:
+            text: root.item.date_crea
+            markup: True
+            color: 0.4, 0.4, 0.4
+            text_size: (None, self.height)
+            size_hint: None, None
+            width: self.texture_size[0]
+            height: 14
+            font_size: 14
+            valign: 'middle'
+            halign: 'center'
+            font_name: proximaSemiBold
+            pos: 420 + 90 + 10, 136
+          
+            canvas.before:
+                Color:
+                    rgba: (.8,.8,.8, 1) if len(self.text) > 0 else (0,0,0,0)
+                Rectangle:
+                    pos: self.x -10, self.y -5
+                    size: self.width + 20 , self.height + 10
+
+        Label:
+            id: collection
+            text: root.item.sub1.upper()
+            markup: True
+            color: 0.4, 0.4, 0.4
+            text_size: (160, None)
+            size_hint: None, None
+            width: self.texture_size[0]
+            height: self.texture_size[1]
+            font_size: 14
+            valign: 'middle'
+            halign: 'left'
+            font_name: proximaSemiBold
+            pos: 420 + 90 + 10, 136 + 14 + 20
+           
+            canvas.before:
+                Color:
+                    rgba: (.8,.8,.8, 1) if len(self.text) > 0 else (0,0,0,0)
+                Rectangle:
+                    pos: self.x -10, self.y -5
+                    size: self.width + 20 , self.height + 10
+
+        Label:
+            text: 'COLLECTION  '
+            markup: True
+            color: greytitle
+            text_size: (self.width, self.height)
+            size_hint: None, None
+            width: 270
+            height: 12
+            font_size: 12
+            font_name: proximaThin
+            pos: 420, 136 + 14 + 20
+      
+        Label:
+            text: 'THÈME  '
+            markup: True
+            color: greytitle
+            text_size: (self.width, self.height)
+            size_hint: None, None
+            width: 270
+            height: 12
+            font_size: 12
+            font_name: proximaThin
+            x: 420
+            y: root.ids['theme'].center_y + 10
+
+        Label:
+            id: theme
+            text: ''
+            markup: True
+            color: 0.4, 0.4, 0.4
+            text_size: (160, None)
+            size_hint: None, None
+            width: self.texture_size[0]
+            height: self.texture_size[1]
+            font_size: 14
+            valign: 'bottom'
+            halign: 'left'
+            font_name: proximaSemiBold
+            x: 420 + 90  +10 #+ self.height/2
+            y: 136 + 12 + 26 + 26 +10 +10
+            # center_y: 136 + 12 + 26 + 26 + 10 + 10
+
+            canvas.before:
+                Color:
+                    rgba: (.8,.8,.8, 1) if len(self.text) > 0 else (0,0,0,0)
+                Rectangle:
+                    pos: self.x -10, self.y -5
+                    size: self.width + 20 , self.height + 10
+      
+        Label:
+            text: 'ESPACE'
+            markup: True
+            color: greytitle
+            text_size: (self.width, self.height)
+            size_hint: None, None
+            width: 270
+            height: 12
+            font_size: 12
+            font_name: proximaThin
+            x: 420
+            y: root.ids['espace'].center_y + 10        
+
+        Label:
+            id: espace
+            text: ''
+            markup: True
+            color: 0.4, 0.4, 0.4
+            text_size: (160, None)
+            size_hint: None, None
+            width: self.texture_size[0]
+            height: self.texture_size[1]
+            font_size: 14
+            valign: 'bottom'
+            halign: 'left'
+            font_name: proximaSemiBold
+            x: 420 + 90  + 10
+            y: 220 - 20 - 10 + root.ids['theme'].height
+            
+            canvas.before:
+                Color:
+                    rgba: (.8,.8,.8, 1) if len(self.text) > 0 else (0,0,0,0)
+                Rectangle:
+                    pos: self.x -10, self.y -5
+                    size: self.width + 20 , self.height + 10
+
+                Color:
+                    rgba: root.color
+                Rectangle:
+                    size: 270, 5
+                    pos: 420, 360 #self.y + self.height + 30
+
+        ToggleButton:
+            id: resume
+            text: 'RÉSUMÉ'
+            state: 'down'
+            size: 102,30
+            size_hint: None, None
+            pos: 30 + self.width-102, 410 - self.height -10
+            background_color: (1,1,1,0)
+            color: white if self.state == 'down' else root.color
+            font_name: proximaSemiBold
+            font_size: 14
+            on_release: root.change_text(self)
+            canvas.before:
+                Color:
+                    rgba: white if self.state == 'normal' else root.color
                 Rectangle:
                     size: self.size
                     pos: self.pos
-
-            Label:
-                text: root.item.title
-                color: white
-                text_size: (self.width, None)
-                size_hint_y: None
-                width: root.width/2 - 30
-                height: self.texture_size[1] + 10
-                font_size: 36
-                canvas:
-                    Color:
-                        rgba: grey
-                    Line:
-                        points: self.x, self.y - 15, self.x + 400 - 30, self.y - 15
-
-            Label:
-                text: root.item.description
-                color: white
-                text_size: (self.width, None)
-                size_hint_y: None
-                width: root.width/2 - 30
-                height: self.texture_size[1] + 10
-                font_size: 18
-                
-
-
-        Image:
-            id: img
-            source: root.item.filename
+                    
+        ToggleButton:
+            id: struct
+            text: 'STRUCTURE'
+            size: 102,30
             size_hint: None, None
-            size: root.width/2, root.height/2
-            y: root.height/2
-            x: - self.width * (1 - self.image_ratio ) /2
-
-
+            pos: 30 + self.width, 410 - self.height -10
+            background_color: (1,1,1,0)
+            color: white if self.state == 'down' else root.color
+            font_name: proximaSemiBold
+            font_size: 14
+            on_release: root.change_text(self)
+            canvas.before:
+                Color:
+                    rgba: white if self.state == 'normal' else root.color
+                Rectangle:
+                    size: self.size
+                    pos: self.pos
+                    
         Button:
-            text: 'X Fermer'
             size_hint: None, None
-            size: 100,50
-            pos: root.width - self.width, root.height - self.height
+            size: 30,30
+            background_normal: 'widgets/cross-icon-30size.png'
+            background_down: 'widgets/cross-icon-30size.png'
+            center: root.width - 30, root.height - 30
             on_release: root.close(self)
-
-<ImageItemContent>:
-	GridLayout:
-		cols: 1
-		rows_default_height: 30
-		pos_hint: {'top': 0.7}
-		size_hint_x: 0.3
-		padding: 5
-
-		Label:
-			text: 'Datation'
-			text_size: (self.width, None)
-			size_hint_y: None
-			height: self.texture_size[1] + 10
-			font_size: 14
-		Label:
-			text: root.item.datation if root.item.datation.strip() != '' else root.item.date_crea
-			text_size: (self.width, None)
-			size_hint_y: None
-			height: self.texture_size[1] + 10
-			font_size: 12
-		Label:
-			text: 'Origine'
-			text_size: (self.width, None)
-			size_hint_y: None
-			height: self.texture_size[1] + 10
-			font_size: 14
-		# Label:
-		# 	text: u'%s\n%s' % (root.item.origin, root.item.origin_ex)
-		# 	text_size: (self.width, None)
-		# 	size_hint_y: None
-		# 	height: self.texture_size[1] + 10
-		# 	font_size: 12
-		Label:
-			text: 'Taille'
-			text_size: (self.width, None)
-			size_hint_y: None
-			height: self.texture_size[1] + 10
-			font_size: 14
-		Label:
-			text: u'%d' % (root.item.taille)
-			text_size: (self.width, None)
-			size_hint_y: None
-			height: self.texture_size[1] + 10
-			font_size: 12
-
-
-	GridLayout:
-		cols: 1
-		pos_hint: {'x': 0.3}
-		size_hint_x: 0.7
-
-		canvas.before:
-			Color:
-				rgb: .1, .1, .1
-			Rectangle:
-				pos: self.x, self.top - self.height * (1 - root.flip_alpha)
-				size: self.width, self.height * (1 - root.flip_alpha)
-
-		Label:
-			text: root.item.title
-			text_size: (self.width - 20, None)
-			valign: 'middle'
-			font_size: 16
-			size_hint_y: None
-			height: max(102, self.texture_size[1])
-			color: (1, 1, 1, 1 - root.flip_alpha)
-
-		Label:
-			text: root.item.description
-			text_size: (self.width - 20, None)
-			size_hint_y: None
-			height: self.texture_size[1]
-			color: (1, 1, 1, 1 - root.flip_alpha)
 
