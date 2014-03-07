@@ -64,25 +64,25 @@ class Keyboard(Scatter):
 		# 			halign = 'center',
 		# 			font_name = join(curdir, 'ProximaNova-Thin-webfont.ttf'))
 
-		self.btnClear = Button(text='x',
-								size = (20, 48), 
-								size_hint = (None, None),
-								# center = (self.pos[0] + self.size[0] - 30 - 22.5/2,self.pos[1] + self.size[1] - 45/2),
-								# pos = (self.pos[0] + self.size[0] - 30, self.pos[1] + 9*self.size[1]/10), 
-								border = [0,0,0,0],
-								background_normal = join(curdir,'btn.png'),
-								background_down = join(curdir,'btn_down.png'),
-								background_color = [0.8,0.8,0.8,1],
-								color = [0,0,0,1])
+		# self.btnClear = Button(text='x',
+		# 						size = (20, 48), 
+		# 						size_hint = (None, None),
+		# 						# center = (self.pos[0] + self.size[0] - 30 - 22.5/2,self.pos[1] + self.size[1] - 45/2),
+		# 						# pos = (self.pos[0] + self.size[0] - 30, self.pos[1] + 9*self.size[1]/10), 
+		# 						border = [0,0,0,0],
+		# 						background_normal = join(curdir,'btn.png'),
+		# 						background_down = join(curdir,'btn_down.png'),
+		# 						background_color = [0.8,0.8,0.8,1],
+		# 						color = [0,0,0,1])
 
-		self.btnClear.center = (self.pos[0] + self.size[0] - 30 - 24/2.,self.pos[1] + self.size[1] - 50/2)
+		# self.btnClear.center = (self.pos[0] + self.size[0] - 30 - 24/2.,self.pos[1] + self.size[1] - 50/2)
 
-		self.btnClear.bind(on_press = self.clear_text)
+		# self.btnClear.bind(on_press = self.clear_text)
 
 		self.load_layout()
 		self.generate()
 
-		self.add_widget(self.btnClear)
+		# self.add_widget(self.btnClear)
 
 
 		# self.add_widget(self.label_text)
@@ -121,7 +121,7 @@ class Keyboard(Scatter):
 		# key.wd = key.wd + 15
 		# key.hgt = key.hgt + 15
 		Animation.stop_all(key)
-		anim = Animation(wd = key.wd_fix + 15, hgt = key.hgt_fix + 15, duration = 0.1, t='out_circ')
+		anim = Animation(wd = key.wd_fix + 15, hgt = key.hgt_fix + 15, duration = 0.07, t='in_quad')
 		anim.start(key)
 		# key.center = center_tmp
 
@@ -153,21 +153,13 @@ class Keyboard(Scatter):
 		elif key.prop[0] == 'change':
 			self.switch()
 
-
-
-
-
-
-
-
-
 		# center_tmp = (key.center[0], key.center[1])
 		# key.size = (key.size[0] - 15, key.size[1] - 15)
 		# print key.pic.size
 		# key.wd = key.wd - 15
 		# key.hgt = key.hgt - 15
 		Animation.stop_all(key)
-		anim = Animation(wd = key.wd_fix, hgt = key.hgt_fix, duration = 0.1, t='out_circ')
+		anim = Animation(wd = key.wd_fix, hgt = key.hgt_fix, duration = 0.07, t='in_quad')
 		anim.start(key)
 		# key.center = center_tmp
 		key.background_color = self.layout['bgr_color'][key.prop[1]]
@@ -315,7 +307,7 @@ class Keyboard(Scatter):
 		else:
 			for key in self.keys:
 				if (key.prop[0] == 'input'):
-					if (key.text in self.nextInput):
+					if (str(key.text) in self.nextInput):
 						key.disabled = False
 					else:
 						key.disabled = True
