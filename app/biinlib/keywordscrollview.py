@@ -10,7 +10,9 @@ from museolib.widgets.keywords import Keyword
 import unicodedata
 from functools import cmp_to_key
 
+from kivy.logger import Logger
 from kivy.uix.button import Button
+import re
 
 # En paramètre un groupe de mot-clé précis.
 # Parcours la liste des mots-clés et les affiche dans la scrollview
@@ -62,6 +64,7 @@ class KeywordScrollView(ScrollView):
             but = KeyScrollItem(
                 text= key['name'],
                 key= key,
+                original_text = key['name'],
                 # width=self.width - 60,
                 active=True,
                 controler=self)
@@ -71,38 +74,66 @@ class KeywordScrollView(ScrollView):
     def remove_accents(self, input_str):
         nkfd_form = unicodedata.normalize('NFKD', input_str)
         return u"".join([c for c in nkfd_form if not unicodedata.combining(c)])
+
+    def clear_self(self):
+        self.selected_keywords = []
+        for child in self.container.children:
+            # child.active = False
+            # self.container.remove_widget(child)
+            child.state = 'normal'
     
     def on_key(self, widget, value):  
 
         next_letters = ''      
         for child in self.buttons:
-            uname = self.remove_accents(child.text)
-            uname = uname.upper()
+            if child.text != '':
+                uname = self.remove_accents(unicode(child.original_text))
+                uname = uname.upper()
+                child.text = text = child.original_text
+                bold = 'fonts/proximanova-bold-webfont.ttf'
+                if value in uname:
+                    if value != '':
+                        splittxt = uname.split(value, 1)
+                        index = uname.index(value)
+                        lv = len(value)
 
-            if value in uname:
-                if value != '':
-                    splittxt = uname.split(value, 1)
-                    # print splittxt
-                    if len(splittxt) > 1:
-                        if len(splittxt[1]) > 0:
-                            letter = splittxt[1][0]
-                            letter = letter.encode('utf-8')
-                            if letter not in next_letters:
-                                next_letters += letter
+                        # print text[index:index+lv], text
+                        insensitive_text = re.compile(re.escape(value), re.IGNORECASE)
+                        ftext = insensitive_text.sub('[font='+ bold +']' + child.original_text[index: index+lv].upper() + '[/font]', text)                        
 
-                if not child in self.container.children:
-                    self.container.add_widget(child)
-                    child.active = True
-            else:
-                if child in self.container.children:
-                    self.container.remove_widget(child)
-                    # child.state = 'normal'
-                    child.active = False
-                    # When a keyword disappear it deactivate itself
-                    # for key in self.selected_keywords: 
-                    #     if key[1] == child.key['id']:
-                    #         self.selected_keywords.remove(key)
-        # print 'NEXT : ', next_letters
+                        child.text = ftext                  
+                        
+                        # TODO
+                        # value in uname ne prend en compte que la première occurence de value:
+                        # Ce n'est pas très grave pour la fonction de recherche qui n'a besoin que d'une seule occurence
+                        # Par contre pour la fonction de prédiction des lettres suivantes c'est plus embetant.
+                        # Ci-dessous occurs contient toutes les positions des occurences de value dans uname.
+                        # Avec len(value) et la position de value, on peut extraire le caractère suivant de chaque occurence de value
+                        
+                        occurs = [m.start() for m in re.finditer(re.escape(value), uname)]
+
+
+                        if len(splittxt) > 1:
+                            if len(splittxt[1]) > 0:
+                                letter = splittxt[1][0]
+                                letter = letter.encode('utf-8')
+                                if letter not in next_letters:
+                                    next_letters += letter
+
+                    if not child in self.container.children:
+                        self.container.add_widget(child)
+                        child.active = True
+                else:
+                    if child in self.container.children:
+                        self.container.remove_widget(child)
+                        # child.state = 'normal'
+                        child.active = False
+                        # When a keyword disappear it deactivate itself
+                        # for key in self.selected_keywords: 
+                        #     if key[1] == child.key['id']:
+                        #         self.selected_keywords.remove(key)
+            # print 'NEXT : ', next_letters
+        
         self.keyboard.next_input(next_letters)
 
 
@@ -110,16 +141,19 @@ class AttributeScrollView(KeywordScrollView):
 
     def on_keywords(self, instance, value):
         self.container.clear_widgets()
+        # self.local_keywords = sorted(self.keywords)
         self.local_keywords = self.keywords
 
         for param in self.local_keywords:
-            but = AttributeScrollItem(
-                text= param,
-                active=True,
-                # width=self.width ,
-                controler=self)
-            self.buttons.append(but) 
-            self.container.add_widget(but)
+            if param != '':
+                but = AttributeScrollItem(
+                    text= param,
+                    active=True,
+                    original_text= param,
+                    # width=self.width ,
+                    controler=self)
+                self.buttons.append(but) 
+                self.container.add_widget(but)
 
 class KeyScrollItem(ToggleButtonBehavior, Label):
     active = BooleanProperty(True)   
@@ -128,16 +162,16 @@ class KeyScrollItem(ToggleButtonBehavior, Label):
 
     key = ObjectProperty(None)
 
+    original_text = StringProperty('')
+
     def on_release(self):
+        key = (self.original_text, self.key['id'])
         if self.state == 'down':
-            # for child in self.controler.buttons:
-            #     if child is not self and child.state == 'down':
-            #         child.state = 'normal'
-            # del self.controler.selected_keywords[:]
-            self.controler.selected_keywords.append((self.text, self.key['id']))
+            if key not in self.controler.selected_keywords:
+                self.controler.selected_keywords.append(key)
         else:
-            # del self.controler.selected_keywords[:]
-            self.controler.selected_keywords.remove((self.text, self.key['id']))
+            if key in self.controler.selected_keywords:
+                self.controler.selected_keywords.remove(key)
         
 
 class AttributeScrollItem(KeyScrollItem):
@@ -148,9 +182,11 @@ class AttributeScrollItem(KeyScrollItem):
             #     if child is not self and child.state == 'down':
             #         child.state = 'normal'
             # del self.controler.selected_keywords[:]
-            self.controler.selected_keywords.append(self.text)
+            if self.original_text not in self.controler.selected_keywords:
+                self.controler.selected_keywords.append(self.original_text)
         else:
-            self.controler.selected_keywords.remove(self.text)
+            if self.original_text in self.controler.selected_keywords:
+                self.controler.selected_keywords.remove(self.original_text)
 
 
 
