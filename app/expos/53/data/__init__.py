@@ -153,6 +153,7 @@ class WidgetsPanel(FloatLayout):
 
             #AUTHORS TEXT
             authors = self.app.author_widget.selected_keywords
+
             authors_text = ''
             if len(authors) > 0:
                 if len(authors) == 1:
@@ -188,7 +189,8 @@ class WidgetsPanel(FloatLayout):
                         else:
                             themes_text += '[color='+blue+']' + th + '[/color]'
                 themes_text += ' '
-                self.dynamic_sentence.text = self.dynamic_sentence2.text = prefix_text + authors_text + themes_text + date_text
+            
+            self.dynamic_sentence.text = self.dynamic_sentence2.text = prefix_text + authors_text + themes_text + date_text
         
         self.dynamic_sentence.x = 30
         duration = 15
