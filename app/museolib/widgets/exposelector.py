@@ -39,23 +39,20 @@ class ExpoItem(ButtonBehavior, Widget):
     def __init__(self, **kwargs):
         super(ExpoItem, self).__init__(**kwargs)
 
-    def check_release(self, dt):
-        if self.state == 'down':
-            self.release_time = time.time() - self.press_time
+    def launch_expo(self, dt):
+        self.selector.select_expo(self.expo)
 
     def on_press(self):    
-        self.press_time = time.time()
-
-
-        Clock.schedule_interval(self.check_release, .1)
+        img = self.ids['main_img']
+        Animation.stop_all(img)
+        anim = Animation(color=(0.224, 0.016, 0.271, 1), d=1)
+        anim.start(img)
+        anim.on_complete = self.launch_expo
 
     def on_release(self):
-        # current = int(time.time())
-        # self.release_time = current - self.press_time
-        Clock.unschedule(self.check_release)
-        if self.release_time > .5:
-            self.selector.select_expo(self.expo)
-
+        img = self.ids['main_img']
+        Animation.cancel_all(img)
+        img.color = (1,1,1,1)
 
 class ExpoSelector(FloatLayout):
 
