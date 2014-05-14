@@ -5,14 +5,14 @@ __all__ = ('KeywordScrollView', )
 from kivy.uix.scrollview import ScrollView
 from kivy.uix.behaviors import ToggleButtonBehavior
 from kivy.uix.label import Label
-from kivy.properties import BooleanProperty, ListProperty, StringProperty, ObjectProperty
+from kivy.properties import BooleanProperty, ListProperty, StringProperty, ObjectProperty, NumericProperty
 from museolib.widgets.keywords import Keyword
 import unicodedata
 from functools import cmp_to_key
 
 from kivy.logger import Logger
 from kivy.uix.button import Button
-import re
+import re, locale
 
 # En paramètre un groupe de mot-clé précis.
 # Parcours la liste des mots-clés et les affiche dans la scrollview
@@ -41,6 +41,8 @@ class KeywordScrollView(ScrollView):
 
     keyboard = ObjectProperty(None)
 
+    multiple_groups = BooleanProperty(False)
+
     def __init__(self, **kwargs):
         super(KeywordScrollView, self).__init__(**kwargs)
         self.container.bind(minimum_height=self.container.setter('height'))
@@ -51,21 +53,20 @@ class KeywordScrollView(ScrollView):
 
     def on_keywords(self, instance, value):
         self.container.clear_widgets()
-       
+        
         for item in value:
             group = item['group']
             children = item['children']
 
             if group == self.title:
-                self.local_keywords = children
+                self.local_keywords = sorted(children, key=lambda x: x['name'].lower(), cmp=locale.strcoll)
                 break
-
+                
         for key in self.local_keywords:
             but = KeyScrollItem(
                 text= key['name'],
                 key= key,
                 original_text = key['name'],
-                # width=self.width - 60,
                 active=True,
                 controler=self)
             self.buttons.append(but) 
@@ -84,7 +85,8 @@ class KeywordScrollView(ScrollView):
     
     def on_key(self, widget, value):  
 
-        next_letters = ''      
+        next_letters = ''
+        result = []
         for child in self.buttons:
             if child.text != '':
                 uname = self.remove_accents(unicode(child.original_text))
@@ -120,20 +122,27 @@ class KeywordScrollView(ScrollView):
                                 if letter not in next_letters:
                                     next_letters += letter
 
-                    if not child in self.container.children:
-                        self.container.add_widget(child)
-                        child.active = True
-                else:
-                    if child in self.container.children:
-                        self.container.remove_widget(child)
-                        # child.state = 'normal'
-                        child.active = False
-                        # When a keyword disappear it deactivate itself
-                        # for key in self.selected_keywords: 
-                        #     if key[1] == child.key['id']:
-                        #         self.selected_keywords.remove(key)
-            # print 'NEXT : ', next_letters
-        
+                    result.append(child)                
+                #     if not child in self.container.children:
+                #         # if hasattr(child, 'index'):
+                #         #     print 'Adding widget with index : ', child.index
+                #         #     self.container.add_widget(child, child.index)
+                #         # else:
+
+                #         # self.container.add_widget(child)
+                #         child.active = True
+                # else:
+                #     if child in self.container.children:
+                #         child.active = False
+                #         # When a keyword disappear it deactivate itself
+                #         # for key in self.selected_keywords: 
+                #         #     if key[1] == child.key['id']:
+                #         #         self.selected_keywords.remove(key)
+            
+        self.container.clear_widgets()
+        for child in result:
+            self.container.add_widget(child)
+
         self.keyboard.next_input(next_letters)
 
 
@@ -141,19 +150,18 @@ class AttributeScrollView(KeywordScrollView):
 
     def on_keywords(self, instance, value):
         self.container.clear_widgets()
-        # self.local_keywords = sorted(self.keywords)
-        self.local_keywords = self.keywords
-
+        self.local_keywords = sorted(self.keywords, key=unicode.lower, cmp=locale.strcoll)
+        
+        
         for param in self.local_keywords:
             if param != '':
                 but = AttributeScrollItem(
                     text= param,
                     active=True,
                     original_text= param,
-                    # width=self.width ,
                     controler=self)
                 self.buttons.append(but) 
-                self.container.add_widget(but)
+                self.container.add_widget(but)            
 
 class KeyScrollItem(ToggleButtonBehavior, Label):
     active = BooleanProperty(True)   

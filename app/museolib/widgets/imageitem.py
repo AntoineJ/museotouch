@@ -126,7 +126,6 @@ class ImageItem(Scatter):
     img_square = ObjectProperty(None)
     
     def __init__(self, *args, **kwargs):
-
         square = False
         if 'square' in kwargs and kwargs['square'] == True:
             square = True

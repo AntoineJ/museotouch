@@ -17,7 +17,7 @@ from kivy.uix.button import Button
 from kivy.uix.scrollview import ScrollView
 from kivy.core.window import Window
 from kivy.uix.behaviors import ButtonBehavior
-import random, os, time
+import random, os, time, locale
 from os.path import dirname,abspath, join, isfile
 
 from kivy.clock import Clock
@@ -33,11 +33,25 @@ class ExpoItem(ButtonBehavior, Widget):
     expo = ObjectProperty(None)
     selector = ObjectProperty(None)
 
-    press_time = NumericProperty(0.0)
-    release_time = NumericProperty(0.0)
+    color = (1,1,1,1)
 
     def __init__(self, **kwargs):
+        yellow = (0.894, 0.886, 0.133,1)
+        cobalt = (0.172, 0.2, 0.219,1)
+        violet = (0.223, 0.015, 0.270,1)
+        blue = (0, 0.376, 0.666,1)
+
+        colors = [yellow, cobalt, violet, blue]
+        random.shuffle(colors)
+
+        rd = random.randint(0,3)
+        self.color = colors[rd]
+
         super(ExpoItem, self).__init__(**kwargs)
+
+
+
+
 
     def launch_expo(self, dt):
         self.selector.select_expo(self.expo)
@@ -45,7 +59,7 @@ class ExpoItem(ButtonBehavior, Widget):
     def on_press(self):    
         img = self.ids['main_img']
         Animation.stop_all(img)
-        anim = Animation(color=(0.224, 0.016, 0.271, 1), d=1)
+        anim = Animation(color=self.color, d=.2)
         anim.start(img)
         anim.on_complete = self.launch_expo
 
@@ -87,6 +101,10 @@ class ExpoSelector(FloatLayout):
         # show them.
         layout = ExpoPopupChoice()
         layout.list_expos.bind(minimum_height=layout.list_expos.setter('height'))
+
+        # Alphabetical sort, case insensitive, and with accents
+        result = sorted(result, key=lambda x: x['name'].lower(), cmp=locale.strcoll)
+                
         for expo in result:
             # convert to string key, python 2.6.
             expo = dict([(str(x), y) for x, y in expo.iteritems()])

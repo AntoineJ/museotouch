@@ -43,6 +43,8 @@ class Keyboard(Scatter):
 	# List of the possible next input
 	nextInput = StringProperty('')
 
+	forbiden_keys = StringProperty('')
+
 	def __init__(self, **kwargs):
 		self.register_event_type('on_input')
 		super(Keyboard, self).__init__(**kwargs)
@@ -51,43 +53,16 @@ class Keyboard(Scatter):
 		curdir = dirname(__file__)
 		self.layout_filename = join(curdir, 'layout.json')
 
-		# self.label_text = Label(text='',
-		# 			font_size = 36, 
-		# 			color = (0,0,0,1),
-		# 			# shorten = True,
-		# 			text_size = (self.size[0] - 60 - 22, 50),
-		# 			size = (self.size[0] - 60 - 22, 50),
-		# 			size_hint = (None, None),
-		# 			pos = (self.pos[0] + 30, self.pos[1] + self.size[1] - 50),
-		# 			pos_hint = {},
-		# 			valign = 'middle',
-		# 			halign = 'center',
-		# 			font_name = join(curdir, 'ProximaNova-Thin-webfont.ttf'))
-
-		# self.btnClear = Button(text='x',
-		# 						size = (20, 48), 
-		# 						size_hint = (None, None),
-		# 						# center = (self.pos[0] + self.size[0] - 30 - 22.5/2,self.pos[1] + self.size[1] - 45/2),
-		# 						# pos = (self.pos[0] + self.size[0] - 30, self.pos[1] + 9*self.size[1]/10), 
-		# 						border = [0,0,0,0],
-		# 						background_normal = join(curdir,'btn.png'),
-		# 						background_down = join(curdir,'btn_down.png'),
-		# 						background_color = [0.8,0.8,0.8,1],
-		# 						color = [0,0,0,1])
-
-		# self.btnClear.center = (self.pos[0] + self.size[0] - 30 - 24/2.,self.pos[1] + self.size[1] - 50/2)
-
-		# self.btnClear.bind(on_press = self.clear_text)
-
 		self.load_layout()
 		self.generate()
 
-		# self.add_widget(self.btnClear)
-
-
-		# self.add_widget(self.label_text)
 	def on_input(self, *args):
 		return True
+
+	def on_forbiden_keys(self, *args):
+		for key in self.keys:
+			if key.prop[3] in self.forbiden_keys:
+				key.disabled = True
 
 	def load_layout(self):
 		"""load the JSON file"""
@@ -303,7 +278,10 @@ class Keyboard(Scatter):
 	def enable_key(self):
 		if (self.label_text.text == ''):
 			for key in self.keys:
-				key.disabled = False
+				if key.prop[3] not in self.forbiden_keys:
+					key.disabled = False
+				else:
+					key.disabled = True
 		else:
 			for key in self.keys:
 				if (key.prop[0] == 'input'):

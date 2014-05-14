@@ -30,7 +30,9 @@ class ImageKeywordsItem(Image):
     def on_touch_up(self, touch):
         if touch.grab_current is self.parent:
             delay = touch.time_update - touch.time_start
-            if delay < 0.3:
+            delta = abs(touch.dx) + abs(touch.dy)
+            
+            if delta < 2:
                 ret = self.toggle_active(touch)       
                 if ret == True:
                     touch.ungrab(self.parent)
@@ -60,7 +62,7 @@ class ImageKeywordsItem(Image):
         y -= self.y
         x = int(x)
         y = int(y)
-        y = self.parent.height - y # Because texture is flipped vertically in kivy 1.5.0
+        y = self.parent.height - y # Because texture is flipped vertically since kivy 1.5.0
         coreimage = self._coreimage
         try:
             color = coreimage.read_pixel(x, y)

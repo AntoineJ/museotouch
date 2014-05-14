@@ -28,7 +28,6 @@ from kivy.utils import format_bytes_to_human, platform
 from kivy.core.window import Window
 from kivy.properties import BooleanProperty, NumericProperty
 
-
 from kivy.loader import Loader
 
 import museolib
@@ -116,8 +115,7 @@ class MuseotouchApp(App):
         children.sort(key=lambda x: x.item.date)
         self._display_ordering_as_table(children)
 
-    def _display_ordering_as_group(self, children, groups, 
-            index_for_child):
+    def _display_ordering_as_group(self, children, groups, index_for_child):
         # size of image
         imgs = int(512 * .7)
 
@@ -428,6 +426,7 @@ class MuseotouchApp(App):
             groups = list(set([x[0] for x in selected_keywords]))
             groups_result = {}
             items_result = []
+
             # check every group
             for group in groups:
                 # check keywords for current group
@@ -444,19 +443,25 @@ class MuseotouchApp(App):
                             if not item in items_result:
                                 items_result.append(item)
                             break
-
                 # add the result to the group result
                 groups_result[group] = result
 
+
+
+
             # on all the avialable item, ensure they are all in the selected
             # group
-            for item in items_result[:]:
-                valid = all([item in x for x in groups_result.itervalues()])
-                if not valid:
-                    items_result.remove(item)
+            if not hasattr(self.keywords, 'multiple_groups'):
+                # if multiple_groups:
+                for item in items_result[:]:
+                    valid = all([item in x for x in groups_result.itervalues()])
+                    if not valid:
+                        items_result.remove(item)
 
             # now set the result as the new set of items
             items = result = items_result
+
+
 
         if self.calendar:
             calfield = 'cal'
@@ -464,6 +469,7 @@ class MuseotouchApp(App):
                 if 'calannee' in items[0]:
                     calfield = 'calannee'
                 items = result = [x for x in items if self.calendar.accepts(x[calfield])]
+
 
         # show only the first 10 objects
         if not self.should_display_images_by_default:
@@ -644,6 +650,7 @@ class MuseotouchApp(App):
         return FloatLayout()
 
     def build_selector(self, *l):
+        
         return ExpoSelector(app=self)
 
     def build_app(self):
@@ -1211,7 +1218,7 @@ class MuseotouchApp(App):
         self._sync_popup.content.children[0].max = total
         self._sync_popup.content.children[0].value = current
         text = self._sync_popup.content.children[-2].text
-
+        
         if text is not None:
             filename = text.split(' ')[0]
             text = ''
