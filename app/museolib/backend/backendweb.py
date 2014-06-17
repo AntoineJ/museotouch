@@ -2,8 +2,8 @@ from museolib.backend import Backend
 from kivy.logger import Logger
 from kivy.network.urlrequest import UrlRequest
 from functools import partial
-from urllib import unquote_plus
-
+from urllib import unquote_plus, urlopen
+    
 class BackendWeb(Backend):
 
     def __init__(self, **kwargs):
@@ -15,7 +15,7 @@ class BackendWeb(Backend):
     def set_expo(self, uid):
         self.expo = uid
 
-    def build_url(self, path):
+    def build_url(self, path):        
         return self.url + path
 
     def build_data_url(self, path):
@@ -95,7 +95,14 @@ class BackendWeb(Backend):
             directory = 'compressed/%s' % directory
         url = self.build_data_url('objets/%(uid)s/%(directory)s/%(uid)s.%(ext)s'
                 % {'uid': uid, 'directory': directory, 'ext': extension})
+
+        resource = urlopen(url)
+        status = resource.getcode()
+        if status == 404 and extension == 'jpg':
+            url = self.build_data_url('objets/%(uid)s/%(directory)s/%(uid)s.%(ext)s'
+                % {'uid': uid, 'directory': directory, 'ext': 'png'})
+
         Logger.debug('BackendWeb: GET %r' % url)
-        self.req = UrlRequest(url, on_success=on_success, on_error=on_error, on_progress=on_progress,
+        self.req = UrlRequest(url, on_success=on_success, on_error=on_error, on_failure=on_error, on_progress=on_progress, timeout=5,
                 chunk_size=32768)
 
