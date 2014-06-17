@@ -567,6 +567,8 @@ class MuseotouchApp(App):
 
         # set the image type from mode
         # TODO : get values from museotouch.ini
+        # self.imgtype = 'dds'
+        # self.imgdir = 'dds'
         self.imgtype = 'jpg'
         self.imgdir = 'raw'
 
@@ -1230,8 +1232,10 @@ class MuseotouchApp(App):
             self._sync_popup.content.children[-2].text = text
 
     def _sync_error(self, req, result):
-        print result
-        self.error('Erreur lors de la synchro : '+ str(result))
+        if req.resp_status == 404: 
+            Clock.schedule_once(self._sync_download_next)
+        else:
+            self.error('Erreur lors de la synchro : '+ str(result))
 
     def _sync_error_but_continue(self, req, result):
         self._sync_popup.dismiss()
