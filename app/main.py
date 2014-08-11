@@ -363,7 +363,8 @@ class MuseotouchApp(App):
             keywords_all = []
 
             for group in groups:
-                if group['group'].find('filtre') != -1:
+                groupname = group['group'].lower()                
+                if groupname.find('filtre') != -1:
                     keywords_all = group['children']
 
             if (keywords_all):
@@ -461,7 +462,8 @@ class MuseotouchApp(App):
             'email_send' : 'True',
             'url_send_url' : 'http://urltest.lapin.be',
             'url_send' : 'True',
-            'url_send_detailed_item' : 'True'
+            'url_send_detailed_item' : 'True',
+            'fast_build' : 'False'
         })
         if platform() not in ('ios', 'android'):
             config.setdefaults('rfid', {
@@ -804,9 +806,8 @@ class MuseotouchApp(App):
         # get the initial json
         self.backend.set_expo(expo_id)
 
-        fast = False
-        if fast:
-            print 'building fast'
+        fast = self.config.get('museotouch', 'fast_build')
+        if fast == True:
             self._sync_popup.dismiss()
             self.build_app()
         else:
