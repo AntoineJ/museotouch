@@ -5,7 +5,6 @@ from kivy.uix.floatlayout import FloatLayout
 from kivy.properties import ListProperty, BooleanProperty, StringProperty
 from kivy.resources import resource_find
 from kivy.core.image import Image as CoreImage
-from kivy.vector import Vector
 
 
 class ImageButtonItem(Image):

@@ -1,12 +1,13 @@
 from museolib.utils import convert_to_key
+from os.path import basename
 
 class BackendItem(dict):
     @property
     def date(self):
         if 'date_crea' in self:
             # return int(self['date_crea'])
-            if self['date_crea']:
-                tmp = int(self['date_crea'])
+            if self['fields']['date_crea']:
+                tmp = int(self['fields']['date_crea'])
             else:
                 tmp=0
             return tmp
@@ -17,46 +18,63 @@ class BackendItem(dict):
 
     @property
     def origin(self):
-        if 'orig_geo' in self:
-            return self['orig_geo']
+        if 'orig_geo' in self['fields']:
+            return self['fields']['orig_geo']
 
     @property
     def origin_ex(self):
-        if 'orig_geo_prec' in self:
-            return self['orig_geo_prec']
+        if 'orig_geo_prec' in self['fields']:
+            return self['fields']['orig_geo_prec']
 
     @property
     def title(self):
-        return self['nom']
-
-    # @property
-    # def description(self):
-    #     return self['cartel']
+        return self['title']
+    
+    @property
+    def description(self):
+        if 'description' in self['fields']:
+            return self['fields']['description']
+        elif 'cartel' in self['fields']:
+            return self['fields']['cartel']
+        else:
+            return ''
 
     @property
     def origin_key(self):
         return convert_to_key(self.origin)
 
     @property
+    def freefield(self):
+        if 'freefield' in self.fields:
+            return self.fields['freefield']
+        else:
+            return ''
+
+    @property
     def medias(self):
         ret = []
-        for x in self['data']:
-            name = x['fichier'].rsplit('/')[-1].rsplit('.')[0]
+        for x in self['fields']['data']:
+            name = x.rsplit('/')[-1].rsplit('.')[0]
             if name == str(self.id):
                 continue
-            ret.append(x['fichier'])
+
+            ret.append(basename(x))
         return ret
 
     @property
     def taille(self):
         try:
-            return int(self['taille'])
+            return int(self['fields']['taille'])
         except:
             return 0
 
     def __getattr__(self, nom):
         """ Si l'attribut n'est pas dans ceux ci dessus, c'est un item du JSON : """
-        if nom in self:  # renvoie None sinon
+        if nom in self:
+            return self[nom]
+        elif nom in self['fields']:  # renvoie None sinon
+            return self['fields'][nom]
+        if nom in self:
             return self[nom]
         else:
             if nom == 'description':

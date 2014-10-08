@@ -4,7 +4,7 @@ from kivy.animation import Animation
 from kivy.uix.scatter import Scatter
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.video import Video
-from kivy.uix.image import AsyncImage
+from kivy.uix.image import Image
 from kivy.uix.label import Label
 from os.path import splitext, join, isfile
 from pdb import set_trace as rrr
@@ -35,8 +35,8 @@ class ItemMediaBrowser(FloatLayout):
         ext = ext[1:].lower()
 
         # convert media url to local media path (all medias are already downloaded)
-        from museolib.utils import no_url
-        media = join(self.parent.parent.parent.parent.app.expo_dir, 'otherfiles', no_url(media))
+        media = join(self.parent.parent.parent.parent.app.expo_dir, 'otherfiles', media)
+
         if not isfile(media):
             print " ### Oops, this media is not downloaded !"
         try:
@@ -47,7 +47,7 @@ class ItemMediaBrowser(FloatLayout):
             elif ext in ('avi', 'mkv', 'mp4', 'ogv', 'mpg', 'mpeg', 'dv'):
                 w = Video(source=media, play=True)
             else:
-                w = AsyncImage(source=media)
+                w = Image(source=media)
         except:
             w = Label(text='Unable to read that media')
         self.content.clear_widgets()
@@ -143,7 +143,7 @@ class ImageItem(Scatter):
             self.img_square.texture = self.img_square.texture.get_region(x, y, w, h)
 
     def on_start(self):
-        #Replace this function in init.py to personnalize dynamically an image item 
+        #Replace this function in init.py to personnalize dynamically an image item        
         pass
 
     def on_touch_down(self, touch): 

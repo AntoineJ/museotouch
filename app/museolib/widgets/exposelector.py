@@ -18,7 +18,7 @@ from kivy.uix.scrollview import ScrollView
 from kivy.core.window import Window
 from kivy.uix.behaviors import ButtonBehavior
 import random, os, time, locale
-from os.path import dirname,abspath, join, isfile
+from os.path import dirname,abspath, join, isfile, basename
 
 from kivy.clock import Clock
 
@@ -46,12 +46,7 @@ class ExpoItem(ButtonBehavior, Widget):
 
         rd = random.randint(0,3)
         self.color = colors[rd]
-
         super(ExpoItem, self).__init__(**kwargs)
-
-
-
-
 
     def launch_expo(self, dt):
         self.selector.select_expo(self.expo)
@@ -93,6 +88,7 @@ class ExpoSelector(FloatLayout):
     def show_expos(self, online=None):
         # get offline expo
         offline = self.get_offline_expos()
+        
         if online is not None and type(offline) in (list, tuple):
             # mix with online expo
             result = self.mix_expos(offline, online)
@@ -107,27 +103,37 @@ class ExpoSelector(FloatLayout):
                 
         for expo in result:
             # convert to string key, python 2.6.
+            
             expo = dict([(str(x), y) for x, y in expo.iteritems()])
-            zipfiles = [x['fichier'] for x in expo['data'] if
-                    x['fichier'].rsplit('.', 1)[-1] == 'zip']
-            data = [x['fichier'] for x in expo['data'] if
-                    x['fichier'].rsplit('.', 1)[-1].lower() in ('jpg', 'png')]
+
+            # zipfile = ''
+            # if 'zipContent' in expo:
+            #     zipfile = expo['zipContent']
+                
+
+            # data = [x['fichier'] for x in expo['data'] if
+            #         x['fichier'].rsplit('.', 1)[-1].lower() in ('jpg', 'png')]
             
             expo_dir = self.app.get_expo_dir(expo['id'])
-            jpg = join(expo_dir, 'thumbnail.jpg')
-            png = join(expo_dir, 'thumbnail.png')
-            no_img = abspath(join(dirname(__file__), os.pardir, 'data/quit.png'))
-
             expo['no_img'] = False
-            if isfile(jpg):
-                expo['data'] = jpg
-            elif isfile(png):
-                expo['data'] = png
+            no_img = abspath(join(dirname(__file__), os.pardir, 'data/quit.png'))
+            img = ''
+
+            if 'mainMedia' in expo:
+                img = expo['mainMedia']
+                img = join(expo_dir, basename(img))
             else:
-                expo['data'] = no_img
+                expo['thumbnail'] = no_img
+            
+            if isfile(img):
+                expo['thumbnail'] = img
+            else:
+                expo['thumbnail'] = no_img
                 expo['no_img'] = True
-            expo['__zipfiles__'] = zipfiles
-            # item = Builder.template('ExpoItem', selector=self, **expo)
+
+            # expo['__zipfiles__'] = zipfile
+            # # item = Builder.template('ExpoItem', selector=self, **expo)
+
             item = ExpoItem(selector=self, expo=expo)
             layout.add_expo(item)
         self.popup(content=layout, title='Liste des expositions')
@@ -182,16 +188,16 @@ class ExpoSelector(FloatLayout):
         return ExpoSelector(app=self)
 
     def on_error(self, req, result):
-        # content = BoxLayout(orientation='vertical', padding=20, spacing=20)
-        # content.add_widget(Label(text=
-        #     'Erreur lors du chargement des expositions\n'
-        #     'disponible en ligne.\n\n' +
-        #     str(result)))
-        # btn = Button(text='Continuer', size_hint_y=.25)
-        # btn.bind(on_release=self.load_offline)
-        # content.add_widget(btn)
-        # self.popup(content=content, title='Erreur')
-        print 'error'
+        content = BoxLayout(orientation='vertical', padding=20, spacing=20)
+        content.add_widget(Label(text=
+            'Erreur lors du chargement des expositions\n'
+            'disponible en ligne.\n\n' +
+            str(result)))
+        btn = Button(text='Continuer', size_hint_y=.25)
+        btn.bind(on_release=self.load_offline)
+        content.add_widget(btn)
+        self.popup(content=content, title='Erreur')
+        print 'error : ', result
         self.load_offline(None)
 
     def popup(self, content, title, **kwargs):

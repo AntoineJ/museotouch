@@ -26,16 +26,19 @@ class BackendWeb(Backend):
             json = self._unquote(json)
             on_success(req, json)
         except Exception, e:
-            Logger.exception('error on request %r' % req, json)
+            # Logger.exception('error on request ', json)
             on_error(req, e)
 
     def _unquote(self, json):
         unquote = self._unquote
         tp = type(json)
+        
         if tp in (list, tuple):
             return tp([unquote(x) for x in json])
         elif tp is dict:
-            return dict((x, unquote(y)) for x, y in json.iteritems())
+            return dict((unquote(x), unquote(y)) for x, y in json.iteritems())
+        elif tp is int:
+            return str(json)
         elif tp in (str, unicode):
             json = unquote_plus(json)
             try:
@@ -66,7 +69,7 @@ class BackendWeb(Backend):
     #
 
     def get_expos(self, uid=None, on_success=None, on_error=None, on_progress=None):
-        url = self.build_url('')
+        url = self.build_url('interfaces')
         on_success = partial(self.unquote_json, on_success, on_error)
         if uid:
             on_success = partial(self._filter_on_id, uid, on_success, on_error)
@@ -75,7 +78,7 @@ class BackendWeb(Backend):
 
     def get_objects(self, on_success=None, on_error=None, on_progress=None):
         assert(self.expo is not None)
-        url = self.build_url('?act=expo&id=%s' % self.expo)
+        url = self.build_url('interface/%s' % self.expo)
         on_success = partial(self.unquote_json, on_success, on_error)
         Logger.debug('BackendWeb: GET %r' % url)
         self.req = UrlRequest(url, on_success=on_success, on_error=on_error, on_progress=on_progress)
@@ -84,23 +87,23 @@ class BackendWeb(Backend):
         Logger.debug('BackendWeb: GET %r' % filename)
         self.req = UrlRequest(filename, on_success=on_success, on_error=on_error, on_progress=on_progress)
 
-    def download_object(self, uid, directory, extension, on_success=None, on_error=None,
+    def download_object(self, url, directory, extension, on_success=None, on_error=None,
             on_progress=None):
         # 2 cases to handle
         # raw images are in objets/raw/*.png
         # compressed images are dispatched in multiple folder like
         # - objets/compressed/dds/*.dds
         # - ...
-        if directory != 'raw':
-            directory = 'compressed/%s' % directory
-        url = self.build_data_url('objets/%(uid)s/%(directory)s/%(uid)s.%(ext)s'
-                % {'uid': uid, 'directory': directory, 'ext': extension})
-
-        resource = urlopen(url)
-        status = resource.getcode()
-        if status == 404 and extension == 'jpg':
-            url = self.build_data_url('objets/%(uid)s/%(directory)s/%(uid)s.%(ext)s'
-                % {'uid': uid, 'directory': directory, 'ext': 'png'})
+        # if directory != 'raw':
+        #     directory = 'compressed/%s' % directory
+        # url = self.build_data_url('objets/%(uid)s/%(directory)s/%(uid)s.%(ext)s'
+        #         % {'uid': uid, 'directory': directory, 'ext': extension})
+        # url = url
+        # resource = urlopen(url)
+        # status = resource.getcode()
+        # if status == 404 and extension == 'jpg':
+        #     url = self.build_data_url('objets/%(uid)s/%(directory)s/%(uid)s.%(ext)s'
+        #         % {'uid': uid, 'directory': directory, 'ext': 'png'})
 
         Logger.debug('BackendWeb: GET %r' % url)
         self.req = UrlRequest(url, on_success=on_success, on_error=on_error, on_failure=on_error, on_progress=on_progress, timeout=5,

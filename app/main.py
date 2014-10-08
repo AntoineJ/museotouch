@@ -30,6 +30,7 @@ from kivy.properties import BooleanProperty, NumericProperty
 
 from kivy.loader import Loader
 
+
 import museolib
 from museolib.utils import format_date, no_url
 from museolib.widgets.imageitem import ImageItem
@@ -42,6 +43,7 @@ from json import dump, dumps
 from imp import load_source
 from math import ceil
 from functools import partial
+import shutil
 
 # from kivy.support import install_twisted_reactor
 # install_twisted_reactor()
@@ -367,36 +369,44 @@ class MuseotouchApp(App):
             groups = self.db.keywords
             items_result = []  
             keywords_all = []
+            groupname = ''
 
             for group in groups:
-                groupname = group['group'].lower()
+                groupname = group['label'].lower()
                 if groupname.find('filtre') != -1:
-                    keywords_all = group['children']
+                    keywords_all = group['choices']
+                    groupname = group['label']
 
             def remove_accents(input_str):
                 nkfd_form = unicodedata.normalize('NFKD', input_str)
                 return u"".join([c for c in nkfd_form if not unicodedata.combining(c)])
 
             if (keywords_all):
+                groupname = group['label']
                 for name in keywords_names:
                     for keyword in keywords_all:
-                        # Preprocess keyname in order to avoid accents and convert from unicode to string for comparison
-                        keyname = remove_accents(keyword['name'])
-                        keyname = keyname.encode('utf8')
+                        # Preprocess keyname in order to avoid accents and convert from unicode to string for comparison                    
+                        keyname = remove_accents(keyword['label'])
+                        keyname = keyname.encode('utf8')    
                         if name == keyname:
                             keywords_ids.append(keyword['id'])
 
                 for item in items:
-                    for key in keywords_ids:
-                        if key in item.keywords:
-                            items_result.append(item)
+                    for key_id in keywords_ids:
+                        for keyword_group in item.keywords:
+                            for key_group, value in keyword_group.iteritems():
+                                key_group = remove_accents(key_group)
+                                # groupname = remove_accents(groupname)
+                                key_group = key_group.encode('utf8')
+                                if remove_accents(groupname) == key_group:
+                                    if key_id in keyword_group[groupname]:                                    
+                                        items_result.append(item)
 
                 if self.imageButtons.show_objects_when_empty == True:
                     if not keywords_names and not items_result: #si aucune image activee et aucun resultat
                       items_result = items # on affiche tout
 
-                items = result = items_result
-
+                items = result = items_result 
             # for group in groups:
             #     if group.title.find('filtre'):
             #         print('filtre image trouvé')
@@ -432,17 +442,18 @@ class MuseotouchApp(App):
                 # check keywords for current group
                 keywords = [x[1] for x in selected_keywords if x[0] == group]
                 result = []
-
                 # check every items if we got at least one keyword of that group
                 for item in items:
                     #print 'item : ', item.origin_ex
                     for key in keywords:
                         # found one group keyword in the 
-                        if key in item.keywords:
-                            result.append(item)
-                            if not item in items_result:
-                                items_result.append(item)
-                            break
+                        for itemgroup in item.keywords:
+                            if group.title in itemgroup:
+                                if key in itemgroup[group.title]:
+                                    result.append(item)
+                                    if not item in items_result:
+                                        items_result.append(item)
+                                    break
                 # add the result to the group result
                 groups_result[group] = result
 
@@ -474,7 +485,6 @@ class MuseotouchApp(App):
         # show only the first 10 objects
         if not self.should_display_images_by_default:
             items = result
-
 
         self.show_objects(items)
 
@@ -669,7 +679,6 @@ class MuseotouchApp(App):
         else:
             modexpo = sys.modules['__expo__'+self.expo_id]
 
-
         # link with the db. later, we need to change it to real one.
         Builder.load_file(join(self.expo_data_dir, 'museotouch.kv'))
         self.db = db = BackendJSON(filename=join(
@@ -684,7 +693,9 @@ class MuseotouchApp(App):
                 directory, ext = 'raw', 'png'
             else:
                 directory, ext = self.imgdir, imgtype
-            filename = join(self.expo_img_dir,  directory, '%d.%s' % (item.id, ext))
+            # filename = join(self.expo_img_dir,  directory, '%d.%s' % (item.id, ext))
+
+            filename = join(self.expo_img_dir, self.imgdir, basename(item.mainMedia))
             if not exists(filename):
                 Logger.error('Museolib: Unable to found image %s' % filename)
                 items.remove(item)
@@ -719,7 +730,7 @@ class MuseotouchApp(App):
         if self.size_slider:
             self.size_slider.bind(value_range=self.trigger_objects_filtering)
 
-        # update the initial slider values to show date.
+        # # update the initial slider values to show date.
         if self.date_slider:
             self.date_slider.bind(value_range=self.trigger_objects_filtering)
 
@@ -817,7 +828,8 @@ class MuseotouchApp(App):
         else:
             root_expo = join(dirname(__file__), 'expos')
         try:
-            makedirs(root_expo)
+            if not exists(root_expo):
+                makedirs(root_expo)
         except OSError, e:
             print 'ERROR WHILE CREATING INITIAL LAYOUT?'
             print e
@@ -874,9 +886,14 @@ class MuseotouchApp(App):
     def _sync_expo_1(self, req, result):
         Logger.info('Museotouch: Synchronization part 1')
         # check result files to found a zip files
-        self._expo_files = files = [x['fichier'] for x in result['data']]
-        zipfiles = [x for x in files if x.rsplit('.', 1)[-1] == 'zip']
-        if len(zipfiles) != 1:
+            # self._expo_files = files = [x['fichier'] for x in result['data']]
+            # zipfiles = [x for x in files if x.rsplit('.', 1)[-1] == 'zip']
+        self.main_media = ''
+        if 'mainMedia' in result:
+            self.main_media = result['mainMedia']
+        if 'zipContent' in result:
+            zipfile = result['zipContent']
+        else:
             self.error(u'Aucun fichier de données attaché '
                     u'à cette exposition (zip not found)')
             return
@@ -894,7 +911,7 @@ class MuseotouchApp(App):
             with open(zipchecksum, 'r') as fd:
                 checksum = fd.read()
 
-        if checksum == zipfiles[0]:
+        if checksum == zipfile:
             Logger.info('Museolib: expo data dir already downloaded, continue.')
             # avoid downloading the zip, already got it.
             self._sync_expo_3()
@@ -902,16 +919,19 @@ class MuseotouchApp(App):
 
 
         # download the zip
-        print ' &&&& the zip is', zipfiles[0]
+        print ' &&&& the zip is', zipfile
         self._sync_popup_text(u'Téléchargement des données')
         self.backend.get_file(
-            zipfiles[0],
+            zipfile,
             on_success=self._sync_expo_2,
             on_error=self._sync_error_but_continue,
             on_progress=self._sync_progress)
 
     def _sync_expo_2(self, req, result):
         Logger.info('Museotouch: Synchronization part 2')
+        # Remove previous data folder if exists
+        if exists(join(self.expo_dir, 'data')):
+            shutil.rmtree(join(self.expo_dir, 'data'))
         # write result to data.zip
         zipfilename = join(self.expo_dir, 'data.zip')
         with open(zipfilename, 'wb') as fd:
@@ -934,11 +954,10 @@ class MuseotouchApp(App):
 
     def _sync_expo_3(self):
         Logger.info('Museotouch: Synchronization part 3')
-        # try to found at least one image
-        images = [x for x in self._expo_files if \
-            x.rsplit('.', 1)[-1].lower() in ('png', 'jpg')]
+        # Load the main image
+        image = self.main_media
 
-        if not images:
+        if image == '':
             self._sync_expo_5()
             return
 
@@ -950,7 +969,7 @@ class MuseotouchApp(App):
             with open(thumbchecksum, 'r') as fd:
                 checksum = fd.read()
 
-        if checksum == images[0]:
+        if checksum == image:
             Logger.info('Museolib: expo thumbnail already downloaded, continue.')
             # avoid downloading the zip, already got it.
             self._sync_expo_5()
@@ -959,15 +978,14 @@ class MuseotouchApp(App):
         # download the first one as a thumbnail
         self._sync_popup_text(u'Téléchargement de la miniature')
         self.backend.get_file(
-            images[0],
+            image,
             on_success=self._sync_expo_4,
             on_error=self._sync_error_but_continue,
             on_progress=self._sync_progress)
 
     def _sync_expo_4(self, req, result):
         Logger.info('Museotouch: Synchronization part 4')
-        ext = req.url.rsplit('.', 1)[-1]
-        thumbnailfn = join(self.expo_dir, 'thumbnail.%s' % ext)
+        thumbnailfn = join(self.expo_dir, basename(req.url))
         with open(thumbnailfn, 'w') as fd:
             fd.write(result)
 
@@ -1025,98 +1043,39 @@ class MuseotouchApp(App):
         # on the result, remove all the object already synced
         items = result['items'][:]
         for item in result['items']:
-            fichiers = item['data']
+            fichiers = item['fields']['data']
+
             if not fichiers:
                 print '===> remove item %r, no data attached' % item['id']
                 items.remove(item)
                 continue
-            need_sync = True
-            # print 'check', item['id']
-            for fichier in fichiers:
-                fichier = fichier['fichier']
-                if not self._sync_is_filename_of_item(item, fichier):
-                    # print ' ### The file <{0}> is not downloaded - yet.'.format(fichier)
-                    from museolib.utils import no_url
-                    filepath = join(self.expo_dir, 'otherfiles', no_url(fichier))
-                    # print ' ### It could be downloaded in', filepath
-                    
 
+            need_sync = True
+
+            for fichier in fichiers:
+                # Si ce n'est pas l'image principale, c'est un fichier secondaire à mettre dans otherfiles
+                if not self._sync_is_filename_of_item(item, fichier):
+
+                    filepath = join(self.expo_dir, 'otherfiles', no_url(fichier)) 
                     filename = basename(fichier)
                     filepath = join(self.expo_dir, 'otherfiles', filename)
 
-                    # if not isfile(join(self.expo_dir, 'otherfiles', no_url(fichier))):
                     if not isfile(filepath):
-                        # print ' ### (this file does not exist yet - let"s download it !)'
-
-                        # def chunk_report(here, step, total):
-                        #     print here, '/', total, '// +', step
-
-                        # def chunk_read(url, chunk_size=8192, on_progress=None):
-                        #     import urllib2
-                        #     response = urllib2.urlopen(url);
-                        #     total_size = response.info().getheader('Content-Length').strip()
-                        #     total_size = int(total_size)
-                        #     bytes_so_far = 0
-
-                        #     while 1:
-                        #         chunk = response.read(chunk_size)
-                        #         bytes_so_far += len(chunk)
-
-                        #         if not chunk:
-                        #             print 'end'
-                        #             break
-
-                        #         if on_progress:
-                        #             class fooo(object): pass
-                        #             req = fooo()
-                        #             req.url = url
-                        #             req.chunk_size = chunk_size
-                        #             on_progress(req, bytes_so_far, total_size)
-
-                        #     return bytes_so_far
-
-                        # self._sync_popup_text(u'Téléchargement de '+fichier)
-                        # chunk_read(fichier, on_progress=self._sync_progress)
-                        # print ' &&&& END of', fichier
-
                         from kivy.network.urlrequest import UrlRequest
                         req = UrlRequest(fichier, on_success=self.aft, on_error=self.aft)
                         self.url_requests.append(req)
-                        # import urllib2
-                        # f = urllib2.urlopen(fichier)
-                        # output = open(filepath, 'wb')
-                        # output.write(f.read())
-                        # output.close()
+                        continue
+                
+            # item['__item_filename__'] = item['mainMedia']
+            # filename, ext = self._sync_convert_filename(fichier)
+            filename = basename(item['mainMedia'])
+            local_filename = self._sync_get_local_filename(filename)
 
-                    # else:
-                    #     print ' ### (this file already exists) : '
+            # if file doesn't exist we jump the next part 
+            if not exists(local_filename):
+                continue
 
-                    continue
-                item['__item_filename__'] = fichier
-                filename, ext = self._sync_convert_filename(fichier)
-                local_filename = self._sync_get_local_filename(filename)
-                if not exists(local_filename):
-                #     print '2'
-                    continue
-
-                # now, ensure the md5 is the same
-                md5_local_filename = '%s.md5sum' % local_filename
-                md5 = item['fichier_md5'].strip()
-
-                # if we don't have md5 sum attached, forget about it.
-                if not exists(md5_local_filename):
-                    if not md5:
-                        need_sync = False
-                    print '3', need_sync, repr(md5)
-                    continue
-                # ok, is the md5 is the same ?
-                with open(md5_local_filename, 'r') as fd:
-                    md5_local = fd.read()
-                # different md5, redownload.
-                if md5 != md5_local:
-                    print '4', repr(md5)
-                    continue
-                need_sync = False
+            need_sync = False
             if not need_sync:
                 items.remove(item)
 
@@ -1134,13 +1093,14 @@ class MuseotouchApp(App):
             self.build_app()
 
     def _sync_get_local_filename(self, fn):
-        if type(fn) in (list, tuple):
-            fn = fn[0]
+        # if type(fn) in (list, tuple):
+        #     fn = fn[0]
         return join(self.expo_img_dir, self.imgdir, fn)
 
     def _sync_is_filename_of_item(self, item, fichier):
-        uid = fichier.split('/')[-1].rsplit('.', 1)[0]
-        return str(uid) == str(item['id'])
+        # uid = fichier.split('/')[-1].rsplit('.', 1)[0]
+        # return str(uid) == str(item['id'])
+        return fichier == item['mainMedia']
 
     def _sync_convert_filename(self, filename):
         # from the original filename given by json
@@ -1153,20 +1113,21 @@ class MuseotouchApp(App):
         return filename, ext
 
     def _sync_download(self):
-        uid = self._sync_result[self._sync_index]['id']   
+        # uid = self._sync_result[self._sync_index]['id']   
         if '__item_filename__' in self._sync_result[self._sync_index]:
-            filename, ext = self._sync_convert_filename(
-                self._sync_result[self._sync_index]['__item_filename__'])
+            # filename, ext = self._sync_convert_filename(
+            #     self._sync_result[self._sync_index]['__item_filename__'])
 
             text = 'Synchronisation de %d/%d' % (
                     self._sync_index + 1, len(self._sync_result))
             if len(self._sync_missing):
                 text += '\n(%d non disponible)' % len(self._sync_missing)
             self._sync_popup.content.children[-1].text = text
-            self._sync_popup.content.children[-2].text = filename
+            # self._sync_popup.content.children[-2].text = filename
 
             # check if the file already exist on the disk
-            filename = self._sync_get_local_filename(filename)
+            # filename = self._sync_get_local_filename(filename)
+            # print filename
             '''
             if exists(filename):
                 # speedup a little bit. but we can't use always -1.
@@ -1174,8 +1135,8 @@ class MuseotouchApp(App):
                         -1 if self._sync_index % 10 < 8 else 0)
             else:
             '''
-
-        self.backend.download_object(uid, self.imgdir, self.imgtype,
+        url = self._sync_result[self._sync_index]['mainMedia']
+        self.backend.download_object(url, self.imgdir, self.imgtype,
                 self._sync_download_ok, self._sync_error, self._sync_progress)
 
     def _sync_download_ok(self, req, result):
@@ -1184,17 +1145,18 @@ class MuseotouchApp(App):
             self._sync_missing.append(self._sync_index)
         else:
             # save on disk
-            filename, ext = self._sync_convert_filename(req.url)
+            # filename, ext = self._sync_convert_filename(req.url)
+            filename = basename(req.url)
             filename = self._sync_get_local_filename(filename)
             with open(filename, 'wb') as fd:
                 fd.write(result)
 
             # write md5 attached to item if exist
-            item_md5 = self._sync_result[self._sync_index]['fichier_md5'].strip()
-            if item_md5:
-                md5_filename = '%s.md5sum' % filename
-                with open(md5_filename, 'wb') as fd:
-                    fd.write(item_md5)
+            # item_md5 = self._sync_result[self._sync_index]['fichier_md5'].strip()
+            # if item_md5:
+            #     md5_filename = '%s.md5sum' % filename
+            #     with open(md5_filename, 'wb') as fd:
+            #         fd.write(item_md5)
 
         Clock.schedule_once(self._sync_download_next)
 
